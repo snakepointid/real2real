@@ -10,15 +10,15 @@ class baseModel(object):
         def __init__(self, is_training=True):
                 self.graph = tf.Graph()
                 self.is_training = is_training
-                self.is_dropout = tf.placeholder_with_default(False, shape=(), name='is_dropout')
                 with self.graph.as_default():
-                        self._forward_()
+                	self.is_dropout = tf.placeholder_with_default(False, shape=(), name='is_dropout')
+                        self._build_()
                         self._metrics_()
                         if self.is_training:
-                                self._backward_()
-                                              
+                                self._cost_()
+                                self._optimize_()              
         @abc.abstractmethod
-        def _forward_(self):
+        def _build_(self):
                 raise NotImplementedError
 
         @abc.abstractmethod
@@ -26,15 +26,23 @@ class baseModel(object):
                 raise NotImplementedError
 
         @abc.abstractmethod
-        def _backward_(self):
+        def _cost_(self):
                 raise NotImplementedError
 
-        
+       	def _optimize_(self):
+		# Training Scheme
+                self.global_step = tf.Variable(0, name='global_step', trainable=False)
+                self.optimizer = tf.train.AdamOptimizer(learning_rate=multiClsModelParams.learning_rate, beta1=0.9, beta2=0.98, epsilon=1e-8)
+                self.train_op = self.optimizer.minimize(self.mean_loss, global_step=self.global_step)
+                self.init_op_  = tf.global_variables_initializer()
+                # Summary 
+                tf.summary.scalar('mean_loss', self.mean_loss)
+                self.merged = tf.summary.merge_all() 
                         
 @six.add_metaclass(abc.ABCMeta)
 class multiClsModel(baseModel):
         @abc.abstractmethod
-        def _forward_(self):
+        def _build_(self):
                 raise NotImplementedError
 
         def _metrics_(self):
@@ -44,7 +52,7 @@ class multiClsModel(baseModel):
                 # save log
                 tf.summary.scalar('acc', self.acc)
 
-        def _backward_(self):
+        def _cost_(self):
                 self.y_smoothed = self.target
                 if multiClsModelParams.flag_label_smooth:
                         self.y_smoothed = label_smoothing(tf.one_hot(self.target, depth=self.target.get_shape().as_list()[-1]))
@@ -55,19 +63,11 @@ class multiClsModel(baseModel):
                         self.mean_loss = tf.reduce_sum(self.loss*self.istarget) / (tf.reduce_sum(self.istarget))
                 else:
                         self.mean_loss = tf.reduce_mean(self.loss)
-                # Training Scheme
-                self.global_step = tf.Variable(0, name='global_step', trainable=False)
-                self.optimizer = tf.train.AdamOptimizer(learning_rate=multiClsModelParams.learning_rate, beta1=0.9, beta2=0.98, epsilon=1e-8)
-                self.train_op = self.optimizer.minimize(self.mean_loss, global_step=self.global_step)
-                self.init_op_  = tf.global_variables_initializer()  
-                # Summary 
-                tf.summary.scalar('mean_loss', self.mean_loss)
-                self.merged = tf.summary.merge_all()
 
 @six.add_metaclass(abc.ABCMeta)
 class regressModel(baseModel):
         @abc.abstractmethod
-        def _forward_(self):
+        def _build_(self):
                 raise NotImplementedError
 
         def _metrics_(self):
@@ -75,17 +75,9 @@ class regressModel(baseModel):
                 # save log
                 tf.summary.scalar('mae', self.mae)
 
-        def _backward_(self):
+        def _cost_(self):
                 self.loss = tf.square(tf.subtract(self.logits,self.target))
                 self.mean_loss = tf.reduce_mean(self.loss)
                 if regressModelParams.loss_rmse:
-                        self.mean_loss = tf.sqrt(mean_loss)
-                # Training Scheme
-                self.global_step = tf.Variable(0, name='global_step', trainable=False)
-                self.optimizer = tf.train.AdamOptimizer(learning_rate=hp.learning_rate, beta1=0.9, beta2=0.98, epsilon=1e-8)
-                self.train_op = self.optimizer.minimize(self.mean_loss, global_step=self.global_step)
-                self.init_op_  = tf.global_variables_initializer()  
-                # Summary 
-                tf.summary.scalar('mean_loss', self.mean_loss)
-                self.merged = tf.summary.merge_all()
+                        self.mean_loss = tf.sqrt(self.mean_loss)
          

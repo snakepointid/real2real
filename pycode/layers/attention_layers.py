@@ -27,7 +27,7 @@ def self_attention(encoding,is_training,is_dropout):
                                                         is_dropout=is_dropout)
                         
                         ### Feed Forward
-                        #encoding = feedforward(encoding, num_units=[4*attentionLayerParams.hidden_units, attentionLayerParams.hidden_units])
+                        encoding = feedforward(encoding, num_units=[4*attentionLayerParams.hidden_units, attentionLayerParams.hidden_units])
         return encoding
 
 def enc_dec_attention(decoding,encoding,is_training,is_dropout):
@@ -62,7 +62,7 @@ def enc_dec_attention(decoding,encoding,is_training,is_dropout):
                                                         is_dropout=is_dropout)
                         
                                 ## Feed Forward
-                                #decoding = feedforward(decoding, num_units=[4*attentionLayerParams.hidden_units, attentionLayerParams.hidden_units])
+                                decoding = feedforward(decoding, num_units=[4*attentionLayerParams.hidden_units, attentionLayerParams.hidden_units])
         return decoding
 
         
@@ -146,17 +146,17 @@ def multihead_attention(queries,
 
 def feedforward(encoder_inputs, 
                 num_units=[2048, 512],
-                scope="multihead_attention", 
+                scope="forward", 
                 reuse=None):
      
         with tf.variable_scope(scope, reuse=reuse):
                 # Inner layer
-                params = {"encoder_inputs": encoder_inputs, "filters": num_units[0], "kernel_size": 1,
+                params = {"inputs": encoder_inputs, "filters": num_units[0], "kernel_size": 1,
                   "activation": tf.nn.relu, "use_bias": True}
-                utputs = tf.layers.conv1d(**params)
+                outputs = tf.layers.conv1d(**params)
         
                 # Readout layer
-                params = {"encoder_inputs": outputs, "filters": num_units[1], "kernel_size": 1,
+                params = {"inputs": outputs, "filters": num_units[1], "kernel_size": 1,
                   "activation": None, "use_bias": True}
                 outputs = tf.layers.conv1d(**params)
         

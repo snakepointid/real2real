@@ -6,11 +6,11 @@ from app.params import transformerParams
 from layers.common_layers import semantic_position_embedding
 
 class transformer(multiClsModel):
-            def _forward_(self):
+            def _build_(self):
                         # input coding placeholder
                         self.source = tf.placeholder(tf.int32, shape=(None, transformerParams.source_maxlen))
                         self.target = tf.placeholder(tf.int32, shape=(None, transformerParams.target_maxlen))
-                        # define decoder inputs
+			# define decoder inputs
                         decoder_inputs = tf.concat((tf.ones_like(self.target[:, :1])*2, self.target[:, :-1]), -1) # 2:<S>
 
                         # source embedding

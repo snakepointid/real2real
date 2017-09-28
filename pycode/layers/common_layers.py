@@ -120,21 +120,25 @@ def semantic_position_embedding(inputs,vocab_size,num_units,maxlen,scope):
                                       scope="pe")
         return encoding
 
-def mlp_layer(inputs,output_dim,mlp_layers,activation_fn,is_training,is_dropout):
-        for layer_idx in enumerate(mlp_layers):
-                with tf.variable_scope("conv_layer{}".format(layer_idx)):
+def mlp_layer(inputs,output_dim,mlp_layers,hidden_units,activation_fn,is_training,is_dropout):
+	dropout_layer = tf.contrib.layers.dropout(
+                                           inputs=inputs,
+                                           keep_prob=directLayerParams.dropout_rate,
+                                           is_training=is_dropout)
+	for layer_idx in range(mlp_layers):
+                with tf.variable_scope("full_layer{}".format(layer_idx)):
                         hidden_layer    = tf.layers.dense(
                                                         inputs=dropout_layer,
                                                         units=hidden_units,
                                                         activation=activation_fn,
                                                         trainable=is_training)
 
-                        dropout_layer   = tf.layers.dropout(
+                        dropout_layer   = tf.contrib.layers.dropout(
                                                 inputs=hidden_layer,
-                                                rate=directLayerParams.dropout_rate,
+                                                keep_prob=directLayerParams.dropout_rate,
                                                 is_training=is_dropout)
 
                         dropout_layer   = layer_norm(dropout_layer)
 
         logits  = tf.layers.dense(dropout_layer,output_dim, name="output")
-        return logits
+        return tf.squeeze(logits)

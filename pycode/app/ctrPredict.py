@@ -6,19 +6,24 @@ import argparse
 import os
 sys.path.append(os.getcwd())
 sys.path.insert(0,'..')
-from models.seq2one import convRank
+from models.seq2one import *
 from layers.utils import *
 from app.params import baseModelParams
 from preprocess.seq2one_feeds_process import LoadTrainFeeds
 from utils.info_layout import *
-from utils.metrics import ctrEval
+from utils.metrics import regression_model_eval
+from pydoc import locate
 def training():
         gpu_options = tf.GPUOptions(allow_growth = True)
         model = convRank(is_training=True)
+        #model = attentionRank(is_training=True)
 	reader = LoadTrainFeeds()
         startTime = time.time()
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
-                sess.run(model.init_op_)
+                try:
+			model.global_saver.restore(sess,FLAGS.restore_path+"/global_model")
+		except:			
+			sess.run(model.init_op)
                 #list all trainable variables the graph hold 
                 layout_trainable_variables()
                 for epoch in range(baseModelParams.num_epochs):
@@ -32,17 +37,18 @@ def training():
                                                                 model.target:ctr_batch,
 								model.is_dropout:True})
 			probs_ = sess.run(model.logits,feed_dict={
-                                                                model.source:text_code_batch,
-                                                                model.tag:tag_code_batch})
-                        ctrEval(ctr_batch,probs_,flag)
+                                                                model.source:text_code_batch,                                            
+                    						model.tag:tag_code_batch})
+
+                        regression_model_eval(ctr_batch,probs_,flag)
                         print('Iteration:%s'%gs)
                         endTime = time.time()
                         if endTime-startTime>3600:
                                 print ("save the whole model")
-                                g.global_saver.save(sess,FLAGS.save_path+"/global_model")
+                                model.global_saver.save(sess,FLAGS.save_path+"/global_model")
                                 startTime = endTime
 
-                g.global_saver.save(sess,FLAGS.save_path+"/global_model")
+                model.global_saver.save(sess,FLAGS.save_path+"/global_model")
  
 def evaluation():
         pass
@@ -52,6 +58,22 @@ def inference():
                  
 
 if __name__ == "__main__":
+	parser = argparse.ArgumentParser()
+        parser.register("type", "bool", lambda v: v.lower() == "true")
+        # Flags for defining the parameter of data path
+        parser.add_argument(
+                "--save_path",
+                type=str,
+                default="",
+                help="The save path for model"
+        )
+        parser.add_argument(
+                "--restore_path",
+                type=str,
+                default="",
+                help="The save path for model"
+        )
+        FLAGS, unparsed = parser.parse_known_args()
 
         if baseModelParams.model_mode == 'train':
                 training()

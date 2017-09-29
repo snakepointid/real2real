@@ -5,6 +5,7 @@
 from __future__ import print_function
 import tensorflow as tf
 from layers.common_layers import *
+from layers.conv_layers import strip_conv
 from app.params import attentionLayerParams
 
 def self_attention(encoding,is_training,is_dropout):
@@ -29,6 +30,32 @@ def self_attention(encoding,is_training,is_dropout):
                         ### Feed Forward
                         encoding = feedforward(encoding, num_units=[4*attentionLayerParams.hidden_units, attentionLayerParams.hidden_units])
         return encoding
+
+def attention_conv(encoding,is_training,is_dropout):
+        with tf.variable_scope("encoder"):
+                ## Dropout
+                encoding = tf.contrib.layers.dropout(encoding,
+                                            keep_prob=attentionLayerParams.dropout_rate,
+                                            is_training=tf.convert_to_tensor(is_training))
+
+                ## Blocks
+                for i in range(attentionLayerParams.num_blocks):
+                    with tf.variable_scope("num_blocks_{}".format(i)):
+                        ### Multihead Attention
+                        encoding = multihead_attention(queries=encoding,
+                                                        keys=encoding,
+                                                        num_heads=attentionLayerParams.num_heads,
+                                                        dropout_rate=attentionLayerParams.dropout_rate,
+                                                        is_training=is_training,
+                                                        causality=False,
+                                                        is_dropout=is_dropout)
+
+        		# skip convolution
+			encoding = strip_conv(
+					inputs=encoding,
+					scope_name='strip_conv',
+					is_training=is_training)
+	return encoding
 
 def enc_dec_attention(decoding,encoding,is_training,is_dropout):
         # Decoder

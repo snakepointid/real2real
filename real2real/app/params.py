@@ -24,7 +24,7 @@ class nmtParams(nlpModelParams,multiClsModelParams):
 		source_vocab_size = 10000
 
 class convLayerParams:
-		kernel_size    = 3
+		kernel_size    = 5
 		filter_nums    = 128
 		dropout_rate   = 0.5
 		conv_layer_num = 3

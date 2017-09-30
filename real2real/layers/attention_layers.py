@@ -84,7 +84,7 @@ def position_attention_1d(inputs,query_length,scope_name,is_training,is_dropout)
                 keys = tf.concat([keys,add_position_embed],2) # N,L,2*E
                 outputs = tf.matmul(query_position_embed, tf.transpose(keys, [0, 2, 1])) #N,QL,L
 
-                key_masks = tf.sign(tf.abs(tf.reduce_sum(inputs, axis=-1))) # (N, L)
+                key_masks = tf.sign(tf.reduce_sum(tf.abs(inputs), axis=-1)) # (N, L)
                 key_masks = tf.tile(tf.expand_dims(key_masks, 1), [1,query_length,1]) # N,QL,L
 
                 paddings = tf.ones_like(outputs)*(-2**32+1)

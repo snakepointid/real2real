@@ -5,9 +5,7 @@ import re
 from itertools import groupby
 from operator import itemgetter
 import cPickle as pickle
-from preprocess.sentence_process import sentenceSeg 
-from app.params import nmtParams
-sys.path.insert(0,'..')
+from real2real.app.params import nmtParams
 
 def LoadData():
 	for line in sys.stdin:
@@ -20,12 +18,17 @@ def LoadTrainFeeds():
 		source_valid,target_valid = [],[]
 		source_testa,target_testa = [],[]
 		cache = {'training':[]}
-		for source,target,rdv in reader:
+		for line in reader:
+				if len(line)!=4:
+					continue
+				_,source,target,rdv = line
 				source = source.split('|')
-				source = source[:nmtParams.source_maxlen]+[0]*(nmtParams.source_maxlen-len(source))
 				target = target.split('|')
+				if len(source)<4 or len(target)<4:
+					continue
+				source = source[:nmtParams.source_maxlen]+[0]*(nmtParams.source_maxlen-len(source))
 				target = target[:nmtParams.target_maxlen]+[0]*(nmtParams.target_maxlen-len(target))
-
+				
 				if abs(float(rdv))<nmtParams.test_rate:
 						source_valid.append(source)
 						target_valid.append(target)

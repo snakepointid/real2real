@@ -4,9 +4,9 @@
 
 from __future__ import print_function
 import tensorflow as tf
-from layers.common_layers import *
-from layers.conv_layers import strip_conv
-from app.params import attentionLayerParams
+from real2real.layers.common_layers import *
+from real2real.layers.conv_layers import strip_conv
+from real2real.app.params import attentionLayerParams
 
 def self_attention(encoding,is_training,is_dropout):
         with tf.variable_scope("encoder"):  

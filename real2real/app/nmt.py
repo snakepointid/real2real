@@ -4,19 +4,19 @@ import sys
 import time
 import argparse
 import os
+sys.path.insert(0,"..")
 sys.path.append(os.getcwd())
-sys.path.insert(0,'..')
-from models.seq2seq import transformer
-from layers.utils import *
-from app.params import baseModelParams
-from preprocess.seq2seq_feeds_process import LoadTrainFeeds
-from utils.info_layout import *
-from utils.metrics import regression_model_eval
+
+from real2real.models.seq2seq import transformer
+from real2real.app.params import baseModelParams
+from real2real.preprocess.seq2seq_feeds_process import LoadTrainFeeds
+from real2real.utils.info_layout import *
+from real2real.utils.metrics import regression_model_eval
 from pydoc import locate
 def training():
         gpu_options = tf.GPUOptions(allow_growth = True)
         model = transformer(is_training=True)
-	reader = LoadTrainFeeds()
+	cache = LoadTrainFeeds()
         startTime = time.time()
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
                 try:
@@ -26,26 +26,32 @@ def training():
                 #list all trainable variables the graph hold 
                 layout_trainable_variables()
                 for epoch in range(baseModelParams.num_epochs):
-                        for flag,cache in reader:
-				text_code_batch,tag_code_batch,ctr_batch = cache
-				if flag=='test':
-					break
+			iters=0
+                        for source,target in cache['training']:
+				iters+=1
                                 _,gs=sess.run([model.train_op,model.global_step],feed_dict={
-                                                                model.source:text_code_batch ,
-                                                                model.target:ctr_batch,
+                                                                model.source:source,
+                                                                model.target:target,
 								model.is_dropout:True})
-			probs_ = sess.run(model.logits,feed_dict={
-                                                                model.source:text_code_batch,                                            
-                    						model.target:ctr_batch})
+				if iters%100==0:
+					train_acc = sess.run(model.acc,feed_dict={
+                                                                model.source:source,                                            
+                    						model.target:target,
+								model.is_dropout:True})
+					print('Iteration:%s\ttrain acc:%s'%(gs,train_acc))
+			#source,target = cache['valid']
+                        #test_acc = sess.run(model.acc,feed_dict={
+                        #                                        model.source:source,                                                     
+                        #                                        model.target:target})
 
-                        print('Iteration:%s'%gs)
+                        #print('Iteration:%s\ttrain acc:%s\ttest acc:%s'%(gs,train_acc,test_acc))
                         endTime = time.time()
                         if endTime-startTime>3600:
                                 print ("save the whole model")
                                 model.global_saver.save(sess,FLAGS.save_path+"/global_model")
                                 startTime = endTime
 
-                g.global_saver.save(sess,FLAGS.save_path+"/global_model")
+                model.global_saver.save(sess,FLAGS.save_path+"/global_model")
  
 def evaluation():
         pass

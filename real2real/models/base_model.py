@@ -2,8 +2,8 @@ from __future__ import print_function
 import tensorflow as tf
 import six
 import abc
-from app.params import multiClsModelParams ,regressModelParams
-from layers.common_layers import label_smoothing
+from real2real.app.params import multiClsModelParams ,regressModelParams
+from real2real.layers.common_layers import label_smoothing
 
 @six.add_metaclass(abc.ABCMeta)
 class baseModel(object):
@@ -16,7 +16,8 @@ class baseModel(object):
                         self._metrics_()
                         if self.is_training:
                                 self._cost_()
-                                self._optimize_()              
+                                self._optimize_()    
+			self.global_saver = tf.train.Saver()         
         @abc.abstractmethod
         def _build_(self):
                 raise NotImplementedError
@@ -55,7 +56,7 @@ class multiClsModel(baseModel):
         def _cost_(self):
                 self.y_smoothed = self.target
                 if multiClsModelParams.flag_label_smooth:
-                        self.y_smoothed = label_smoothing(tf.one_hot(self.target, depth=self.target.get_shape().as_list()[-1]))
+                        self.y_smoothed = label_smoothing(tf.one_hot(self.target, depth=multiClsModelParams.target_vocab_size))
 
                 self.loss = tf.nn.softmax_cross_entropy_with_logits(logits=self.logits, labels=self.y_smoothed)
 

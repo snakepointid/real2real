@@ -1,8 +1,8 @@
 from __future__ import print_function
 import tensorflow as tf
-from layers.common_layers import *
+from real2real.layers.common_layers import *
 from pydoc import locate
-from app.params import convLayerParams 
+from real2real.app.params import convLayerParams 
 
 def multiLayer_conv(inputs,is_training,is_dropout):
         activation_fn = locate(convLayerParams.activation_fn)

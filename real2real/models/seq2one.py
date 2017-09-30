@@ -1,10 +1,10 @@
 from __future__ import print_function
 import tensorflow as tf
-from layers.conv_layers import multiLayer_conv_strip,conv1d_to_full_layer
-from app.params import convRankParams 
-from models.base_model import regressModel
-from layers.common_layers import semantic_position_embedding,embedding,mlp_layer
-from layers.attention_layers import attention_conv
+from real2real.layers.conv_layers import multiLayer_conv_strip,conv1d_to_full_layer
+from real2real.app.params import convRankParams 
+from real2real.models.base_model import regressModel
+from real2real.layers.common_layers import semantic_position_embedding,embedding,mlp_layer
+from real2real.layers.attention_layers import attention_conv
 from pydoc import locate
 
 class convRank(regressModel):
@@ -45,8 +45,6 @@ class convRank(regressModel):
 						activation_fn=locate(convRankParams.activation_fn),
                                                 is_training=self.is_training,
                                                 is_dropout=self.is_dropout)
-                        # saver
-                        self.global_saver = tf.train.Saver()
 
 class attentionRank(regressModel):
             def _build_(self):

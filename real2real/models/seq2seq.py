@@ -1,9 +1,9 @@
 from __future__ import print_function
 import tensorflow as tf
-from layers.attention_layers import self_attention,enc_dec_attention
-from models.base_model import multiClsModel
-from app.params import transformerParams  
-from layers.common_layers import semantic_position_embedding
+from real2real.layers.attention_layers import self_attention,enc_dec_attention
+from real2real.models.base_model import multiClsModel
+from real2real.app.params import transformerParams  
+from real2real.layers.common_layers import semantic_position_embedding
 
 class transformer(multiClsModel):
             def _build_(self):
@@ -43,6 +43,4 @@ class transformer(multiClsModel):
                                                       inputs=self.decoding, 
                                                       units=transformerParams.target_vocab_size,
                                                       name="full_conn")
-                        # saver                        
-                        self.global_saver = tf.train.Saver()
                         

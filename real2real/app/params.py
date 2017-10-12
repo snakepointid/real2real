@@ -12,7 +12,7 @@ class nlpModelParams(baseModelParams):
 
 class multiClsModelParams(baseModelParams):
         flag_label_smooth = True
-	target_vocab_size = 100000
+		target_vocab_size = 100000
 
 class regressModelParams(baseModelParams):
         loss_rmse = True        

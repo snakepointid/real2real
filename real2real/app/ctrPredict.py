@@ -16,7 +16,6 @@ from pydoc import locate
 def training():
         gpu_options = tf.GPUOptions(allow_growth = True)
         model = convRank(is_training=True)
-        #model = attentionRank(is_training=True)
         startTime = time.time()
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
                 try:

@@ -7,7 +7,7 @@ import os
 sys.path.insert(0,"..")
 sys.path.append(os.getcwd())
 
-from real2real.models.seq2seq import transformer
+from real2real.models.seq2seq import transformer,simpleAttentionCNN
 from real2real.app.params import baseModelParams
 from real2real.preprocess.seq2seq_feeds_process import LoadTrainFeeds
 from real2real.utils.info_layout import *
@@ -15,7 +15,8 @@ from real2real.utils.metrics import regression_model_eval
 from pydoc import locate
 def training():
         gpu_options = tf.GPUOptions(allow_growth = True)
-        model = transformer(is_training=True)
+        #model = transformer(is_training=True)
+        model = simpleAttentionCNN(is_training=True)
 	cache = LoadTrainFeeds()
         startTime = time.time()
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
@@ -37,8 +38,13 @@ def training():
 					train_acc = sess.run(model.acc,feed_dict={
                                                                 model.source:source,                                            
                     						model.target:target,
-								model.is_dropout:True})
-					print('Iteration:%s\ttrain acc:%s'%(gs,train_acc))
+								model.is_dropout:False})
+
+					train_acc_drop = sess.run(model.acc,feed_dict={
+                                                                model.source:source,
+                                                                model.target:target,
+                                                                model.is_dropout:True})
+					print('Iteration:%s\ttrain acc:%s\tdrop train acc:%s'%(gs,train_acc,train_acc_drop))
 			#source,target = cache['valid']
                         #test_acc = sess.run(model.acc,feed_dict={
                         #                                        model.source:source,                                                     

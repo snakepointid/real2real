@@ -4,7 +4,31 @@ from real2real.layers.common_layers import *
 from pydoc import locate
 from real2real.app.params import convLayerParams 
 
- 
+def multiLayer_conv(inputs,is_training,is_dropout):
+        activation_fn = locate(convLayerParams.activation_fn)
+        with tf.variable_scope("cnn"):
+                # Apply dropout to embeddings
+                inputs = tf.contrib.layers.dropout(
+                                        inputs=inputs,
+                                        keep_prob=convLayerParams.dropout_rate,
+                                        is_training=is_dropout)
+
+                cnn_a_output = inputs
+                for layer_idx in range(convLayerParams.conv_layer_num):
+                        with tf.variable_scope("conv_layer{}".format(layer_idx)):
+                                next_layer = tf.contrib.layers.conv2d(
+                                inputs=cnn_a_output,
+                                num_outputs=convLayerParams.filter_nums,
+                                kernel_size=convLayerParams.kernel_size,
+                                padding="SAME",
+                                activation_fn=None,
+                                trainable = is_training)
+                                # Add a residual connection, except for the first layer
+                                if layer_idx > 0:
+                                        next_layer += cnn_a_output
+                                next_layer = tf.layers.batch_normalization(next_layer)
+                                cnn_a_output = activation_fn(next_layer)
+        return cnn_a_output
       
 def multiLayer_conv_strip(inputs,is_training,is_dropout):
         activation_fn = locate(convLayerParams.activation_fn)

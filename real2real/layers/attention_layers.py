@@ -32,28 +32,27 @@ def self_attention(encoding,is_training,is_dropout):
         return encoding
 
 def conv_attention_conv(inputs,query_length,scope_name,is_training,is_dropout):
-        with tf.variable_scope("encoder"):
+        with tf.variable_scope(scope_name):
                 ## Dropout
                 inputs = tf.contrib.layers.dropout(inputs,
                                             keep_prob=attentionLayerParams.dropout_rate,
                                             is_training=is_dropout)
 
 
-                with tf.variable_scope("num_blocks_{}".format(i)):
-                        conv_out=direct_conv(
-                                            inputs=inputs,
-                                            scope_name='before_atten',
-                                            is_training=is_training)  
-                        atten_out=position_attention_1d(
-                                                        inputs=conv_out,
-                                                        query_length=query_length,
-                                                        scope_name='posi_atten',
-                                                        is_training=is_training,
-                                                        is_dropout=is_dropout)
-                        conv_out=direct_conv(
-                                            inputs=atten_out,
-                                            scope_name='after_atten',
-                                            is_training=is_training)
+                conv_out=direct_conv(
+                                   inputs=inputs,
+                                   scope_name='before_atten',
+                                   is_training=is_training)  
+                atten_out=position_attention_1d(
+                                              inputs=conv_out,
+                                              query_length=query_length,
+                                              scope_name='posi_atten',
+                                              is_training=is_training,
+                                              is_dropout=is_dropout)
+                conv_out=direct_conv(
+                                    inputs=atten_out,
+                                    scope_name='after_atten',
+                                    is_training=is_training)
         return conv_out
 def position_attention_1d(inputs,query_length,scope_name,is_training,is_dropout):
         '''
@@ -71,7 +70,7 @@ def position_attention_1d(inputs,query_length,scope_name,is_training,is_dropout)
                                                     trainable=is_training)
                 query_position_embed = tf.get_variable(
                                                     'query_position', 
-                                                    shape=[1,query_length,2*static_shape[2]],
+                                                    shape=[1,query_length,2*int(static_shape[2])],
                                                     trainable=is_training)
 
                 #ops

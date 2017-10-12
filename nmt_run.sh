@@ -13,7 +13,7 @@ fi
    #--stream-epoch 100\
 $HBOX_HOME/bin/hbox-submit \
    --app-type "tensorflow" \
-   --files pycode,shell.sh \
+   --files real2real\
    --worker-memory 30000 \
    --worker-cores 2 \
    --worker-gpus 1 \

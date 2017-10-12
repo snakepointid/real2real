@@ -57,10 +57,26 @@ class simpleAttentionCNN(multiClsModel):
                                                             scope='encoder')
                          
                         #simple attention cnn
-                        self.decoding=conv_attention_conv(
+                        dec = conv_attention_conv(
                                           inputs=encoding,
+                                          query_length=transformerParams.source_maxlen,
+                                          scope_name="simpAttenCnn1",
+                                          is_training=self.is_training,
+                                          is_dropout=self.is_dropout)
+
+                        #simple attention cnn
+                        dec = conv_attention_conv(
+                                          inputs=dec,
+                                          query_length=transformerParams.source_maxlen,
+                                          scope_name="simpAttenCnn2",
+                                          is_training=self.is_training,
+                                          is_dropout=self.is_dropout)
+
+                        #simple attention cnn
+                        self.decoding=conv_attention_conv(
+                                          inputs=dec,
                                           query_length=transformerParams.target_maxlen,
-                                          scope_name="simpAttenCnn",
+                                          scope_name="simpAttenCnn3",
                                           is_training=self.is_training,
                                           is_dropout=self.is_dropout)
                         # Final linear projection

@@ -53,7 +53,7 @@ class multiClsModel(baseModel):
                 tf.summary.scalar('acc', self.acc)
 
         def _cost_(self):
-                self.loss = tf.nn.softmax_cross_entropy_with_logits(logits=self.logits, labels=self.target)
+                self.loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.logits, labels=tf.reshape(self.target,[-1,1]))
                 self.mean_loss = tf.reduce_mean(self.loss)
 
 

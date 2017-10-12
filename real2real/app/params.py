@@ -11,11 +11,11 @@ class nlpModelParams(baseModelParams):
 		flag_position_embed = True
 
 class multiClsModelParams(baseModelParams):
-        flag_label_smooth = True
+   		flag_label_smooth = True
 		target_vocab_size = 100000
 
 class regressModelParams(baseModelParams):
-        loss_rmse = True        
+        	loss_rmse = True        
 
 class nmtParams(nlpModelParams,multiClsModelParams):
 		source_maxlen = 30

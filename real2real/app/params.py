@@ -16,7 +16,9 @@ class multiClsModelParams(baseModelParams):
 
 class regressModelParams(baseModelParams):
         	loss_rmse = True        
-
+class pairEmbedModelParms(multiClsModelParams):
+			vocab_size = 100000
+			embedding_dim = 128
 class nmtParams(nlpModelParams,multiClsModelParams):
 		source_maxlen = 30
 		target_maxlen = 30 

@@ -6,49 +6,50 @@ import argparse
 import os
 sys.path.insert(0,"..")
 sys.path.append(os.getcwd())
-print(sys.path)
-from real2real.models.seq2one import *
+
+from real2real.models.entityEmbed import pairEmbed
 from real2real.app.params import baseModelParams
-from real2real.preprocess.seq2one_feeds_process import LoadTrainFeeds
+from real2real.preprocess.seq2seq_feeds_process import LoadTrainFeeds
 from real2real.utils.info_layout import *
-from real2real.utils.metrics import regression_model_eval
 from pydoc import locate
 def training():
         gpu_options = tf.GPUOptions(allow_growth = True)
-        model = convRank(is_training=True)
+        #model = transformer(is_training=True)
+        model = simpleAttentionCNN(is_training=True)
+        cache = LoadTrainFeeds()
         startTime = time.time()
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
                 try:
                         model.global_saver.restore(sess,FLAGS.restore_path+"/global_model")
                 except:			
                         sess.run(model.init_op)
-		        #list all trainable variables the graph hold 
+                #list all trainable variables the graph hold 
                 layout_trainable_variables()
-                cache = LoadTrainFeeds()
                 for epoch in range(baseModelParams.num_epochs):
-                        for text_code_batch,tag_code_batch,ctr_batch in cache['training']:
+                        iters=0
+                        for source,target in cache['training']:
+                                iters+=1
                                 _,gs=sess.run([model.train_op,model.global_step],feed_dict={
-                                                                model.source:text_code_batch ,
-                                                                model.tag:tag_code_batch ,
-                                                                model.target:ctr_batch,
-								                                model.is_dropout:True})
-	 
-                        text_code_batch,tag_code_batch,ctr_batch = cache['train']	
-                        probs_ = sess.run(model.logits,feed_dict={
-                                                model.source:text_code_batch,                                            
-                            						model.tag:tag_code_batch,
-        								                model.is_dropout:False})
+                                                                model.source:source,
+                                                                model.target:target,
+                                                                model.is_dropout:True})
+                                if iters%100==0:
+                                        train_acc = sess.run(model.acc,feed_dict={
+                                                                model.source:source,                                            
+                    						                    model.target:target,
+								                                model.is_dropout:False})
 
-                        regression_model_eval(ctr_batch,probs_,'train')
-                        text_code_batch,tag_code_batch,ctr_batch = cache['valid']   
-                        probs_ = sess.run(model.logits,feed_dict={
-                                                                model.source:text_code_batch,                                            
-                                                                model.tag:tag_code_batch,
-                                                                model.is_dropout:is_dropout})
+                                        train_acc_drop = sess.run(model.acc,feed_dict={
+                                                                model.source:source,
+                                                                model.target:target,
+                                                                model.is_dropout:True})
+					                    print('Iteration:%s\ttrain acc:%s\tdrop train acc:%s'%(gs,train_acc,train_acc_drop))
+			         #source,target = cache['valid']
+                        #test_acc = sess.run(model.acc,feed_dict={
+                        #                                        model.source:source,                                                     
+                        #                                        model.target:target})
 
-                        regression_model_eval(ctr_batch,probs_,'valid')
-                        print('Iteration:%s'%gs)
-                        
+                        #print('Iteration:%s\ttrain acc:%s\ttest acc:%s'%(gs,train_acc,test_acc))
                         endTime = time.time()
                         if endTime-startTime>3600:
                                 print ("save the whole model")

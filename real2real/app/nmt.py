@@ -17,35 +17,35 @@ def training():
         gpu_options = tf.GPUOptions(allow_growth = True)
         #model = transformer(is_training=True)
         model = simpleAttentionCNN(is_training=True)
-	cache = LoadTrainFeeds()
+        cache = LoadTrainFeeds()
         startTime = time.time()
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
                 try:
-			model.global_saver.restore(sess,FLAGS.restore_path+"/global_model")
-		except:			
-			sess.run(model.init_op)
+                        model.global_saver.restore(sess,FLAGS.restore_path+"/global_model")
+                except:			
+                        sess.run(model.init_op)
                 #list all trainable variables the graph hold 
                 layout_trainable_variables()
                 for epoch in range(baseModelParams.num_epochs):
-			iters=0
+                        iters=0
                         for source,target in cache['training']:
-				iters+=1
+                                iters+=1
                                 _,gs=sess.run([model.train_op,model.global_step],feed_dict={
                                                                 model.source:source,
                                                                 model.target:target,
-								model.is_dropout:True})
-				if iters%100==0:
-					train_acc = sess.run(model.acc,feed_dict={
+                                                                model.is_dropout:True})
+                                if iters%100==0:
+                                        train_acc = sess.run(model.acc,feed_dict={
                                                                 model.source:source,                                            
-                    						model.target:target,
-								model.is_dropout:False})
+                    						                    model.target:target,
+								                                model.is_dropout:False})
 
-					train_acc_drop = sess.run(model.acc,feed_dict={
+                                        train_acc_drop = sess.run(model.acc,feed_dict={
                                                                 model.source:source,
                                                                 model.target:target,
                                                                 model.is_dropout:True})
-					print('Iteration:%s\ttrain acc:%s\tdrop train acc:%s'%(gs,train_acc,train_acc_drop))
-			#source,target = cache['valid']
+					                    print('Iteration:%s\ttrain acc:%s\tdrop train acc:%s'%(gs,train_acc,train_acc_drop))
+			         #source,target = cache['valid']
                         #test_acc = sess.run(model.acc,feed_dict={
                         #                                        model.source:source,                                                     
                         #                                        model.target:target})

@@ -23,10 +23,12 @@ class convRank(regressModel):
                                                       inputs=source_embed,
                                                       is_training=self.is_training,
                                                       is_dropout=self.is_dropout)
-			self.encoding = conv1d_to_full_layer(
+
+			      self.encoding = conv1d_to_full_layer(
 							inputs=conv_c_out,
 							scope_name="conv2full",
 							is_training=self.is_training)
+
                         tagEmbed = embedding(
                                           inputs=self.tag,
                                           vocab_size=convRankParams.tag_size,
@@ -41,7 +43,7 @@ class convRank(regressModel):
                                                 output_dim=1,
                                                 mlp_layers=convRankParams.mlp_layers,
                                                 hidden_units=convRankParams.hidden_units,
-						activation_fn=locate(convRankParams.activation_fn),
+						            activation_fn=locate(convRankParams.activation_fn),
                                                 is_training=self.is_training,
                                                 is_dropout=self.is_dropout)
 

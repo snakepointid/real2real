@@ -48,7 +48,7 @@ class multiClsModel(baseModel):
                 
         def _metrics_(self):
                 self.preds = tf.to_int32(tf.arg_max(self.logits, dimension=-1))
-                
+
                 self.acc = tf.reduce_mean(tf.to_float(tf.equal(self.preds, self.target)))
                 # save log
                 tf.summary.scalar('acc', self.acc)
@@ -56,7 +56,6 @@ class multiClsModel(baseModel):
         def _cost_(self):
                 self.loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.logits, labels=tf.reshape(self.target,[-1,1]))
                 self.mean_loss = tf.reduce_mean(self.loss)
-
 
 @six.add_metaclass(abc.ABCMeta)
 class regressModel(baseModel):

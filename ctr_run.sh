@@ -10,7 +10,7 @@ if [ $? -ne 0 ]; then
 	echo "$MODEL_FILE not exist"
 	$HADOOP_HOME/bin/hadoop fs -mkdir $MODEL_FILE     
 fi
-   #--stream-epoch 100\
+
 $HBOX_HOME/bin/hbox-submit \
    --app-type "tensorflow" \
    --files real2real \

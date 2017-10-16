@@ -20,10 +20,15 @@ def LoadTrainFeeds():
 		source_testa,tag_testa,target_testa=[],[],[]
 		cache={'training':[]}
 		for line in reader:
-				_,_,tag_code,source,target,rdv=line
+				rdv,tag_code,source,target,flag=line
 				source=source.split('|')
 				source=source[:convRankParams.source_maxlen]+[0]*(convRankParams.source_maxlen-len(source))
 
+				if flag=='test':
+						source_testa.append(source)
+						tag_testa.append(tag_code)
+						target_testa.append(target)		
+						continue
 				if abs(float(rdv))<convRankParams.test_rate:
 						source_valid.append(source)
 						tag_valid.append(tag_code)
@@ -57,6 +62,11 @@ def LoadTrainFeeds():
  		tag_train =np.array(tag_train,dtype=np.int64)
  		target_train=np.array(target_train,dtype=np.float32)
 		cache['train']=[source_train,tag_train,target_train]
+
+		source_testa=np.array(source_testa,dtype=np.int64)
+ 		tag_testa =np.array(tag_testa,dtype=np.int64)
+ 		target_testa=np.array(target_testa,dtype=np.float32)
+		cache['testa']=[source_testa,tag_testa,target_testa]
 
 		return cache
 

@@ -19,6 +19,10 @@ class regressModelParams(baseModelParams):
 class pairEmbedModelParms(multiClsModelParams):
 			vocab_size = 100000
 			embedding_dim = 128
+			activation_fn  = "tensorflow.nn.relu"
+			mlp_layers  = 2
+			hidden_units  = 128
+			window_span = 5
 class nmtParams(nlpModelParams,multiClsModelParams):
 		source_maxlen = 30
 		target_maxlen = 30 

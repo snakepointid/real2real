@@ -48,7 +48,7 @@ class multiClsModel(baseModel):
                 
         def _metrics_(self):
                 self.preds = tf.to_int32(tf.arg_max(self.logits, dimension=-1))
-
+                
                 self.acc = tf.reduce_mean(tf.to_float(tf.equal(self.preds, self.target)))
                 # save log
                 tf.summary.scalar('acc', self.acc)
@@ -75,5 +75,20 @@ class regressModel(baseModel):
                 if regressModelParams.loss_rmse:
                         self.mean_loss = tf.sqrt(self.mean_loss)
 
- 
+@six.add_metaclass(abc.ABCMeta)
+class embedModel(multiClsModel):
+        @abc.abstractmethod
+        def _build_(self):
+                raise NotImplementedError
+
+        def _metrics_(self):
+                self.mae = tf.reduce_mean(tf.abs(self.logits-self.target))
+                # save log
+                tf.summary.scalar('mae', self.mae)
+
+        def _cost_(self):
+                self.loss = tf.square(tf.subtract(self.logits,self.target))
+                self.mean_loss = tf.reduce_mean(self.loss)
+                if regressModelParams.loss_rmse:
+                        self.mean_loss = tf.sqrt(self.mean_loss)
          

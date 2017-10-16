@@ -13,9 +13,8 @@ from real2real.preprocess.seq2seq_feeds_process import LoadTrainFeeds
 from real2real.utils.info_layout import *
 from pydoc import locate
 def training():
-        gpu_options = tf.GPUOptions(allow_growth = True)
-        #model = transformer(is_training=True)
-        model = simpleAttentionCNN(is_training=True)
+        gpu_options = tf.GPUOptions(allow_growth = True) 
+        model = pairEmbed(is_training=True)
         cache = LoadTrainFeeds()
         startTime = time.time()
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
@@ -33,6 +32,7 @@ def training():
                                                                 model.source:source,
                                                                 model.target:target,
                                                                 model.is_dropout:True})
+
                                 if iters%100==0:
                                         train_acc = sess.run(model.acc,feed_dict={
                                                                 model.source:source,                                            
@@ -43,8 +43,9 @@ def training():
                                                                 model.source:source,
                                                                 model.target:target,
                                                                 model.is_dropout:True})
+
 					                    print('Iteration:%s\ttrain acc:%s\tdrop train acc:%s'%(gs,train_acc,train_acc_drop))
-			         #source,target = cache['valid']
+			            #source,target = cache['valid']
                         #test_acc = sess.run(model.acc,feed_dict={
                         #                                        model.source:source,                                                     
                         #                                        model.target:target})
@@ -63,8 +64,7 @@ def evaluation():
 
 def inference():
         pass
-                 
-
+ 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
         parser.register("type", "bool", lambda v: v.lower() == "true")

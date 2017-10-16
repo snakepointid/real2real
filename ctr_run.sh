@@ -26,5 +26,5 @@ $HBOX_HOME/bin/hbox-submit \
    --conf hbox.task.timeout=1200000\
    --appName "ctrPredict_$1" 
 
-echo "view result"
+echo "view result~~~"
 $HADOOP_HOME/bin/hadoop fs -ls $MODEL_FILE

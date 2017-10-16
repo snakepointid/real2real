@@ -1,4 +1,3 @@
-
 class baseModelParams:
 		model_mode = 'train'
 		test_rate  = 0.02
@@ -31,7 +30,7 @@ class nmtParams(nlpModelParams,multiClsModelParams):
 
 class convLayerParams:
 		kernel_size    = 5
-		filter_nums    = 128
+		filter_nums    = 512
 		dropout_rate   = 0.5
 		conv_layer_num = 3
 		strip_step     = 2
@@ -40,9 +39,14 @@ class convLayerParams:
 class convRankParams(nlpModelParams,regressModelParams,convLayerParams):
 		source_vocab_size = 10000
 		tag_size = 130000
-		source_maxlen = 30
+		source_maxlen = 40
+<<<<<<< HEAD
 		embedding_dim = 128
 		hidden_units  = 128
+=======
+		embedding_dim = 512
+		hidden_units  = 512
+>>>>>>> a6e4f631e69500c13fce160239425a687eb104f3
 		mlp_layers  = 2
 
 

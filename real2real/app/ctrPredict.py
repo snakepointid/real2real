@@ -22,33 +22,44 @@ def training():
                         model.global_saver.restore(sess,FLAGS.restore_path+"/global_model")
                 except:			
                         sess.run(model.init_op)
+			print("initial the graph")
 		        #list all trainable variables the graph hold 
                 layout_trainable_variables()
                 cache = LoadTrainFeeds()
+		old_pc=0
                 for epoch in range(baseModelParams.num_epochs):
                         for text_code_batch,tag_code_batch,ctr_batch in cache['training']:
                                 _,gs=sess.run([model.train_op,model.global_step],feed_dict={
                                                                 model.source:text_code_batch ,
                                                                 model.tag:tag_code_batch ,
                                                                 model.target:ctr_batch,
-								                                model.is_dropout:True})
+								model.is_dropout:True})
 	 
                         text_code_batch,tag_code_batch,ctr_batch = cache['train']	
                         probs_ = sess.run(model.logits,feed_dict={
                                                 model.source:text_code_batch,                                            
-                            						model.tag:tag_code_batch,
-        								                model.is_dropout:False})
+                            			model.tag:tag_code_batch,
+        			                model.is_dropout:False})
 
-                        regression_model_eval(ctr_batch,probs_,'train')
+                        _ = regression_model_eval(ctr_batch,probs_,'train')
                         text_code_batch,tag_code_batch,ctr_batch = cache['valid']   
+                        probs_ = sess.run(model.logits,feed_dict={
+                                            			model.source:text_code_batch,                                            
+                                                                model.tag:tag_code_batch,
+                                                                model.is_dropout:False})
+
+                        _ = regression_model_eval(ctr_batch,probs_,'valid')
+
+                        text_code_batch,tag_code_batch,ctr_batch = cache['testa']   
                         probs_ = sess.run(model.logits,feed_dict={
                                                                 model.source:text_code_batch,                                            
                                                                 model.tag:tag_code_batch,
-                                                                model.is_dropout:is_dropout})
+                                                                model.is_dropout:False})
 
-                        regression_model_eval(ctr_batch,probs_,'valid')
-                        print('Iteration:%s'%gs)
-                        
+                        new_pc = regression_model_eval(ctr_batch,probs_,'testa')
+			if new_pc<old_pc:
+				break
+                   	old_pc = new_pc     
                         endTime = time.time()
                         if endTime-startTime>3600:
                                 print ("save the whole model")

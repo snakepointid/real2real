@@ -22,6 +22,8 @@ def LoadTrainFeeds():
 		for line in reader:
 				rdv,tag_code,source,target,flag=line
 				source=source.split('|')
+				if len(source)<4:
+					continue
 				source=source[:convRankParams.source_maxlen]+[0]*(convRankParams.source_maxlen-len(source))
 
 				if flag=='test':

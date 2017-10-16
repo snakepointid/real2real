@@ -24,7 +24,7 @@ class convRank(regressModel):
                                                       is_training=self.is_training,
                                                       is_dropout=self.is_dropout)
 
-			      self.encoding = conv1d_to_full_layer(
+                        self.encoding = conv1d_to_full_layer(
 							inputs=conv_c_out,
 							scope_name="conv2full",
 							is_training=self.is_training)

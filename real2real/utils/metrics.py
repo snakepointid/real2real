@@ -1,7 +1,7 @@
 import numpy as np
 def regression_model_eval(ground_truth,predict,flag='train'):
-	ground_truth_resort = ground_truth[(-predict).argsort()]
-        predict_flag_resort = ground_truth[(-ground_truth).argsort()]
+	ground_truth_resort = ground_truth[(-ground_truth).argsort()]
+    predict_flag_resort = ground_truth[(-predict).argsort()]
 	diff_info = "%s\t%s"%(flag,diff_eval(ground_truth_resort,predict_flag_resort))
 	print diff_info
 	truth_bin_info = "%s\tgroud truth:\t%s"%(flag,bin_eval(ground_truth_resort))

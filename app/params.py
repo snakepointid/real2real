@@ -1,6 +1,6 @@
 class baseModelParams:
 		test_rate  = 0.05
-		batch_size = 1000
+		batch_size = 100
 		dropout_rate  = 0.5
 		learning_rate = 0.0001
 		num_epochs = 20
@@ -42,7 +42,7 @@ class convRankParams(nlpModelParams,regressModelParams,convLayerParams):
 		source_maxlen = 40
 		embedding_dim = 128
 		hidden_units  = 128
-		mlp_layers  = 3
+		mlp_layers  = 2
 
 
 class directLayerParams:

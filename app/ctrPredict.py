@@ -22,12 +22,12 @@ def training():
                         model.global_saver.restore(sess,FLAGS.restore_path+"/global_model")
                 except:			
                         sess.run(model.init_op)
-			            print("initial the graph")
+			print("initial the graph")
 		        #list all trainable variables the graph hold 
                 layout_trainable_variables()
                 cache = LoadTrainFeeds()
                 #compute the initial pearson coef
-		        text_code_batch,tag_code_batch,ctr_batch = cache['testa']   
+		text_code_batch,tag_code_batch,ctr_batch = cache['testa']   
                 probs = sess.run(model.logits,feed_dict={
                                                         model.source:text_code_batch,                                            
                                                         model.tag:tag_code_batch,
@@ -84,7 +84,6 @@ def inference():
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
                 model.global_saver.restore(sess,FLAGS.restore_path+"/global_model")
                 cache = LoadPredictFeeds()
-                old_pc=0
     
                 for raw_batch,source_batch,tag_batch in cache:
                         probs=sess.run(model.logits,feed_dict={
@@ -93,7 +92,7 @@ def inference():
                                                         model.is_dropout:False}) 
 
                         for idx,raw in enumerate(raw_batch):
-                                print "%s\t%s"%(raw,probs[idx])
+                                print("%s\t%s"%(raw,probs[idx]))
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()

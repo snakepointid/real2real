@@ -42,7 +42,7 @@ class convRankParams(nlpModelParams,regressModelParams,convLayerParams):
 		source_maxlen = 40
 		embedding_dim = 128
 		hidden_units  = 128
-		mlp_layers  = 2
+		mlp_layers  = 3
 
 
 class directLayerParams:

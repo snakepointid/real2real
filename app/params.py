@@ -1,10 +1,11 @@
 class baseModelParams:
 		model_mode = 'train'
-		test_rate  = 0.02
+		test_rate  = 0.05
 		batch_size = 100
 		dropout_rate  = 0.5
 		learning_rate = 0.0001
 		num_epochs = 20
+
 class nlpModelParams(baseModelParams):
 		flag_sinusoid = True     
 		flag_position_embed = True
@@ -14,7 +15,8 @@ class multiClsModelParams(baseModelParams):
 		target_vocab_size = 100000
 
 class regressModelParams(baseModelParams):
-        	loss_rmse = True        
+        	loss_rmse = True     
+   
 class pairEmbedModelParms(multiClsModelParams):
 			vocab_size = 100000
 			embedding_dim = 128
@@ -22,6 +24,7 @@ class pairEmbedModelParms(multiClsModelParams):
 			mlp_layers  = 2
 			hidden_units  = 128
 			window_span = 5
+
 class nmtParams(nlpModelParams,multiClsModelParams):
 		source_maxlen = 30
 		target_maxlen = 30 
@@ -40,9 +43,9 @@ class convRankParams(nlpModelParams,regressModelParams,convLayerParams):
 		source_vocab_size = 10000
 		tag_size = 130000
 		source_maxlen = 40
-		embedding_dim = 512
+		embedding_dim = 128
 		hidden_units  = 128
-		mlp_layers  = 2
+		mlp_layers  = 5
 
 
 class directLayerParams:
@@ -52,7 +55,7 @@ class attentionLayerParams:
 		num_blocks   = 6
 		num_heads    = 8
 		dropout_rate = 0.5
-		hidden_units = 512
+		hidden_units = 128
 
 class transformerParams(nmtParams,attentionLayerParams):
 		pass

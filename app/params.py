@@ -1,6 +1,6 @@
 class baseModelParams:
 		test_rate  = 0.05
-		batch_size = 100
+		batch_size = 1000
 		dropout_rate  = 0.5
 		learning_rate = 0.0001
 		num_epochs = 20

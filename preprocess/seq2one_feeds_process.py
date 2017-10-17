@@ -26,17 +26,18 @@ def LoadTrainFeeds():
 					continue
 				source=source[:convRankParams.source_maxlen]+[0]*(convRankParams.source_maxlen-len(source))
 
-				if flag=='test' and abs(float(rdv))<convRankParams.test_rate:
-						source_testa.append(source)
-						tag_testa.append(tag_code)
-						target_testa.append(target)		
+				if flag=='test':
+						if abs(float(rdv))<convRankParams.test_rate:
+								source_testa.append(source)
+								tag_testa.append(tag_code)
+								target_testa.append(target)		
 						continue
+						
 				if abs(float(rdv))<convRankParams.test_rate:
 						source_valid.append(source)
 						tag_valid.append(tag_code)
 						target_valid.append(target)
 				else:
-
 						source_batch.append(source)
 		 				tag_batch.append(tag_code)
 		 				target_batch.append(target)

@@ -26,7 +26,14 @@ def training():
 		        #list all trainable variables the graph hold 
                 layout_trainable_variables()
                 cache = LoadTrainFeeds()
-		        old_pc=0
+                #compute the initial pearson coef
+		        text_code_batch,tag_code_batch,ctr_batch = cache['testa']   
+                probs = sess.run(model.logits,feed_dict={
+                                                        model.source:text_code_batch,                                            
+                                                        model.tag:tag_code_batch,
+                                                        model.is_dropout:False})
+                old_pc = regression_model_eval(ctr_batch,probs,'testa',False)
+
                 for epoch in range(baseModelParams.num_epochs):
                         for text_code_batch,tag_code_batch,ctr_batch in cache['training']:
                                 _,gs=sess.run([model.train_op,model.global_step],feed_dict={

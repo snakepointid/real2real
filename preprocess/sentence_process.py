@@ -2,6 +2,8 @@
 import numpy as np
 import sys
 import re
+
+
 def quick_sentence_segment(sentence,case_sense=False,keep_eng=False):
         if not case_sense:
                 sentence = sentence.lower()
@@ -9,7 +11,7 @@ def quick_sentence_segment(sentence,case_sense=False,keep_eng=False):
         for char in sentence:
                 if re.match("[a-z']",char):
                         eng+=char
-                elif re.match("[0-9.]",char):
+                elif re.match("[0-9]",char):
                         numb+=char
                 else:
                         if len(eng):
@@ -30,6 +32,26 @@ def quick_sentence_segment(sentence,case_sense=False,keep_eng=False):
                 segmented+=["#NUMB#"];numb=""
         return segmented
 
+def sentenceSeg(sentence):
+        sentence = sentence.lower()
+        ret,eng,numb = [],'',''
+        for char in sentence:
+                if re.match("[a-z']",char):
+                        eng+=char
+                elif re.match("[0-9]",char):
+                        numb+=char
+                else:
+                        if len(eng):
+                                ret+=["#ENG#"];eng=""
+                        if len(numb):
+                                ret+=["#NUMB#"];numb=""
+                        ret+=[char]
+        if len(eng):
+                ret+=["#ENG#"];eng=""
+        if len(numb):
+                ret+=["#NUMB#"];numb=""
+        return ret
+
 def full_sentence_segment(sentence,case_sense=False,keep_eng=True):
         if not case_sense:
                 sentence = sentence.lower()
@@ -39,7 +61,7 @@ def full_sentence_segment(sentence,case_sense=False,keep_eng=True):
                         eng+=char;punced=False
                 elif re.match("[\u4e00-\u9fa5]",char):
                         segmented+=[char];punced=False
-                elif re.match("[0-9.]",char):
+                elif re.match("[0-9]",char):
                         numb+=char
                 else:
                         if len(eng):

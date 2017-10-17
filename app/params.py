@@ -1,5 +1,4 @@
 class baseModelParams:
-		model_mode = 'train'
 		test_rate  = 0.05
 		batch_size = 100
 		dropout_rate  = 0.5

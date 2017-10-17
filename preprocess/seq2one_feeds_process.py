@@ -5,7 +5,7 @@ import re
 from itertools import groupby
 from operator import itemgetter
 import cPickle as pickle
-from real2real.preprocess.sentence_process import full_sentence_segment 
+from real2real.preprocess.sentence_process import quick_sentence_segment 
 from real2real.app.params import convRankParams
 
 def LoadData():
@@ -75,7 +75,7 @@ def LoadTrainFeeds():
 def LoadPredictFeeds():
 		tag2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/source_batchs/recalltag2code.pkl','rb'))
 		zh2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/source_batchs/zh2code.pkl','rb'))
-		zh2code['#NUMB#']=len(zh2code)+1
+		zh2code['#NUMB#']=len(zh2code)+2
 		zh2code['#ENG#']=len(zh2code)+2
 
 		reader=LoadData()
@@ -86,7 +86,7 @@ def LoadPredictFeeds():
 				url,recalltag,title=line
 				tag_code=tag2code.get(recalltag,0)
 				try:
-						source=["%s"%zh2code.get(char,"1") for char in full_sentence_segment(title.decode('utf-8'))]
+						source=["%s"%zh2code.get(char,"1") for char in quick_sentence_segment(title.decode('utf-8'))]
 						if len(source)<4:
 								continue		
 						source=source[:convRankParams.source_maxlen]+[0]*(convRankParams.source_maxlen-len(source))		

@@ -1,14 +1,15 @@
 import numpy as np
-def regression_model_eval(ground_truth,predict,flag='train'):
+def regression_model_eval(ground_truth,predict,flag='train',verbose=True):
 	ground_truth_resort = ground_truth[(-ground_truth).argsort()]
     	predict_flag_resort = ground_truth[(-predict).argsort()]
 	pearson_corr,info = diff_eval(ground_truth_resort,predict_flag_resort)
 	diff_info = "%s\t%s"%(flag,info)
-	print diff_info
 	truth_bin_info = "%s\tgroud truth:\t%s"%(flag,bin_eval(ground_truth_resort))
-	print truth_bin_info
 	predict_bin_info = "%s\tpredict:\t%s"%(flag,bin_eval(predict_flag_resort))
-	print predict_bin_info
+	if verbose:
+		print diff_info
+		print truth_bin_info
+		print predict_bin_info
 	return pearson_corr
 
 def bin_eval(logits,bins=10):

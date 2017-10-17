@@ -19,6 +19,21 @@ class convRank(regressModel):
                                                             maxlen=convRankParams.source_maxlen,
                                                             scope='encoder')
 
+                        conv_2_out = multiLayer_conv_strip(
+                                                      inputs=source_embed,
+                                                      kernel_size=2,
+                                                      conv_layer_num=5,
+                                                      scope_name='cnn5',
+                                                      is_training=self.is_training,
+                                                      is_dropout=self.is_dropout)
+                        conv_3_out = multiLayer_conv_strip(
+                                                      inputs=source_embed,
+                                                      kernel_size=3,
+                                                      conv_layer_num=4,
+                                                      scope_name='cnn5',
+                                                      is_training=self.is_training,
+                                                      is_dropout=self.is_dropout)
+
                         conv_5_out = multiLayer_conv_strip(
                                                       inputs=source_embed,
                                                       kernel_size=5,
@@ -27,9 +42,17 @@ class convRank(regressModel):
                                                       is_training=self.is_training,
                                                       is_dropout=self.is_dropout)
                          
+                        conv_2_out = conv1d_to_full_layer(
+                                          inputs=conv_2_out,
+                                          scope_name="conv2full_2",
+                                          is_training=self.is_training)
+                        conv_3_out = conv1d_to_full_layer(
+                                          inputs=conv_3_out,
+                                          scope_name="conv2full_3",
+                                          is_training=self.is_training)
                         conv_5_out = conv1d_to_full_layer(
                                           inputs=conv_5_out,
-                                          scope_name="conv2full",
+                                          scope_name="conv2full_5",
                                           is_training=self.is_training)
 
                         tagEmbed = embedding(
@@ -41,6 +64,9 @@ class convRank(regressModel):
                                           scope="tagEmbed")
 
                         full_layer = tf.concat([tagEmbed,conv_5_out],1)
+                        #full_layer = tf.concat([tagEmbed,conv_2_out],1)
+                        #full_layer = tf.concat([tagEmbed,conv_2_out,conv_3_out],1)
+                        #full_layer = tf.concat([tagEmbed,conv_2_out,conv_3_out,conv_5_out],1)
 
                         self.logits = mlp_layer(
                                                 inputs=full_layer,

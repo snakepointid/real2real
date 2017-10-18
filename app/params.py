@@ -3,7 +3,7 @@ class baseModelParams:
 		batch_size = 100
 		dropout_rate  = 0.5
 		learning_rate = 0.0001
-		num_epochs = 20
+		num_epochs = 2000
 
 class nlpModelParams(baseModelParams):
 		flag_sinusoid = True     

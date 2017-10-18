@@ -33,13 +33,21 @@ class nmtParams(nlpModelParams,multiClsModelParams):
 class convLayerParams:
 		filter_nums    = 128
 		dropout_rate   = 0.5
-		strip_step     = 2
 		activation_fn  = "tensorflow.nn.relu"
 
 class convRankParams(nlpModelParams,regressModelParams,convLayerParams):
 		source_vocab_size = 10000
 		tag_size = 130000
 		source_maxlen = 40
+		embedding_dim = 128
+		hidden_units  = 128
+		mlp_layers  = 2
+
+class convClsParams(nlpModelParams,multiClsModelParams,convLayerParams):
+		source_vocab_size = 10000
+		target_vocab_size = 30
+		title_maxlen = 30
+		content_maxlen = 3000
 		embedding_dim = 128
 		hidden_units  = 128
 		mlp_layers  = 2

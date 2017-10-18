@@ -74,8 +74,8 @@ def LoadTrainFeeds():
 		return cache
 
 def LoadPredictFeeds():
-		tag2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/source_batchs/recalltag2code.pkl','rb'))
-		zh2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/source_batchs/zh2code.pkl','rb'))
+		tag2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/sources/recalltag2code.pkl','rb'))
+		zh2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/sources/zh2code.pkl','rb'))
 		zh2code['#NUMB#']=len(zh2code)+2
 		zh2code['#ENG#']=len(zh2code)+2
 

@@ -6,10 +6,9 @@ import argparse
 import os
 sys.path.insert(0,"..")
 sys.path.append(os.getcwd())
-print(sys.path)
 from real2real.models.seq2one import *
 from real2real.app.params import baseModelParams
-from real2real.preprocess.seq2one_feeds_process import LoadTrainFeeds
+from real2real.preprocess.seq2one_feeds_process import *
 from real2real.utils.info_layout import *
 from real2real.utils.metrics import regression_model_eval
 
@@ -87,8 +86,8 @@ def inference():
     
                 for raw_batch,source_batch,tag_batch in cache:
                         probs=sess.run(model.logits,feed_dict={
-                                                        model.source:text_code_batch ,
-                                                        model.tag:tag_code_batch ,
+                                                        model.source:source_batch ,
+                                                        model.tag:tag_batch ,
                                                         model.is_dropout:False}) 
 
                         for idx,raw in enumerate(raw_batch):

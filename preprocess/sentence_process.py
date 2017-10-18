@@ -3,7 +3,6 @@ import numpy as np
 import sys
 import re
 
-
 def quick_sentence_segment(sentence,case_sense=False,keep_eng=False):
         if not case_sense:
                 sentence = sentence.lower()

@@ -50,7 +50,7 @@ def LoadTrainFeeds():
 				if len(title_batch)==convClsParams.batch_size:
 						title_batch=np.array(title_batch,dtype=np.int64)
 						content_batch=np.array(content_batch,dtype=np.int64)
-						target_batch=np.array(target_batch,dtype=np.float32)
+						target_batch=np.array(target_batch,dtype=np.int32)
 						train_cache=[title_batch,content_batch,target_batch]
 
 						cache['training'].append(train_cache)
@@ -59,17 +59,17 @@ def LoadTrainFeeds():
 		title_valid+=title_batch;content_valid+=content_batch;target_valid+=target_batch
  		title_valid=np.array(title_valid,dtype=np.int64)
  		content_valid =np.array(content_valid,dtype=np.int64)
- 		target_valid=np.array(target_valid,dtype=np.float32)
+ 		target_valid=np.array(target_valid,dtype=np.int32)
 		cache['valid']=[title_valid,content_valid,target_valid]
 
 		title_train=np.array(title_train,dtype=np.int64)
  		content_train =np.array(content_train,dtype=np.int64)
- 		target_train=np.array(target_train,dtype=np.float32)
+ 		target_train=np.array(target_train,dtype=np.int32)
 		cache['train']=[title_train,content_train,target_train]
 
 		title_testa=np.array(title_testa,dtype=np.int64)
  		content_testa =np.array(content_testa,dtype=np.int64)
- 		target_testa=np.array(target_testa,dtype=np.float32)
+ 		target_testa=np.array(target_testa,dtype=np.int32)
 		cache['testa']=[title_testa,content_testa,target_testa]
 
 		return cache
@@ -112,5 +112,6 @@ def LoadPredictFeeds():
         		yield predict_cache
 
 if __name__ =="__main__":
-	cache=LoadTrainFeeds()
-	print ("train nums is %s\ttest nums is %s"%(len(cache['training'])*convClsParams.batch_size,len(cache['valid'][1])))
+	reader=LoadData()
+	for line in reader:
+		print (line)

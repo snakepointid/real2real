@@ -1,5 +1,5 @@
 class baseModelParams:
-		test_rate  = 0.05
+		test_rate  = 0.005
 		batch_size = 100
 		dropout_rate  = 0.5
 		learning_rate = 0.0001
@@ -45,7 +45,7 @@ class convRankParams(nlpModelParams,regressModelParams,convLayerParams):
 
 class convClsParams(nlpModelParams,multiClsModelParams,convLayerParams):
 		source_vocab_size = 10000
-		target_vocab_size = 30
+		target_vocab_size = 34
 		title_maxlen = 30
 		content_maxlen = 3000
 		embedding_dim = 128

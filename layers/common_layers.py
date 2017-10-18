@@ -94,12 +94,13 @@ def label_smoothing(inputs, epsilon=0.1):
         K = inputs.get_shape().as_list()[-1] # number of channels
         return ((1-epsilon) * inputs) + (epsilon / K)
     
-def semantic_position_embedding(inputs,vocab_size,num_units,maxlen,scope):
+def semantic_position_embedding(inputs,vocab_size,num_units,maxlen,scope,reuse):
         with tf.variable_scope(scope):
                 encoding = embedding(inputs, 
                                         vocab_size=vocab_size, 
                                         num_units=num_units, 
                                         scale=True,
+					reuse=reuse,
                                         scope="embedding")
                 if not nlpModelParams.flag_position_embed:
                         return encoding
@@ -117,6 +118,7 @@ def semantic_position_embedding(inputs,vocab_size,num_units,maxlen,scope):
                                       num_units=num_units, 
                                       zero_pad=False, 
                                       scale=False,
+				      reuse=reuse,
                                       scope="pe")
         return encoding
 

@@ -49,7 +49,7 @@ def conv1d_to_full_layer(inputs,scope_name,is_training):
 	with tf.variable_scope(scope_name,reuse=None):
                 filter_kernels = tf.get_variable('kernel', shape=[static_shape[1],static_shape[2],convLayerParams.filter_nums],trainable=is_training)
                 cnn_bias      = tf.get_variable('bias'  , shape=(convLayerParams.filter_nums,), initializer=tf.constant_initializer(0),trainable=is_training)
-                cnn_output  = tf.nn.conv1d(inputs, filter_kernels, padding='VALID')+ cnn_bias
+                cnn_output  = tf.nn.conv1d(inputs, filter_kernels,stride=1, padding='VALID')+ cnn_bias
         return tf.squeeze(cnn_output,1) 
 
 def conv2d_to_full_layer(inputs,scope_name,is_training):
@@ -57,5 +57,5 @@ def conv2d_to_full_layer(inputs,scope_name,is_training):
         with tf.variable_scope(scope_name,reuse=None):
                 filter_kernels = tf.get_variable('kernel', shape=[static_shape[1],static_shape[2],static_shape[3],convLayerParams.filter_nums],trainable=is_training)
                 cnn_bias      = tf.get_variable('bias'  , shape=(convLayerParams.filter_nums,), initializer=tf.constant_initializer(0),trainable=is_training)
-                cnn_output  = tf.nn.conv1d(inputs, filter_kernels, padding='VALID')+ cnn_bias
+                cnn_output  = tf.nn.conv1d(inputs, filter_kernels,stride=1, padding='VALID')+ cnn_bias
         return tf.squeeze(cnn_output,[1,2])

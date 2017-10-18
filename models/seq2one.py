@@ -2,7 +2,7 @@ from __future__ import print_function
 import tensorflow as tf
 from real2real.layers.conv_layers import multiLayer_conv_strip,conv1d_to_full_layer
 from real2real.app.params import convRankParams,convClsParams
-from real2real.models.base_model import regressModel
+from real2real.models.base_model import regressModel,multiClsModel
 from real2real.layers.common_layers import semantic_position_embedding,embedding,mlp_layer
 from pydoc import locate
 
@@ -17,7 +17,8 @@ class ConvRank(regressModel):
                                                             vocab_size=convRankParams.source_vocab_size,
                                                             num_units=convRankParams.embedding_dim,
                                                             maxlen=convRankParams.source_maxlen,
-                                                            scope='encoder')
+                                                            scope='encoder',
+							    reuse=None)
 
                         conv_5_out = multiLayer_conv_strip(
                                                       inputs=source_embed,
@@ -51,19 +52,20 @@ class ConvRank(regressModel):
                                                 is_training=self.is_training,
                                                 is_dropout=self.is_dropout)
 
-class ConvCls(regressModel):
+class ConvCls(multiClsModel):
             def _build_(self):
                         # input coding placeholder
                         self.title_source = tf.placeholder(shape=(None, convClsParams.title_maxlen),dtype=tf.int64)
                         self.content_source = tf.placeholder(shape=(None, convClsParams.content_maxlen),dtype=tf.int64)
-                        self.target = tf.placeholder(shape=(None, ),dtype=tf.int64)
+                        self.target = tf.placeholder(shape=(None, ),dtype=tf.int32)
 
                         title_embed = semantic_position_embedding(
                                                             inputs=self.title_source,
                                                             vocab_size=convClsParams.source_vocab_size,
                                                             num_units=convClsParams.embedding_dim,
                                                             maxlen=convClsParams.title_maxlen,
-                                                            scope='title_embed')
+                                                            scope='zh_encode',
+							    reuse=None)
 
                         title_out = multiLayer_conv_strip(
                                                       inputs=title_embed,
@@ -79,7 +81,8 @@ class ConvCls(regressModel):
                                                             vocab_size=convClsParams.source_vocab_size,
                                                             num_units=convClsParams.embedding_dim,
                                                             maxlen=convClsParams.content_maxlen,
-                                                            scope='content_embed')
+                                                            scope='zh_encode',
+						            reuse=True)
 
                         content_out = multiLayer_conv_strip(
                                                       inputs=content_embed,
@@ -105,7 +108,7 @@ class ConvCls(regressModel):
                         full_layer = tf.concat([title_out,content_out],1)
                         self.logits = mlp_layer(
                                                 inputs=full_layer,
-                                                output_dim=1,
+                                                output_dim=convClsParams.target_vocab_size,
                                                 mlp_layers=convClsParams.mlp_layers,
                                                 hidden_units=convClsParams.hidden_units,
                                                 activation_fn=locate(convClsParams.activation_fn),

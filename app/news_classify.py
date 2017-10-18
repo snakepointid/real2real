@@ -20,7 +20,7 @@ def training():
                         model.global_saver.restore(sess,FLAGS.restore_path+"/global_model")
                 except:			
                         sess.run(model.init_op)
-			            print("initial the graph")
+			print("initial the graph")
 		        #list all trainable variables the graph hold 
                 layout_trainable_variables()
                 cache = LoadTrainFeeds()
@@ -32,22 +32,24 @@ def training():
                                                                 model.title_source:title_code_batch ,
                                                                 model.content_source:content_code_batch ,
                                                                 model.target:label_batch,
-								                                model.is_dropout:True})
+								model.is_dropout:True})
 	 
                         title_code_batch,content_code_batch,label_batch = cache['train']	
                         train_acc = sess.run(model.acc,feed_dict={
-                                                model.title_source:title_code_batch,                                            
-                            			        model.content_source:content_code_batch,
-        			                            model.is_dropout:False})
+                                                                model.title_source:title_code_batch,                                            
+                            			                model.content_source:content_code_batch,
+								model.target:label_batch,
+        			                                model.is_dropout:False})
 
-                
+                	train_num=len(label_batch)
                         title_code_batch,content_code_batch,label_batch = cache['valid']   
                         valid_acc = sess.run(model.acc,feed_dict={
-                                            			        model.title_source:title_code_batch,                                            
+                                            			model.title_source:title_code_batch,                                            
                                                                 model.content_source:content_code_batch,
+								model.target:label_batch,
                                                                 model.is_dropout:False})
-
-                        print("train accuracy:%s\tvalid accuracy:%s"%(train_acc,valid_acc))  
+			valid_num=len(label_batch)
+                        print("train num:%s\ttrain accuracy:%s\tvalid num:%s\tvalid accuracy:%s"%(train_num,train_acc,valid_num,valid_acc))  
                         endTime = time.time()
                         if endTime-startTime>3600:
                                 print ("save the whole model")

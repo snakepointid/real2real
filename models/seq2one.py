@@ -106,7 +106,7 @@ class ConvCls(multiClsModel):
                          
 
                         full_layer = tf.concat([title_out,content_out],1)
-                        #full_layer = title_out
+                        #full_layer = content_out
 			self.logits = mlp_layer(
                                                 inputs=full_layer,
                                                 output_dim=convClsParams.target_vocab_size,

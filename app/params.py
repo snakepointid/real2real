@@ -1,7 +1,7 @@
 class baseModelParams:
 		test_rate  = 0.005
 		batch_size = 100
-		dropout_rate  = 0.5
+		dropout_rate  = 0.1
 		learning_rate = 0.0001
 		num_epochs = 2000
 
@@ -27,12 +27,10 @@ class pairEmbedModelParms(multiClsModelParams):
 class nmtParams(nlpModelParams,multiClsModelParams):
 		source_maxlen = 30
 		target_maxlen = 30 
-		dropout_rate = 0.1
 		source_vocab_size = 10000
 
-class convLayerParams:
+class convLayerParams(baseModelParams):
 		filter_nums    = 128
-		dropout_rate   = 0.5
 		activation_fn  = "tensorflow.nn.relu"
 
 class convRankParams(nlpModelParams,regressModelParams,convLayerParams):
@@ -53,13 +51,12 @@ class convClsParams(nlpModelParams,multiClsModelParams,convLayerParams):
 		mlp_layers  = 2
 
 
-class directLayerParams:
-		dropout_rate = 0.5
+class directLayerParams(baseModelParams):
+		pass
 
-class attentionLayerParams:
+class attentionLayerParams(baseModelParams):
 		num_blocks   = 6
 		num_heads    = 8
-		dropout_rate = 0.5
 		hidden_units = 128
 
 class transformerParams(nmtParams,attentionLayerParams):

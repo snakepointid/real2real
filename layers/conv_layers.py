@@ -23,7 +23,7 @@ def multiLayer_conv_strip(inputs,kernel_size,stride_step,conv_layer_num,scope_na
                                               is_training = is_training)
                         next_layer = tf.layers.batch_normalization(next_layer)          
                         cnn_a_output = activation_fn(next_layer)
-        return	cnn_a_output 
+        return  cnn_a_output 
 
 def strip_conv(inputs,kernel_size,stride_step,scope_name,is_training):
         static_shape  = inputs.get_shape()
@@ -34,19 +34,19 @@ def strip_conv(inputs,kernel_size,stride_step,scope_name,is_training):
         return cnn_output
 
 def conv_to_full_layer(inputs,scope,is_training):
-	activation_fn = locate(convLayerParams.activation_fn)
-	static_shape  = inputs.get_shape()
-	if len(static_shape)==3:
-		outputs = conv1d_to_full_layer(inputs,scope,is_training)
-	elif len(static_shape)==4:
-		outputs = conv2d_to_full_layer(inputs,scope,is_training)
-	else:
-		raise ValueError("input shape's rank  must be 3 or 4")
-	return activation_fn(outputs)
+    activation_fn = locate(convLayerParams.activation_fn)
+    static_shape  = inputs.get_shape()
+    if len(static_shape)==3:
+        outputs = conv1d_to_full_layer(inputs,scope,is_training)
+    elif len(static_shape)==4:
+        outputs = conv2d_to_full_layer(inputs,scope,is_training)
+    else:
+        raise ValueError("input shape's rank  must be 3 or 4")
+    return activation_fn(outputs)
 
 def conv1d_to_full_layer(inputs,scope_name,is_training):
-	static_shape  = inputs.get_shape()
-	with tf.variable_scope(scope_name,reuse=None):
+    static_shape  = inputs.get_shape()
+    with tf.variable_scope(scope_name,reuse=None):
                 filter_kernels = tf.get_variable('kernel', shape=[static_shape[1],static_shape[2],convLayerParams.filter_nums],trainable=is_training)
                 cnn_bias      = tf.get_variable('bias'  , shape=(convLayerParams.filter_nums,), initializer=tf.constant_initializer(0),trainable=is_training)
                 cnn_output  = tf.nn.conv1d(inputs, filter_kernels,stride=1, padding='VALID')+ cnn_bias

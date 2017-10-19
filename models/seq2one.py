@@ -12,28 +12,14 @@ class ConvRank(regressModel):
                         self.source = tf.placeholder(shape=(None, convRankParams.source_maxlen),dtype=tf.int64)
                         self.tag = tf.placeholder(shape=(None, ),dtype=tf.int64)
                         self.target = tf.placeholder(shape=(None, ),dtype=tf.float32)
+                        #embeddings
                         source_embed = semantic_position_embedding(
                                                             inputs=self.source,
                                                             vocab_size=convRankParams.source_vocab_size,
                                                             num_units=convRankParams.embedding_dim,
                                                             maxlen=convRankParams.source_maxlen,
                                                             scope='encoder',
-							    reuse=None)
-
-                        conv_5_out = multiLayer_conv_strip(
-                                                      inputs=source_embed,
-                                                      kernel_size=5,
-                                                      conv_layer_num=3,
-                                                      stride_step=2,
-                                                      scope_name='cnn5',
-                                                      is_training=self.is_training,
-                                                      is_dropout=self.is_dropout)
-                         
-                        conv_5_out = conv1d_to_full_layer(
-                                          inputs=conv_5_out,
-                                          scope_name="conv2full_5",
-                                          is_training=self.is_training)
-
+                                                            reuse=None)
                         tagEmbed = embedding(
                                           inputs=self.tag,
                                           vocab_size=convRankParams.tag_size,
@@ -41,7 +27,68 @@ class ConvRank(regressModel):
                                           zero_pad=False,
                                           scale=True,
                                           scope="tagEmbed")
+                        #convolution
+                        conv_out = multiLayer_conv_strip(
+                                                      inputs=source_embed,
+                                                      kernel_size=5,
+                                                      conv_layer_num=3,
+                                                      stride_step=2,
+                                                      scope_name='cnn',
+                                                      is_training=self.is_training,
+                                                      is_dropout=self.is_dropout)
+                         
+                        conv_out = conv1d_to_full_layer(
+                                                      inputs=conv_out,
+                                                      scope_name="conv2full",
+                                                      is_training=self.is_training)
 
+                        
+                        #forward feed connect
+                        full_layer = tf.concat([tagEmbed,conv_out],1)
+                        self.logits = mlp_layer(
+                                                inputs=full_layer,
+                                                output_dim=1,
+                                                mlp_layers=convRankParams.mlp_layers,
+                                                hidden_units=convRankParams.hidden_units,
+                                                activation_fn=locate(convRankParams.activation_fn),
+                                                is_training=self.is_training,
+                                                is_dropout=self.is_dropout)
+class AttenRank(regressModel):
+            def _build_(self):
+                        # input coding placeholder
+                        self.source = tf.placeholder(shape=(None, convRankParams.source_maxlen),dtype=tf.int64)
+                        self.tag = tf.placeholder(shape=(None, ),dtype=tf.int64)
+                        self.target = tf.placeholder(shape=(None, ),dtype=tf.float32)
+                        #embeddings
+                        source_embed = semantic_position_embedding(
+                                                            inputs=self.source,
+                                                            vocab_size=convRankParams.source_vocab_size,
+                                                            num_units=convRankParams.embedding_dim,
+                                                            maxlen=convRankParams.source_maxlen,
+                                                            scope='encoder',
+                                                            reuse=None)
+                        tagEmbed = embedding(
+                                          inputs=self.tag,
+                                          vocab_size=convRankParams.tag_size,
+                                          num_units=convRankParams.embedding_dim,
+                                          zero_pad=False,
+                                          scale=True,
+                                          scope="tagEmbed")
+                        #convolution
+                        conv_out = multiLayer_conv_strip(
+                                                      inputs=source_embed,
+                                                      kernel_size=5,
+                                                      conv_layer_num=1,
+                                                      stride_step=1,
+                                                      scope_name='cnn',
+                                                      is_training=self.is_training,
+                                                      is_dropout=self.is_dropout)
+                         
+                        
+                        
+
+                        
+                        #forward feed connect
                         full_layer = tf.concat([tagEmbed,conv_5_out],1)
                         self.logits = mlp_layer(
                                                 inputs=full_layer,
@@ -65,7 +112,7 @@ class ConvCls(multiClsModel):
                                                             num_units=convClsParams.embedding_dim,
                                                             maxlen=convClsParams.title_maxlen,
                                                             scope='zh_encode',
-							    reuse=None)
+                                                            reuse=None)
 
                         title_out = multiLayer_conv_strip(
                                                       inputs=title_embed,
@@ -82,7 +129,7 @@ class ConvCls(multiClsModel):
                                                             num_units=convClsParams.embedding_dim,
                                                             maxlen=convClsParams.content_maxlen,
                                                             scope='zh_encode',
-						            reuse=True)
+                                                            reuse=True)
 
                         content_out = multiLayer_conv_strip(
                                                       inputs=content_embed,
@@ -107,12 +154,12 @@ class ConvCls(multiClsModel):
 
                         full_layer = tf.concat([title_out,content_out],1)
                         #full_layer = content_out
-			self.logits = mlp_layer(
-                                                inputs=full_layer,
-                                                output_dim=convClsParams.target_vocab_size,
-                                                mlp_layers=convClsParams.mlp_layers,
-                                                hidden_units=convClsParams.hidden_units,
-                                                activation_fn=locate(convClsParams.activation_fn),
-                                                is_training=self.is_training,
-                                                is_dropout=self.is_dropout)
+                  self.logits = mlp_layer(
+                                          inputs=full_layer,
+                                          output_dim=convClsParams.target_vocab_size,
+                                          mlp_layers=convClsParams.mlp_layers,
+                                          hidden_units=convClsParams.hidden_units,
+                                          activation_fn=locate(convClsParams.activation_fn),
+                                          is_training=self.is_training,
+                                          is_dropout=self.is_dropout)
 

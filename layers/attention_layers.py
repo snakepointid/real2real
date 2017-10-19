@@ -31,70 +31,66 @@ def self_attention(encoding,is_training,is_dropout):
                         encoding = feedforward(encoding, num_units=[4*attentionLayerParams.hidden_units, attentionLayerParams.hidden_units])
         return encoding
 
-def conv_attention_conv(inputs,query_length,scope_name,is_training,is_dropout):
+def hot_attention(inputs,query,scope_name,activation_function,is_training,is_dropout):
+    '''
+    inputs N*SL*WD
+    query N*QD
+    '''
+        activation_fn = locate(attentionLayerParams.activation_fn)
         with tf.variable_scope(scope_name):
-                ## Dropout
-                inputs = tf.contrib.layers.dropout(inputs,
-                                            keep_prob=attentionLayerParams.dropout_rate,
-                                            is_training=is_dropout)
-
-
-                conv_out=direct_conv(
-                                   inputs=inputs,
-                                   scope_name='before_atten',
-                                   is_training=is_training)  
-                atten_out=position_attention_1d(
-                                              inputs=conv_out,
-                                              query_length=query_length,
-                                              scope_name='posi_atten',
-                                              is_training=is_training,
-                                              is_dropout=is_dropout)
-                conv_out=direct_conv(
-                                    inputs=atten_out,
-                                    scope_name='after_atten',
-                                    is_training=is_training)
-        return conv_out
-def position_attention_1d(inputs,query_length,scope_name,is_training,is_dropout):
-        '''
-            inputs N * L * E
-
-        '''
-        static_shape  = inputs.get_shape()
-        with tf.variable_scope(scope_name):
-                inputs = tf.contrib.layers.dropout(inputs,
-                                            keep_prob=attentionLayerParams.dropout_rate,
-                                            is_training=is_dropout)
-                add_position_embed = tf.get_variable(
-                                                    'add_position', 
-                                                    shape=[1,static_shape[1],static_shape[2]],
-                                                    trainable=is_training)
-                query_position_embed = tf.get_variable(
-                                                    'query_position', 
-                                                    shape=[1,query_length,2*int(static_shape[2])],
-                                                    trainable=is_training)
-
-                #ops
-                keys = tf.layers.dense(inputs, static_shape[2], activation=tf.nn.relu) #N,L,E
-                values = tf.layers.dense(inputs, static_shape[2], activation=tf.nn.relu) #N,L,E
-                #augment
-                add_position_embed = tf.tile(add_position_embed,[tf.shape(inputs)[0],1,1])
-                query_position_embed = tf.tile(query_position_embed,[tf.shape(inputs)[0],1,1])#N,QL,2*E
-                #combine
-                keys = tf.concat([keys,add_position_embed],2) # N,L,2*E
-                outputs = tf.matmul(query_position_embed, tf.transpose(keys, [0, 2, 1])) #N,QL,L
-
-                key_masks = tf.sign(tf.reduce_sum(tf.abs(inputs), axis=-1)) # (N, L)
-                key_masks = tf.tile(tf.expand_dims(key_masks, 1), [1,query_length,1]) # N,QL,L
-
+                # Linear projections
+                K = tf.layers.dense(inputs, query.get_shape()[1], activation=activation_fn) # (N, SL, QD)
+                V = tf.layers.dense(inputs, query.get_shape()[1], activation=activation_fn) # (N, SL, QD)
+                Q = tf.tile(query,[1,inputs.get_shape()[1],1]) # (N, SL, QD)
+                # Multiplication
+                outputs = tf.matmul(Q_, tf.transpose(K_, [0, 2, 1])) # (h*N, T_q, T_k)
+        
+                # Scale
+                outputs = outputs / (K_.get_shape().as_list()[-1] ** 0.5)
+        
+                # Key Masking
+                key_masks = tf.sign(tf.abs(tf.reduce_sum(keys, axis=-1))) # (N, T_k)
+                key_masks = tf.tile(key_masks, [num_heads, 1]) # (h*N, T_k)
+                key_masks = tf.tile(tf.expand_dims(key_masks, 1), [1, tf.shape(queries)[1], 1]) # (h*N, T_q, T_k)
+        
                 paddings = tf.ones_like(outputs)*(-2**32+1)
-                outputs = tf.where(tf.equal(key_masks, 0), paddings, outputs) # N,QL,L
-                outputs = tf.nn.softmax(outputs) # N,QL,L
-
-                outputs = tf.matmul(outputs, values) #N,QL,E
+                outputs = tf.where(tf.equal(key_masks, 0), paddings, outputs) # (h*N, T_q, T_k)
+  
+                # Causality = Future blinding
+                if causality:
+                        diag_vals = tf.ones_like(outputs[0, :, :]) # (T_q, T_k)
+                        tril = tf.contrib.linalg.LinearOperatorTriL(diag_vals).to_dense() # (T_q, T_k)
+                        masks = tf.tile(tf.expand_dims(tril, 0), [tf.shape(outputs)[0], 1, 1]) # (h*N, T_q, T_k)
+   
+                        paddings = tf.ones_like(masks)*(-2**32+1)
+                        outputs = tf.where(tf.equal(masks, 0), paddings, outputs) # (h*N, T_q, T_k)
+  
+                # Activation
+                outputs = tf.nn.softmax(outputs) # (h*N, T_q, T_k)
+         
+                # Query Masking
+                query_masks = tf.sign(tf.abs(tf.reduce_sum(queries, axis=-1))) # (N, T_q)
+                query_masks = tf.tile(query_masks, [num_heads, 1]) # (h*N, T_q)
+                query_masks = tf.tile(tf.expand_dims(query_masks, -1), [1, 1, tf.shape(keys)[1]]) # (h*N, T_q, T_k)
+                outputs *= query_masks # broadcasting. (N, T_q, C)
+          
+                # Dropouts
+                outputs = tf.contrib.layers.dropout(
+                                            inputs=outputs,
+                                            keep_prob=dropout_rate,
+                                            is_training=is_dropout)
+               
+                # Weighted sum
+                outputs = tf.matmul(outputs, V_) # ( h*N, T_q, C/h)
+        
+                # Restore shape
+                outputs = tf.concat(tf.split(outputs, num_heads, axis=0), axis=2 ) # (N, T_q, C)
+              
+                # Residual connection
+                outputs += queries
+              
                 # Normalize
-                outputs = layer_norm(outputs) # N,QL,E
-
-        return outputs
+                outputs = layer_norm(outputs) # (N, T_q, C)
 
 def enc_dec_attention(decoding,encoding,is_training,is_dropout):
         # Decoder

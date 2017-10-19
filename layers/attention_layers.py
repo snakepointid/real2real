@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 #/usr/bin/python2
- 
-
-from __future__ import print_function
 import tensorflow as tf
 from real2real.layers.common_layers import *
 from real2real.app.params import attentionLayerParams
@@ -47,8 +44,8 @@ def multi_hot_attention(inputs,query,scope_name,is_training):
         activation_fn = locate(attentionLayerParams.activation_fn)
         with tf.variable_scope(scope_name):
                 # Linear projections
-                K = tf.layers.dense(inputs, query.get_shape()[1], activation=activation_fn) # (N, SL, QD)
-                V = tf.layers.dense(inputs, query.get_shape()[1], activation=activation_fn) # (N, SL, QD)
+                K = tf.layers.dense(inputs, query.get_shape()[2], activation=activation_fn) # (N, SL, QD)
+                V = tf.layers.dense(inputs, query.get_shape()[2], activation=activation_fn) # (N, SL, QD)
                 Q = query # (N, m, QD)
                 # Multiplication
                 weights =  tf.matmul(Q,tf.transpose(K,[0,2,1])) # (N,m,SL)
@@ -57,7 +54,7 @@ def multi_hot_attention(inputs,query,scope_name,is_training):
                 # Weighted sum
                 outputs = tf.matmul(weights, V) # (N,m,QD)
                 # Residual connection
-                outputs += queries# (N,m,QD)
+                outputs += query# (N,m,QD)
                 # Normalize
                 outputs = layer_norm(outputs) # (N,m,QD)
                 return outputs

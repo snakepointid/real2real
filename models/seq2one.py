@@ -139,6 +139,15 @@ class AttenCls(multiClsModel):
                                                             scope='zh_encode',
                                                             reuse=None)
 
+                        content_embed = semantic_position_embedding(
+                                                            inputs=self.content_source,
+                                                            vocab_size=newsClsModelParams.source_vocab_size,
+                                                            num_units=newsClsModelParams.embedding_dim,
+                                                            is_training=self.is_training,
+                                                            maxlen=newsClsModelParams.content_maxlen,
+                                                            scope='zh_encode',
+                                                            reuse=True)
+
                         target_embed = tf.get_variable('stack_var',
                                                        dtype=tf.float32,
                                                        shape=[newsClsModelParams.target_vocab_size, newsClsModelParams.embedding_dim],
@@ -155,12 +164,27 @@ class AttenCls(multiClsModel):
                                                       scope_name='cnn_title',
                                                       is_training=self.is_training,
                                                       is_dropout=self.is_dropout)
+
+                        content_out = multiLayer_conv_strip(
+                                                      inputs=content_embed,
+                                                      kernel_size=3,
+                                                      stride_step=1,
+                                                      conv_layer_num=1,
+                                                      scope_name='cnn_content',
+                                                      is_training=self.is_training,
+                                                      is_dropout=self.is_dropout)
                          
-                        atten_out = multi_hot_attention(
+                        title_atten_out = multi_hot_attention(
                                                       inputs=title_out,
                                                       query=target_embed,
                                                       scope_name="multi_hot_atten",
                                                       is_training=self.is_training) #N,m,WD
 
-                        self.logits = tf.squeeze(tf.layers.dense(atten_out,1, activation=locate(newsClsModelParams.activation_fn)))
+                        content_atten_out = multi_hot_attention(
+                                                      inputs=content_out,
+                                                      query=target_embed,
+                                                      scope_name="multi_hot_atten",
+                                                      is_training=self.is_training) #N,m,WD
+
+                        self.logits = tf.squeeze(tf.layers.dense(content_atten_out,1, activation=locate(newsClsModelParams.activation_fn)))
 

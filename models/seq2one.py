@@ -19,6 +19,7 @@ class ConvRank(regressModel):
                                                             inputs=self.source,
                                                             vocab_size=ctrRankModelParams.source_vocab_size,
                                                             num_units=ctrRankModelParams.embedding_dim,
+                                                            is_training=self.is_training,
                                                             maxlen=ctrRankModelParams.source_maxlen,
                                                             scope='encoder',
                                                             reuse=None)
@@ -68,6 +69,7 @@ class ConvCls(multiClsModel):
                                                             inputs=self.title_source,
                                                             vocab_size=newsClsModelParams.source_vocab_size,
                                                             num_units=newsClsModelParams.embedding_dim,
+                                                            is_training=self.is_training,
                                                             maxlen=newsClsModelParams.title_maxlen,
                                                             scope='zh_encode',
                                                             reuse=None)
@@ -85,6 +87,7 @@ class ConvCls(multiClsModel):
                                                             inputs=self.content_source,
                                                             vocab_size=newsClsModelParams.source_vocab_size,
                                                             num_units=newsClsModelParams.embedding_dim,
+                                                            is_training=self.is_training,
                                                             maxlen=newsClsModelParams.content_maxlen,
                                                             scope='zh_encode',
                                                             reuse=True)
@@ -131,6 +134,7 @@ class AttenCls(multiClsModel):
                                                             inputs=self.title_source,
                                                             vocab_size=newsClsModelParams.source_vocab_size,
                                                             num_units=newsClsModelParams.embedding_dim,
+                                                            is_training=self.is_training,
                                                             maxlen=newsClsModelParams.title_maxlen,
                                                             scope='zh_encode',
                                                             reuse=None)
@@ -139,7 +143,7 @@ class AttenCls(multiClsModel):
                                                        dtype=tf.float32,
                                                        shape=[newsClsModelParams.target_vocab_size, newsClsModelParams.embedding_dim],
                                                        initializer=tf.contrib.layers.xavier_initializer(),
-                                                       trainable=is_training)
+                                                       trainable=self.is_training)
 
                         target_embed = tf.tile(tf.expand_dims(target_embed,0),[tf.shape(self.target)[0],1,1]) #N,m,WD
                         #conv and anttention

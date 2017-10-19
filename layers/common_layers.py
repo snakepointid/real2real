@@ -127,7 +127,7 @@ def mlp_layer(inputs,output_dim,mlp_layers,hidden_units,activation_fn,is_trainin
                                            inputs=inputs,
                                            keep_prob=directLayerParams.dropout_rate,
                                            is_training=is_dropout)
-  dropout_layer   = layer_norm(dropout_layer)
+  dropout_layer = layer_norm(dropout_layer)
 	for layer_idx in range(mlp_layers):
                 with tf.variable_scope("full_layer{}".format(layer_idx)):
                         hidden_layer    = tf.layers.dense(

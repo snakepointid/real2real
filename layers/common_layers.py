@@ -4,7 +4,7 @@
 
 from __future__ import print_function
 import tensorflow as tf
-from real2real.app.params import nlpModelParams,directLayerParams
+from real2real.app.params import nlpModelParams,baseLayerParams
 
 def layer_norm(x, filters=None, epsilon=1e-6, name=None, reuse=None):
         """Layer normalize the tensor x, averaging over the last dimension."""
@@ -34,20 +34,22 @@ def noam_norm(x, epsilon=1.0, name=None):
                 ndims = len(shape)
                 result = tf.nn.l2_normalize(x, ndims - 1, epsilon=epsilon)*tf.sqrt(tf.to_float(shape[-1]))
                 return result
- 
+
 def embedding(inputs, 
               vocab_size, 
               num_units, 
               zero_pad=True, 
               scale=True,
               scope="embedding", 
+              is_training=True,
               reuse=None):
    
         with tf.variable_scope(scope, reuse=reuse):
                 lookup_table = tf.get_variable('lookup_table',
                                    dtype=tf.float32,
                                    shape=[vocab_size, num_units],
-                                   initializer=tf.contrib.layers.xavier_initializer())
+                                   initializer=tf.contrib.layers.xavier_initializer(),
+                                   trainable=is_training)
         if zero_pad:
                 lookup_table = tf.concat((tf.zeros(shape=[1, num_units]), lookup_table[1:, :]), 0)
         outputs = tf.nn.embedding_lookup(lookup_table, inputs)
@@ -80,8 +82,7 @@ def positional_encoding(inputs,
 
                 if zero_pad:
 
-                        lookup_table = tf.concat((tf.zeros(shape = [1, num_units]),
-                                    lookup_table[1:, :]), 0)
+                        lookup_table = tf.concat((tf.zeros(shape = [1, num_units]), lookup_table[1:, :]), 0)
                 outputs = tf.nn.embedding_lookup(lookup_table, input_one)
     
                 if scale:
@@ -94,13 +95,14 @@ def label_smoothing(inputs, epsilon=0.1):
         K = inputs.get_shape().as_list()[-1] # number of channels
         return ((1-epsilon) * inputs) + (epsilon / K)
     
-def semantic_position_embedding(inputs,vocab_size,num_units,maxlen,scope,reuse):
+def semantic_position_embedding(inputs,vocab_size,num_units,maxlen,is_training,scope,reuse):
         with tf.variable_scope(scope):
                 encoding = embedding(inputs, 
                                         vocab_size=vocab_size, 
                                         num_units=num_units, 
                                         scale=True,
-					reuse=reuse,
+                                        reuse=reuse,
+                                        is_training=is_training,
                                         scope="embedding")
                 if not nlpModelParams.flag_position_embed:
                         return encoding
@@ -118,16 +120,18 @@ def semantic_position_embedding(inputs,vocab_size,num_units,maxlen,scope,reuse):
                                       num_units=num_units, 
                                       zero_pad=False, 
                                       scale=False,
-				      reuse=reuse,
+                                      reuse=reuse,
+                                      is_training=is_training,
                                       scope="pe")
         return encoding
 
 def mlp_layer(inputs,output_dim,mlp_layers,hidden_units,activation_fn,is_training,is_dropout):
-	dropout_layer = tf.contrib.layers.dropout(
+        activation_fn = locate(activation_fn)
+        dropout_layer = tf.contrib.layers.dropout(
                                            inputs=inputs,
-                                           keep_prob=directLayerParams.dropout_rate,
+                                           keep_prob=baseLayerParams.dropout_rate,
                                            is_training=is_dropout)
-	for layer_idx in range(mlp_layers):
+        for layer_idx in range(mlp_layers):
                 with tf.variable_scope("full_layer{}".format(layer_idx)):
                         hidden_layer    = tf.layers.dense(
                                                         inputs=dropout_layer,
@@ -137,10 +141,11 @@ def mlp_layer(inputs,output_dim,mlp_layers,hidden_units,activation_fn,is_trainin
 
                         dropout_layer   = tf.contrib.layers.dropout(
                                                 inputs=hidden_layer,
-                                                keep_prob=directLayerParams.dropout_rate,
+                                                keep_prob=baseLayerParams.dropout_rate,
                                                 is_training=is_dropout)
 
                         dropout_layer   = layer_norm(dropout_layer)
 
         logits  = tf.layers.dense(dropout_layer,output_dim, name="output")
+
         return tf.squeeze(logits)

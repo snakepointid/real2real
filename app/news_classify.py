@@ -6,7 +6,7 @@ import argparse
 import os
 sys.path.insert(0,"..")
 sys.path.append(os.getcwd())
-from real2real.models.seq2one import ConvCls
+from real2real.models.seq2one import ConvCls,AttenCls
 from real2real.app.params import baseModelParams
 from real2real.preprocess.news_cls_feeds import *
 from real2real.utils.info_layout import *
@@ -14,6 +14,7 @@ from real2real.utils.info_layout import *
 def training():
         gpu_options = tf.GPUOptions(allow_growth = True)
         model = ConvCls(is_training=True)
+        model = AttenCls(is_training=True)
         startTime = time.time()
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
                 try:

@@ -109,12 +109,10 @@ class ConvCls(multiClsModel):
                         content_out = conv1d_to_full_layer(
                                           inputs=content_out,
                                           scope_name="content2full",
-                                          is_training=self.is_training)
-
-                         
+                                          is_training=self.is_training)            
 
                         #full_layer = tf.concat([title_out,content_out],1)
-                        full_layer = title_out
+                        full_layer = content_out
                         self.logits = mlp_layer(
                                           inputs=full_layer,
                                           output_dim=newsClsModelParams.target_vocab_size,

@@ -45,7 +45,7 @@ class convRankParams(nlpModelParams,regressModelParams,convLayerParams):
 
 class convClsParams(nlpModelParams,multiClsModelParams,convLayerParams):
 		source_vocab_size = 10000
-		target_vocab_size = 34
+		target_vocab_size = 35
 		title_maxlen = 30
 		content_maxlen = 3000
 		embedding_dim = 128

@@ -35,7 +35,7 @@ def training():
 								model.is_dropout:True})
 	 
                         title_code_batch,content_code_batch,label_batch = cache['train']	
-                        train_acc = sess.run(model.acc,feed_dict={
+                        train_acc,train_loss = sess.run([model.acc,model.mean_loss],feed_dict={
                                                                 model.title_source:title_code_batch,                                            
                             			                model.content_source:content_code_batch,
 								model.target:label_batch,
@@ -43,13 +43,13 @@ def training():
 
                 	train_num=len(label_batch)
                         title_code_batch,content_code_batch,label_batch = cache['valid']   
-                        valid_acc = sess.run(model.acc,feed_dict={
+                        valid_acc,valid_loss = sess.run([model.acc,model.mean_loss],feed_dict={
                                             			model.title_source:title_code_batch,                                            
                                                                 model.content_source:content_code_batch,
 								model.target:label_batch,
                                                                 model.is_dropout:False})
 			valid_num=len(label_batch)
-                        print("train num:%s\ttrain accuracy:%s\tvalid num:%s\tvalid accuracy:%s"%(train_num,train_acc,valid_num,valid_acc))  
+                        print("Iteration:%s\ttrain num:%s\ttrain accuracy:%s\ttrain loss:%s\tvalid num:%s\tvalid accuracy:%s\tvalid loss:%s"%(gs,train_num,train_acc,train_loss,valid_num,valid_acc,valid_loss))  
                         endTime = time.time()
                         if endTime-startTime>3600:
                                 print ("save the whole model")

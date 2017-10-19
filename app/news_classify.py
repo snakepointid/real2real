@@ -14,7 +14,7 @@ from real2real.utils.info_layout import *
 def training():
         gpu_options = tf.GPUOptions(allow_growth = True)
         model = ConvCls(is_training=True)
-        model = AttenCls(is_training=True)
+       # model = AttenCls(is_training=True)
         startTime = time.time()
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
                 try:

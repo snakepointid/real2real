@@ -38,7 +38,10 @@ class newsClsModelParams(embedLayerParams,multiClsModelParams,convLayerParams):
 		embedding_dim = 128
 		hidden_units  = 128
 		mlp_layers  = 2
-
+class attentionLayerParams(baseLayerParams):
+		num_blocks   = 6
+		num_heads    = 8
+		hidden_units = 128
 
 
  

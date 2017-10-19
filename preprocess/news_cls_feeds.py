@@ -6,7 +6,7 @@ from itertools import groupby
 from operator import itemgetter
 import cPickle as pickle
 from real2real.preprocess.sentence_process import quick_sentence_segment 
-from real2real.app.params import convClsParams
+from real2real.app.params import newsClsModelParams
 
 def LoadData():
 	for line in sys.stdin:
@@ -24,17 +24,17 @@ def LoadTrainFeeds():
 				title=title.split('|');content=content.split('|')
 				if len(title)<4 or len(content)<20:
 					continue
-				title=title[:convClsParams.title_maxlen]+[0]*(convClsParams.title_maxlen-len(title))
-				content=content[:convClsParams.content_maxlen]+[0]*(convClsParams.content_maxlen-len(content))
+				title=title[:newsClsModelParams.title_maxlen]+[0]*(newsClsModelParams.title_maxlen-len(title))
+				content=content[:newsClsModelParams.content_maxlen]+[0]*(newsClsModelParams.content_maxlen-len(content))
 
 				if flag=='test':
-						if abs(float(rdv))<convClsParams.test_rate:
+						if abs(float(rdv))<newsClsModelParams.test_rate:
 								title_testa.append(title)
 								content_testa.append(content)
 								target_testa.append(target)		
 						continue
 						
-				if abs(float(rdv))<convClsParams.test_rate:
+				if abs(float(rdv))<newsClsModelParams.test_rate:
 						title_valid.append(title)
 						content_valid.append(content)
 						target_valid.append(target)
@@ -42,12 +42,12 @@ def LoadTrainFeeds():
 						title_batch.append(title)
 		 				content_batch.append(content)
 		 				target_batch.append(target)
-		 				if abs(float(rdv))>(1-convClsParams.test_rate):
+		 				if abs(float(rdv))>(1-newsClsModelParams.test_rate):
  								title_train.append(title)
 								content_train.append(content)
 								target_train.append(target)
 
-				if len(title_batch)==convClsParams.batch_size:
+				if len(title_batch)==newsClsModelParams.batch_size:
 						title_batch=np.array(title_batch,dtype=np.int64)
 						content_batch=np.array(content_batch,dtype=np.int64)
 						target_batch=np.array(target_batch,dtype=np.int32)
@@ -91,14 +91,14 @@ def LoadPredictFeeds():
 						title=["%s"%zh2code.get(char,"1") for char in quick_sentence_segment(title.decode('utf-8'))]
 						if len(title)<4:
 								continue		
-						title=title[:convClsParams.title_maxlen]+[0]*(convClsParams.title_maxlen-len(title))		
+						title=title[:newsClsModelParams.title_maxlen]+[0]*(newsClsModelParams.title_maxlen-len(title))		
 				except:
 						continue
 				raw='%s\t%s\t%s'%(url,recallcontent,title)
 				raw_batch.append(raw)
 				title_batch.append(title)
 				content_batch.append(content)
-				if len(title_batch)==convClsParams.batch_size:
+				if len(title_batch)==newsClsModelParams.batch_size:
 						title_batch=np.array(title_batch,dtype=np.int64)
 						content_batch=np.array(content_batch,dtype=np.int64)
 						predict_cache=[raw_batch,title_batch,content_batch]

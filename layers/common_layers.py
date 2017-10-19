@@ -4,7 +4,7 @@
 
 from __future__ import print_function
 import tensorflow as tf
-from real2real.app.params import nlpModelParams,baseLayerParams
+from real2real.app.params import embedLayerParams,baseLayerParams
 
 def layer_norm(x, filters=None, epsilon=1e-6, name=None, reuse=None):
         """Layer normalize the tensor x, averaging over the last dimension."""
@@ -104,10 +104,10 @@ def semantic_position_embedding(inputs,vocab_size,num_units,maxlen,is_training,s
                                         reuse=reuse,
                                         is_training=is_training,
                                         scope="embedding")
-                if not nlpModelParams.flag_position_embed:
+                if not embedLayerParams.flag_position_embed:
                         return encoding
             ## Positional Encoding
-                if nlpModelParams.flag_sinusoid:
+                if embedLayerParams.flag_sinusoid:
                         encoding += positional_encoding(inputs,
                                       vocab_size=maxlen, 
                                       num_units=num_units, 

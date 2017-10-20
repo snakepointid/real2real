@@ -67,6 +67,7 @@ def text_atten_encoder(inputs,query,vocab_size,num_units,kernel_size,conv_layer_
                                            inputs=conv_out,
                                            query=query,
                                            scope_name="target_atten",
+                                           zero_pad=zero_pad,
                                            is_training=is_training) #N,m,WD
                  
         return atten_layer

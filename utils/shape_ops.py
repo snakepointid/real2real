@@ -15,7 +15,12 @@ def split_long_text(inputs,short_length):
         return outputs,splited_num
 
 def stack_short_encode(inputs,splited_num):
-        return tf.reshape(inputs,[-1,splited_num,int(inputs.get_shape()[-1])])
+		static_shape = inputs.get_shape()
+        if len(static_shape)==2:
+                outputs = tf.reshape(inputs,[-1,splited_num,int(static_shape[1])])
+        elif len(inputs.get_shape())==3:
+                outputs = tf.reshape(inputs,[-1,splited_num,int(static_shape[1]),int(static_shape[2])])
+        return outputs
 
 def label_smoothing(inputs, epsilon=0.1):
         K = inputs.get_shape().as_list()[-1] # number of channels

@@ -27,7 +27,7 @@ def self_attention(encoding,is_training,is_dropout):
                         encoding = feedforward(encoding, num_units=[4*attentionLayerParams.hidden_units, attentionLayerParams.hidden_units])
         return encoding
 
-def target_attention(inputs,query,scope_name,is_training):
+def target_attention(inputs,query,scope_name,zero_pad,is_training):
         '''
         inputs N*SL*WD
         query N*QD
@@ -42,13 +42,20 @@ def target_attention(inputs,query,scope_name,is_training):
                 raise ValueError("the rank of query must be 2 or 3")
 
         activation_fn = locate(attentionLayerParams.activation_fn)
+        out_dim = int(query.get_shape()[2])
         with tf.variable_scope(scope_name):
                 # Linear projections
-                K = tf.layers.dense(inputs, query.get_shape()[2], activation=activation_fn) # (N, SL, QD)
-                V = tf.layers.dense(inputs, query.get_shape()[2], activation=activation_fn) # (N, SL, QD)
+                K = tf.layers.dense(inputs, out_dim, activation=activation_fn) # (N, SL, QD)
+                V = tf.layers.dense(inputs, out_dim, activation=activation_fn) # (N, SL, QD)
                 Q = query # (N, m, QD)
                 # Multiplication
                 weights =  tf.matmul(Q,tf.transpose(K,[0,2,1])) # (N,m,SL)
+                #mask
+                if zero_pad:
+                        mask = tf.sign(tf.reduce_sum(tf.abs(inputs), axis=-1)) #N,SL
+                        mask = tf.tile(tf.expand_dims(mask,2),[1,tf.shape(query)[1],1])#N,m,SL
+                        paddings = tf.ones_like(weights)*(-2**32+1)
+                        weights = tf.where(tf.equal(mask, 0), paddings, weights)
                 # Activation
                 weights = tf.nn.softmax(weights) # (N,m,SL)
                 # Weighted sum
@@ -57,6 +64,12 @@ def target_attention(inputs,query,scope_name,is_training):
                 outputs += query# (N,m,QD)
                 # Normalize
                 outputs = layer_norm(outputs) # (N,m,QD)
+                #sentence mask
+                if zero_pad:
+                        mask = tf.sign(tf.reduce_sum(tf.abs(inputs), axis=[1,2])) #N 
+                        mask = tf.tile(tf.expand_dims(tf.expand_dims(mask,1),1),[1,tf.shape(outputs)[1],tf.shape(outputs)[2]])#(N,m,QD)
+                        paddings = tf.zeros_like(outputs) 
+                        outputs = tf.where(tf.equal(mask, 0), paddings, outputs)
                 return outputs
 
 def enc_dec_attention(decoding,encoding,is_training,is_dropout):

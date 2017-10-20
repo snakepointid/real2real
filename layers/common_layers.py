@@ -65,13 +65,10 @@ def positional_encoding(inputs,
             num_units,
             zero_pad = True,
             scale = True,
-            scope = "positional_embedding",
+            scope = "position_embedding",
             reuse = None):
  
-
         with tf.variable_scope(scope, reuse = reuse):
-
-                input_one = tf.tile(tf.expand_dims(tf.range(tf.shape(inputs)[1]), 0), [tf.shape(inputs)[0], 1])
                 position_block = tf.tile(tf.expand_dims(tf.range(vocab_size), 1), [1, num_units // 2])
                 unit_block = tf.tile(tf.expand_dims(tf.range(num_units // 2), 0), [vocab_size, 1])
                 rad_block = tf.pow(tf.div(position_block, tf.multiply(10000, 1)), tf.div(unit_block, num_units // 2))
@@ -81,9 +78,8 @@ def positional_encoding(inputs,
                 lookup_table = tf.concat([sin_block, cos_block], axis = 1)
 
                 if zero_pad:
-
                         lookup_table = tf.concat((tf.zeros(shape = [1, num_units]), lookup_table[1:, :]), 0)
-                outputs = tf.nn.embedding_lookup(lookup_table, input_one)
+                outputs = tf.nn.embedding_lookup(lookup_table, inputs)
     
                 if scale:
                         outputs = outputs * math.sqrt(num_units)
@@ -91,61 +87,45 @@ def positional_encoding(inputs,
         return outputs
 
 def label_smoothing(inputs, epsilon=0.1):
-     
         K = inputs.get_shape().as_list()[-1] # number of channels
         return ((1-epsilon) * inputs) + (epsilon / K)
     
-def semantic_position_embedding(inputs,vocab_size,num_units,maxlen,is_training,scope,reuse):
-        with tf.variable_scope(scope):
-                encoding = embedding(inputs, 
-                                        vocab_size=vocab_size, 
-                                        num_units=num_units, 
-                                        scale=True,
-                                        reuse=reuse,
-                                        is_training=is_training,
-                                        scope="embedding")
+def semantic_position_embedding(inputs,vocab_size,num_units,maxlen,zero_pad,scale,is_training,scope,reuse=None):
+        with tf.variable_scope(scope,reuse=reuse):
+                encoding = embedding(inputs=inputs, 
+                                     vocab_size=vocab_size, 
+                                     num_units=num_units, 
+                                     zero_pad=zero_pad,
+                                     scale=scale,
+                                     reuse=reuse,
+                                     is_training=is_training,
+                                     scope="token")
+
                 if not embedLayerParams.flag_position_embed:
                         return encoding
-            ## Positional Encoding
+                ## Positional Encoding
+                position_code = tf.tile(tf.expand_dims(tf.to_int64(tf.range(tf.shape(inputs)[1])+1), 0), [tf.shape(inputs)[0], 1])
+                paddings = tf.zeros_like(inputs)
+                position_code = tf.where(tf.equal(inputs, 0), paddings, position_code)
+
                 if embedLayerParams.flag_sinusoid:
-                        encoding += positional_encoding(inputs,
-                                      vocab_size=maxlen, 
-                                      num_units=num_units, 
-                                      zero_pad=False, 
-                                      scale=False,
-                                      scope="pe")
+                        encoding += positional_encoding(
+                                        inputs=position_code,
+                                        vocab_size=maxlen+1, 
+                                        num_units=num_units, 
+                                        zero_pad=zero_pad, 
+                                        scale=scale,
+                                        scope="position")
                 else:
-                        encoding += embedding(tf.tile(tf.expand_dims(tf.range(tf.shape(inputs)[1]), 0), [tf.shape(inputs)[0], 1]),
-                                      vocab_size=maxlen, 
-                                      num_units=num_units, 
-                                      zero_pad=False, 
-                                      scale=False,
-                                      reuse=reuse,
-                                      is_training=is_training,
-                                      scope="pe")
+                        encoding += embedding(
+                                        inputs=position_code,
+                                        vocab_size=maxlen+1, 
+                                        num_units=num_units, 
+                                        zero_pad=zero_pad, 
+                                        scale=scale,
+                                        reuse=reuse,
+                                        is_training=is_training,
+                                        scope="position")
         return encoding
 
-def mlp_layer(inputs,output_dim,mlp_layers,hidden_units,activation_fn,is_training,is_dropout):
-        activation_fn = locate(activation_fn)
-        dropout_layer = tf.contrib.layers.dropout(
-                                           inputs=inputs,
-                                           keep_prob=baseLayerParams.dropout_rate,
-                                           is_training=is_dropout)
-        for layer_idx in range(mlp_layers):
-                with tf.variable_scope("full_layer{}".format(layer_idx)):
-                        hidden_layer    = tf.layers.dense(
-                                                        inputs=dropout_layer,
-                                                        units=hidden_units,
-                                                        activation=activation_fn,
-                                                        trainable=is_training)
 
-                        dropout_layer   = tf.contrib.layers.dropout(
-                                                inputs=hidden_layer,
-                                                keep_prob=baseLayerParams.dropout_rate,
-                                                is_training=is_dropout)
-
-                        dropout_layer   = layer_norm(dropout_layer)
-
-        logits  = tf.layers.dense(dropout_layer,output_dim, name="output")
-
-        return tf.squeeze(logits)

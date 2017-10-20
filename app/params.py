@@ -11,7 +11,9 @@ class baseModelParams(baseLayerParams):
 class embedLayerParams(baseModelParams):
 		flag_sinusoid = True     
 		flag_position_embed = True
-
+		zero_pad=True
+		scale=True
+		
 class multiClsModelParams(baseModelParams):
    		flag_label_smooth = True
 		target_vocab_size = 100000
@@ -38,6 +40,7 @@ class newsClsModelParams(embedLayerParams,multiClsModelParams,convLayerParams):
 		embedding_dim = 128
 		hidden_units  = 128
 		mlp_layers  = 2
+
 class attentionLayerParams(baseLayerParams):
 		num_blocks   = 6
 		num_heads    = 8

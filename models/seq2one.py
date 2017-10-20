@@ -98,7 +98,7 @@ class AttenCls(multiClsModel):
                         self.content_source = tf.placeholder(shape=(None, newsClsModelParams.content_maxlen),dtype=tf.int64)
                         self.target = tf.placeholder(shape=(None, ),dtype=tf.int32)
                         #target embedding
-                        target_embed = tf.get_variable('stack_var',
+                        target_embed = tf.get_variable('target_embed',
                                                        dtype=tf.float32,
                                                        shape=[newsClsModelParams.target_vocab_size, newsClsModelParams.embedding_dim],
                                                        initializer=tf.contrib.layers.xavier_initializer(),
@@ -121,6 +121,6 @@ class AttenCls(multiClsModel):
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
                                                        reuse=None)    
-
+                        #full connect
                         self.logits = tf.squeeze(tf.layers.dense(content_encoding,1, activation=locate(newsClsModelParams.activation_fn)))
 

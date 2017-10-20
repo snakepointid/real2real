@@ -27,7 +27,7 @@ def self_attention(encoding,is_training,is_dropout):
                         encoding = feedforward(encoding, num_units=[4*attentionLayerParams.hidden_units, attentionLayerParams.hidden_units])
         return encoding
 
-def multi_hot_attention(inputs,query,scope_name,is_training):
+def target_attention(inputs,query,scope_name,is_training):
         '''
         inputs N*SL*WD
         query N*QD

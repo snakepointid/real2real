@@ -18,6 +18,9 @@ class ConvRank(regressModel):
                                                        inputs=self.source,
                                                        vocab_size=ctrRankModelParams.source_vocab_size,
                                                        num_units=ctrRankModelParams.embedding_dim,
+                                                       kernel_size=5,
+                                                       conv_layer_num=3,
+                                                       stride_step=2,
                                                        zero_pad=ctrRankModelParams.zero_pad,
                                                        scale=ctrRankModelParams.scale,
                                                        maxlen=ctrRankModelParams.source_maxlen,
@@ -63,10 +66,13 @@ class ConvCls(multiClsModel):
                                                        is_dropout=self.is_dropout,
                                                        reuse=None)'''
 			
-			content_encoding = short_text_conv_encoder(
+                        content_encoding = short_text_conv_encoder(
                                                        inputs=self.content_source,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
                                                        num_units=newsClsModelParams.embedding_dim,
+                                                       kernel_size=5,
+                                                       conv_layer_num=6,
+                                                       stride_step=3,
                                                        zero_pad=newsClsModelParams.zero_pad,
                                                        scale=newsClsModelParams.scale,
                                                        maxlen=newsClsModelParams.content_maxlen,
@@ -91,29 +97,7 @@ class AttenCls(multiClsModel):
                         self.title_source = tf.placeholder(shape=(None, newsClsModelParams.title_maxlen),dtype=tf.int64)
                         self.content_source = tf.placeholder(shape=(None, newsClsModelParams.content_maxlen),dtype=tf.int64)
                         self.target = tf.placeholder(shape=(None, ),dtype=tf.int32)
-                        #embedding
-                        title_embed = semantic_position_embedding(
-                                                            inputs=self.title_source,
-                                                            vocab_size=newsClsModelParams.source_vocab_size,
-                                                            num_units=newsClsModelParams.embedding_dim,
-                                                            is_training=self.is_training,
-                                                            zero_pad=newsClsModelParams.zero_pad,
-                                                            scale=newsClsModelParams.scale,
-                                                            maxlen=newsClsModelParams.title_maxlen,
-                                                            scope='zh_encode',
-                                                            reuse=None)
-
-                        content_embed = semantic_position_embedding(
-                                                            inputs=self.content_source,
-                                                            vocab_size=newsClsModelParams.source_vocab_size,
-                                                            num_units=newsClsModelParams.embedding_dim,
-                                                            is_training=self.is_training,
-                                                            zero_pad=newsClsModelParams.zero_pad,
-                                                            scale=newsClsModelParams.scale,
-                                                            maxlen=newsClsModelParams.content_maxlen,
-                                                            scope='zh_encode',
-                                                            reuse=True)
-
+                        #target embedding
                         target_embed = tf.get_variable('stack_var',
                                                        dtype=tf.float32,
                                                        shape=[newsClsModelParams.target_vocab_size, newsClsModelParams.embedding_dim],
@@ -122,37 +106,21 @@ class AttenCls(multiClsModel):
 
                         target_embed = tf.tile(tf.expand_dims(target_embed,0),[tf.shape(self.target)[0],1,1]) #N,m,WD
                         #conv and anttention
-                        title_out = multiLayer_conv_strip(
-                                                      inputs=title_embed,
-                                                      kernel_size=3,
-                                                      stride_step=1,
-                                                      conv_layer_num=1,
-                                                      zero_pad=newsClsModelParams.zero_pad,
-                                                      scope_name='cnn_title',
-                                                      is_training=self.is_training,
-                                                      is_dropout=self.is_dropout)
+                        content_encoding = short_text_conv_encoder(
+                                                       inputs=self.content_source,
+                                                       query=target_embed,
+                                                       vocab_size=newsClsModelParams.source_vocab_size,
+                                                       num_units=newsClsModelParams.embedding_dim,
+                                                       kernel_size=10,
+                                                       conv_layer_num=1,
+                                                       stride_step=10,
+                                                       zero_pad=newsClsModelParams.zero_pad,
+                                                       scale=newsClsModelParams.scale,
+                                                       maxlen=newsClsModelParams.content_maxlen,
+                                                       scope='content',
+                                                       is_training=self.is_training,
+                                                       is_dropout=self.is_dropout,
+                                                       reuse=None)    
 
-                        content_out = multiLayer_conv_strip(
-                                                      inputs=content_embed,
-                                                      kernel_size=10,
-                                                      stride_step=10,
-                                                      conv_layer_num=1,
-                                                      zero_pad=newsClsModelParams.zero_pad,
-                                                      scope_name='cnn_content',
-                                                      is_training=self.is_training,
-                                                      is_dropout=self.is_dropout)
-                         
-                        title_atten_out = multi_hot_attention(
-                                                      inputs=title_out,
-                                                      query=target_embed,
-                                                      scope_name="multi_hot_title_atten",
-                                                      is_training=self.is_training) #N,m,WD
-
-                        content_atten_out = multi_hot_attention(
-                                                      inputs=content_out,
-                                                      query=target_embed,
-                                                      scope_name="multi_hot_content_atten",
-                                                      is_training=self.is_training) #N,m,WD
-
-                        self.logits = tf.squeeze(tf.layers.dense(content_atten_out,1, activation=locate(newsClsModelParams.activation_fn)))
+                        self.logits = tf.squeeze(tf.layers.dense(content_encoding,1, activation=locate(newsClsModelParams.activation_fn)))
 

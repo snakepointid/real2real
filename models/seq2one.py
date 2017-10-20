@@ -5,7 +5,7 @@ from real2real.modules.text_encoder import text_conv_encoder,text_atten_encoder
 from real2real.app.params import ctrRankModelParams,newsClsModelParams
 from real2real.models.base_model import regressModel,multiClsModel
 from real2real.modules.full_connector import multi_layer_perceptron
-from real2real.utils.shape_ops import split_long_text
+from real2real.utils.shape_ops import *
 from pydoc import locate
 
 class ConvRank(regressModel):
@@ -55,8 +55,8 @@ class ConvCls(multiClsModel):
                         self.content_source = tf.placeholder(shape=(None, newsClsModelParams.content_maxlen),dtype=tf.int64)
                         self.target = tf.placeholder(shape=(None, ),dtype=tf.int32)
                         
-			      title_encoding = text_conv_encoder(
-                                                       inputs=self.content_source,
+			title_encoding = text_conv_encoder(
+                                                       inputs=self.title_source,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
                                                        num_units=newsClsModelParams.embedding_dim,
                                                        kernel_size=5,
@@ -70,8 +70,7 @@ class ConvCls(multiClsModel):
                                                        is_dropout=self.is_dropout,
                                                        reuse=None) #N,FN
 
-			      split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
-
+			split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
                         content_encoding = text_conv_encoder(
                                                        inputs=split_content,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
@@ -104,7 +103,8 @@ class ConvCls(multiClsModel):
                                                        is_dropout=self.is_dropout,
                                                        reuse=None)   #N,FN
                         #full_layer = tf.concat([title_out,content_out],1)
-                        full_layer = content_encoding
+                        #full_layer = content_encoding
+                        full_layer = title_encoding
                         self.logits = multi_layer_perceptron(
                                           inputs=full_layer,
                                           output_dim=newsClsModelParams.target_vocab_size,
@@ -145,7 +145,7 @@ class AttenCls(multiClsModel):
                                                        reuse=None) #N,m,FN
 
                         split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
-
+			'''
                         content_encoding = text_atten_encoder(
                                                        inputs=split_content,
                                                        query=target_embed,
@@ -156,7 +156,7 @@ class AttenCls(multiClsModel):
                                                        stride_step=1,
                                                        zero_pad=newsClsModelParams.zero_pad,
                                                        scale=newsClsModelParams.scale,
-                                                       maxlen=newsClsModelParams.content_maxlen,
+                                                       maxlen=newsClsModelParams.title_maxlen,
                                                        scope='sentence',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
@@ -179,6 +179,8 @@ class AttenCls(multiClsModel):
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
                                                        reuse=None)   ##N*m,m,FN
+			'''
                         #full connect
-                        self.logits = tf.squeeze(tf.layers.dense(content_encoding,1, activation=locate(newsClsModelParams.activation_fn)))
+                        #self.logits = tf.squeeze(tf.layers.dense(content_encoding,1, activation=locate(newsClsModelParams.activation_fn)))
+                        self.logits = tf.squeeze(tf.layers.dense(title_encoding,1, activation=locate(newsClsModelParams.activation_fn)))
 

@@ -3,7 +3,7 @@ import tensorflow as tf
 import six
 import abc
 from real2real.app.params import regressModelParams,baseModelParams
-from real2real.layers.common_layers import label_smoothing
+from real2real.utils.shape_ops import label_smoothing
 
 @six.add_metaclass(abc.ABCMeta)
 class baseModel(object):

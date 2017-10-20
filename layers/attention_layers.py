@@ -53,7 +53,7 @@ def target_attention(inputs,query,scope_name,zero_pad,is_training):
                 #mask
                 if zero_pad:
                         mask = tf.sign(tf.reduce_sum(tf.abs(inputs), axis=-1)) #N,SL
-                        mask = tf.tile(tf.expand_dims(mask,2),[1,tf.shape(query)[1],1])#N,m,SL
+                        mask = tf.tile(tf.expand_dims(mask,1),[1,tf.shape(query)[1],1])#N,m,SL
                         paddings = tf.ones_like(weights)*(-2**32+1)
                         weights = tf.where(tf.equal(mask, 0), paddings, weights)
                 # Activation
@@ -68,7 +68,7 @@ def target_attention(inputs,query,scope_name,zero_pad,is_training):
                 if zero_pad:
                         mask = tf.sign(tf.reduce_sum(tf.abs(inputs), axis=[1,2])) #N 
                         mask = tf.tile(tf.expand_dims(tf.expand_dims(mask,1),1),[1,tf.shape(outputs)[1],tf.shape(outputs)[2]])#(N,m,QD)
-                        paddings = tf.zeros_like(outputs) 
+                        paddings = tf.zeros_like(outputs)
                         outputs = tf.where(tf.equal(mask, 0), paddings, outputs)
                 return outputs
 

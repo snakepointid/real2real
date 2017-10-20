@@ -50,8 +50,8 @@ class ConvCls(multiClsModel):
                         self.title_source = tf.placeholder(shape=(None, newsClsModelParams.title_maxlen),dtype=tf.int64)
                         self.content_source = tf.placeholder(shape=(None, newsClsModelParams.content_maxlen),dtype=tf.int64)
                         self.target = tf.placeholder(shape=(None, ),dtype=tf.int32)
-
-                        title_encoding = short_text_conv_encoder(
+                        
+			'''title_encoding = short_text_conv_encoder(
                                                        inputs=self.title_source,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
                                                        num_units=newsClsModelParams.embedding_dim,
@@ -61,10 +61,10 @@ class ConvCls(multiClsModel):
                                                        scope='title',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
-                                                       reuse=None)
-
-                        content_encoding = short_text_conv_encoder(
-                                                       inputs=self.source,
+                                                       reuse=None)'''
+			
+			content_encoding = short_text_conv_encoder(
+                                                       inputs=self.content_source,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
                                                        num_units=newsClsModelParams.embedding_dim,
                                                        zero_pad=newsClsModelParams.zero_pad,
@@ -76,7 +76,7 @@ class ConvCls(multiClsModel):
                                                        reuse=None)   
 
                         #full_layer = tf.concat([title_out,content_out],1)
-                        full_layer = content_out
+                        full_layer = content_encoding
                         self.logits = multi_layer_perceptron(
                                           inputs=full_layer,
                                           output_dim=newsClsModelParams.target_vocab_size,

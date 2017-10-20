@@ -5,6 +5,7 @@
 from __future__ import print_function
 import tensorflow as tf
 from real2real.app.params import embedLayerParams,baseLayerParams
+import math
 from pydoc import locate
 def layer_norm(x, filters=None, epsilon=1e-6, name=None, reuse=None):
         """Layer normalize the tensor x, averaging over the last dimension."""

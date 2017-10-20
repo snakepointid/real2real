@@ -2,7 +2,8 @@
 #/usr/bin/python2
         
 import tensorflow as tf
-from real2real.app.params import baseLayerParam
+from real2real.app.params import baseLayerParams
+from real2real.layers.common_layers import layer_norm
 from pydoc import locate
 
 def multi_layer_perceptron(inputs,output_dim,mlp_layers,hidden_units,activation_fn,is_training,is_dropout):

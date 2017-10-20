@@ -22,8 +22,8 @@ def short_text_conv_encoder(inputs,vocab_size,num_units,zero_pad,scale,maxlen,sc
                 conv_out = multiLayer_conv_strip(
                                     inputs=embed,
                                     kernel_size=5,
-                                    conv_layer_num=3,
-                                    stride_step=2,
+                                    conv_layer_num=6,
+                                    stride_step=3,
                                     scope_name='ml_cnn',
                                     zero_pad=zero_pad,
                                     is_training=is_training,

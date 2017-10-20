@@ -13,10 +13,8 @@ def layer_norm(x, filters=None, epsilon=1e-6, name=None, reuse=None):
                 filters = x.get_shape()[-1]
         with tf.variable_scope(
                                 name, default_name="layer_norm", values=[x], reuse=reuse):
-                scale = tf.get_variable(
-                                        "layer_norm_scale", [filters], initializer=tf.ones_initializer())
-                bias  = tf.get_variable(
-                                        "layer_norm_bias", [filters], initializer=tf.zeros_initializer())
+                scale = tf.get_variable( "layer_norm_scale", [filters], initializer=tf.ones_initializer())
+                bias  = tf.get_variable( "layer_norm_bias", [filters], initializer=tf.zeros_initializer())
  
                 result = layer_norm_compute_python(x, epsilon, scale, bias)
         return result
@@ -66,10 +64,9 @@ def positional_encoding(inputs,
             num_units,
             zero_pad = True,
             scale = True,
-            scope = "position_embedding",
-            reuse = None):
+            scope = "position_embedding"):
  
-        with tf.variable_scope(scope, reuse = reuse):
+        with tf.name_scope(scope):
                 position_block = tf.tile(tf.expand_dims(tf.range(vocab_size), 1), [1, num_units // 2])
                 unit_block = tf.tile(tf.expand_dims(tf.range(num_units // 2), 0), [vocab_size, 1])
                 rad_block = tf.pow(tf.div(position_block, tf.multiply(10000, 1)), tf.div(unit_block, num_units // 2))
@@ -87,9 +84,7 @@ def positional_encoding(inputs,
 
         return outputs
 
-def label_smoothing(inputs, epsilon=0.1):
-        K = inputs.get_shape().as_list()[-1] # number of channels
-        return ((1-epsilon) * inputs) + (epsilon / K)
+
     
 def semantic_position_embedding(inputs,vocab_size,num_units,maxlen,zero_pad,scale,is_training,scope,reuse=None):
         with tf.variable_scope(scope,reuse=reuse):

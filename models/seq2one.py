@@ -1,10 +1,11 @@
 from __future__ import print_function
 import tensorflow as tf
  
-from real2real.modules.text_encoder import short_text_conv_encoder,short_text_atten_encoder
+from real2real.modules.text_encoder import text_conv_encoder,text_atten_encoder
 from real2real.app.params import ctrRankModelParams,newsClsModelParams
 from real2real.models.base_model import regressModel,multiClsModel
 from real2real.modules.full_connector import multi_layer_perceptron
+from real2real.utils.shape_ops import split_long_text
 from pydoc import locate
 
 class ConvRank(regressModel):
@@ -14,7 +15,7 @@ class ConvRank(regressModel):
                         self.tag = tf.placeholder(shape=(None, ),dtype=tf.int64)
                         self.target = tf.placeholder(shape=(None, ),dtype=tf.float32)
 
-                        encoding = short_text_conv_encoder(
+                        encoding = text_conv_encoder(
                                                        inputs=self.source,
                                                        vocab_size=ctrRankModelParams.source_vocab_size,
                                                        num_units=ctrRankModelParams.embedding_dim,
@@ -54,33 +55,54 @@ class ConvCls(multiClsModel):
                         self.content_source = tf.placeholder(shape=(None, newsClsModelParams.content_maxlen),dtype=tf.int64)
                         self.target = tf.placeholder(shape=(None, ),dtype=tf.int32)
                         
-			'''title_encoding = short_text_conv_encoder(
-                                                       inputs=self.title_source,
-                                                       vocab_size=newsClsModelParams.source_vocab_size,
-                                                       num_units=newsClsModelParams.embedding_dim,
-                                                       zero_pad=newsClsModelParams.zero_pad,
-                                                       scale=newsClsModelParams.scale,
-                                                       maxlen=newsClsModelParams.title_maxlen,
-                                                       scope='title',
-                                                       is_training=self.is_training,
-                                                       is_dropout=self.is_dropout,
-                                                       reuse=None)'''
-			
-                        content_encoding = short_text_conv_encoder(
+			      title_encoding = text_conv_encoder(
                                                        inputs=self.content_source,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
                                                        num_units=newsClsModelParams.embedding_dim,
                                                        kernel_size=5,
-                                                       conv_layer_num=6,
-                                                       stride_step=3,
+                                                       conv_layer_num=3,
+                                                       stride_step=2,
+                                                       zero_pad=newsClsModelParams.zero_pad,
+                                                       scale=newsClsModelParams.scale,
+                                                       maxlen=newsClsModelParams.title_maxlen,
+                                                       scope='sentence',
+                                                       is_training=self.is_training,
+                                                       is_dropout=self.is_dropout,
+                                                       reuse=None) #N,FN
+
+			      split_content,splited_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
+
+                        content_encoding = text_conv_encoder(
+                                                       inputs=split_content,
+                                                       vocab_size=newsClsModelParams.source_vocab_size,
+                                                       num_units=newsClsModelParams.embedding_dim,
+                                                       kernel_size=5,
+                                                       conv_layer_num=3,
+                                                       stride_step=2,
                                                        zero_pad=newsClsModelParams.zero_pad,
                                                        scale=newsClsModelParams.scale,
                                                        maxlen=newsClsModelParams.content_maxlen,
-                                                       scope='content',
+                                                       scope='sentence',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
-                                                       reuse=None)   
+                                                       reuse=True)   #N*ST,FN
 
+                        content_encoding = stack_short_encode(content_encoding,splited_num)#N,ST,FN
+
+                        content_encoding = text_conv_encoder(
+                                                       inputs=split_content,
+                                                       vocab_size=newsClsModelParams.source_vocab_size,
+                                                       num_units=newsClsModelParams.embedding_dim,
+                                                       kernel_size=3,
+                                                       conv_layer_num=1,
+                                                       stride_step=1,
+                                                       zero_pad=newsClsModelParams.zero_pad,
+                                                       scale=newsClsModelParams.scale,
+                                                       maxlen=newsClsModelParams.content_maxlen,
+                                                       scope='doc',
+                                                       is_training=self.is_training,
+                                                       is_dropout=self.is_dropout,
+                                                       reuse=None)   #N,FN
                         #full_layer = tf.concat([title_out,content_out],1)
                         full_layer = content_encoding
                         self.logits = multi_layer_perceptron(
@@ -106,7 +128,7 @@ class AttenCls(multiClsModel):
 
                         target_embed = tf.tile(tf.expand_dims(target_embed,0),[tf.shape(self.target)[0],1,1]) #N,m,WD
                         #conv and anttention
-                        content_encoding = short_text_atten_encoder(
+                        content_encoding = text_atten_encoder(
                                                        inputs=self.content_source,
                                                        query=target_embed,
                                                        vocab_size=newsClsModelParams.source_vocab_size,

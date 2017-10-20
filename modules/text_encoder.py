@@ -7,17 +7,20 @@ from real2real.layers.common_layers import semantic_position_embedding,embedding
 from real2real.layers.attention_layers import target_attention
 from pydoc import locate
 
-def short_text_conv_encoder(inputs,vocab_size,num_units,kernel_size,conv_layer_num,stride_step,zero_pad,scale,maxlen,scope,is_training,is_dropout,reuse):
+def text_conv_encoder(inputs,vocab_size,num_units,kernel_size,conv_layer_num,stride_step,zero_pad,scale,maxlen,scope,is_training,is_dropout,reuse):
         with tf.variable_scope(scope,reuse=reuse):
-                embed = semantic_position_embedding(
+                if len(inputs.get_shape())==2:
+                        embed = semantic_position_embedding(
                                            inputs=inputs,
                                            vocab_size=vocab_size,
                                            num_units=num_units,
                                            is_training=is_training,
-                                           zero_pad=zero_pad,
+                                           zero_pad=True,
                                            scale=scale,
                                            maxlen=maxlen,
                                            scope='embedding')
+                else:
+                        embed = inputs                 
                 #convolution
                 conv_out = multiLayer_conv_strip(
                                            inputs=embed,
@@ -35,18 +38,20 @@ def short_text_conv_encoder(inputs,vocab_size,num_units,kernel_size,conv_layer_n
                                            is_training=is_training)
         return full_layer
 
-def short_text_atten_encoder(inputs,query,vocab_size,num_units,kernel_size,conv_layer_num,stride_step,zero_pad,scale,maxlen,scope,is_training,is_dropout,reuse):
+def text_atten_encoder(inputs,query,vocab_size,num_units,kernel_size,conv_layer_num,stride_step,zero_pad,scale,maxlen,scope,is_training,is_dropout,reuse):
         with tf.variable_scope(scope,reuse=reuse):
-                embed = semantic_position_embedding(
+                if len(inputs.get_shape())==2:
+                        embed = semantic_position_embedding(
                                            inputs=inputs,
                                            vocab_size=vocab_size,
                                            num_units=num_units,
                                            is_training=is_training,
-                                           zero_pad=zero_pad,
+                                           zero_pad=True,
                                            scale=scale,
                                            maxlen=maxlen,
                                            scope='embedding')
-
+                else:
+                        embed = inputs
                 #convolution
                 conv_out = multiLayer_conv_strip(
                                            inputs=embed,

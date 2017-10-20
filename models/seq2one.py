@@ -165,8 +165,8 @@ class AttenCls(multiClsModel):
 
                         content_out = multiLayer_conv_strip(
                                                       inputs=content_embed,
-                                                      kernel_size=3,
-                                                      stride_step=1,
+                                                      kernel_size=10,
+                                                      stride_step=10,
                                                       conv_layer_num=1,
                                                       scope_name='cnn_content',
                                                       is_training=self.is_training,
@@ -175,13 +175,13 @@ class AttenCls(multiClsModel):
                         title_atten_out = multi_hot_attention(
                                                       inputs=title_out,
                                                       query=target_embed,
-                                                      scope_name="multi_hot_atten",
+                                                      scope_name="multi_hot_title_atten",
                                                       is_training=self.is_training) #N,m,WD
 
                         content_atten_out = multi_hot_attention(
                                                       inputs=content_out,
                                                       query=target_embed,
-                                                      scope_name="multi_hot_atten",
+                                                      scope_name="multi_hot_content_atten",
                                                       is_training=self.is_training) #N,m,WD
 
                         self.logits = tf.squeeze(tf.layers.dense(content_atten_out,1, activation=locate(newsClsModelParams.activation_fn)))

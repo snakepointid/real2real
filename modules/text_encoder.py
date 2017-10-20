@@ -62,6 +62,6 @@ def short_text_atten_encoder(inputs,query,vocab_size,num_units,kernel_size,conv_
                                            inputs=conv_out,
                                            query=query,
                                            scope_name="target_atten",
-                                           is_training=self.is_training) #N,m,WD
+                                           is_training=is_training) #N,m,WD
                  
-        return full_layer
+        return atten_layer

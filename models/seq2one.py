@@ -1,7 +1,7 @@
 from __future__ import print_function
 import tensorflow as tf
  
-from real2real.modules.text_encoder import short_text_conv_encoder
+from real2real.modules.text_encoder import short_text_conv_encoder,short_text_atten_encoder
 from real2real.app.params import ctrRankModelParams,newsClsModelParams
 from real2real.models.base_model import regressModel,multiClsModel
 from real2real.modules.full_connector import multi_layer_perceptron
@@ -106,7 +106,7 @@ class AttenCls(multiClsModel):
 
                         target_embed = tf.tile(tf.expand_dims(target_embed,0),[tf.shape(self.target)[0],1,1]) #N,m,WD
                         #conv and anttention
-                        content_encoding = short_text_conv_encoder(
+                        content_encoding = short_text_atten_encoder(
                                                        inputs=self.content_source,
                                                        query=target_embed,
                                                        vocab_size=newsClsModelParams.source_vocab_size,

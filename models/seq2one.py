@@ -55,7 +55,7 @@ class ConvCls(multiClsModel):
                         self.content_source = tf.placeholder(shape=(None, newsClsModelParams.content_maxlen),dtype=tf.int64)
                         self.target = tf.placeholder(shape=(None, ),dtype=tf.int32)
                         
-			title_encoding = text_conv_encoder(
+                        title_encoding = text_conv_encoder(
                                                        inputs=self.title_source,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
                                                        num_units=newsClsModelParams.embedding_dim,
@@ -70,7 +70,7 @@ class ConvCls(multiClsModel):
                                                        is_dropout=self.is_dropout,
                                                        reuse=None) #N,FN
 
-			split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
+                        split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
                         content_encoding = text_conv_encoder(
                                                        inputs=split_content,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
@@ -144,7 +144,7 @@ class AttenCls(multiClsModel):
                                                        is_dropout=self.is_dropout,
                                                        reuse=None) #N,m,FN
 
-                        split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
+                        #split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
 			'''
                         content_encoding = text_atten_encoder(
                                                        inputs=split_content,

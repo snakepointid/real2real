@@ -79,6 +79,7 @@ class ConvCls(multiClsModel):
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
                                                        reuse=None)   #N,FN
+                        
                         #full_layer = tf.concat([title_out,content_out],1)
                         #full_layer = content_encoding
                         full_layer = title_encoding

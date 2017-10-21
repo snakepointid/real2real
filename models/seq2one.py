@@ -100,8 +100,6 @@ class AttenCls(multiClsModel):
                                                        shape=[newsClsModelParams.target_vocab_size, embedLayerParams.embedding_dim],
                                                        initializer=tf.contrib.layers.xavier_initializer(),
                                                        trainable=self.is_training)
-
-                        target_token_embed = tf.tile(tf.expand_dims(target_token_embed,0),[tf.shape(self.target)[0],1,1]) #N,m,WD
                         #title encoding
                         title_encoding = text_atten_encoder(
                                                        inputs=self.title_source,
@@ -115,7 +113,6 @@ class AttenCls(multiClsModel):
                                                        reuse=None) #N,m,FN
                         #content encoding
                         split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
-			 
                         content_encoding = text_atten_encoder(
                                                        inputs=split_content,
                                                        query=target_token_embed,
@@ -134,8 +131,6 @@ class AttenCls(multiClsModel):
                                                        shape=[newsClsModelParams.target_vocab_size, embedLayerParams.embedding_dim],
                                                        initializer=tf.contrib.layers.xavier_initializer(),
                                                        trainable=self.is_training)
-
-                        target_sentence_embed = tf.tile(tf.expand_dims(target_sentence_embed,0),[tf.shape(self.target)[0],1,1]) #N,m,WD
 
                         content_encoding = text_atten_encoder(
                                                        inputs=stack_content,

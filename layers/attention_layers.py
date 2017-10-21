@@ -17,16 +17,11 @@ def target_attention(inputs,query,scope_name,is_training):
 def target_attention_3d(inputs,query,scope_name,is_training):
         '''
         inputs N*SL*WD
-        query N*m*QD
+        query m*QD
         '''
         query_shape = query.get_shape()
-
         if len(query_shape)==2:
-                query = tf.expand_dims(query,1) # (N, 1, QD)
-        elif len(query_shape)==3:
-                pass
-        else:
-                raise ValueError("the rank of query must be 2 or 3")
+                query = tf.tile(tf.expand_dims(query,0),[tf.shape(inputs)[0],1,1]) # (N, m, QD)
 
         activation_fn = locate(attentionLayerParams.activation_fn)
         out_dim = int(query.get_shape()[2])
@@ -65,16 +60,13 @@ def target_attention_3d(inputs,query,scope_name,is_training):
 def target_attention_4d(inputs,query,scope_name,is_training):
         '''
         inputs N*SL*m*WD
-        query N*m*QD
+        query m*QD
         '''
         query_shape = query.get_shape()
 
-        if len(query_shape)==3:
+        if len(query_shape)==2:
+		query = tf.tile(tf.expand_dims(query,0),[tf.shape(inputs)[0],1,1]) # (N, m, QD)
                 reshaped_query = tf.tile(tf.expand_dims(query,1),[1,tf.shape(inputs)[1],1,1])# (N, SL,m, QD)
-        elif len(query_shape)==4:
-                pass
-        else:
-                raise ValueError("the rank of query must be 3 or 4")
 
         activation_fn = locate(attentionLayerParams.activation_fn)
 

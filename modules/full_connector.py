@@ -15,7 +15,7 @@ def multi_layer_perceptron(inputs,output_dim,is_training,is_dropout):
                                            inputs=inputs,
                                            keep_prob=fullLayerParams.dropout_rate,
                                            is_training=is_dropout)
-
+        
         for layer_idx in range(fullLayerParams.mlp_layers):
                 with tf.variable_scope("full_layer{}".format(layer_idx)):
                         hidden_layer    = tf.layers.dense(

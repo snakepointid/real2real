@@ -58,6 +58,7 @@ class ConvCls(multiClsModel):
                                                        reuse=None) #N,FN
 
                         split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
+                        
                         content_encoding = text_conv_encoder(
                                                        inputs=split_content,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
@@ -124,7 +125,7 @@ class AttenCls(multiClsModel):
                                                        is_dropout=self.is_dropout,
                                                        reuse=True)   #N*ST,m,FN
                         
-			stack_content = stack_short_encode(content_encoding,sentence_num)#N,ST,m,FN
+                        stack_content = stack_short_encode(content_encoding,sentence_num)#N,ST,m,FN
                         #target to sentence embedding
                         target_sentence_embed = tf.get_variable('target_sentence_embed',
                                                        dtype=tf.float32,

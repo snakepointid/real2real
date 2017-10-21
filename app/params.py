@@ -11,7 +11,7 @@ class convLayerParams(baseLayerParams):
 
 class fullLayerParams(baseLayerParams):
         hidden_units  = 128
-        mlp_layers = 2
+        mlp_layers = 0
 
 class attentionLayerParams(baseLayerParams):
         pass

@@ -68,14 +68,22 @@ class ConvCls(multiClsModel):
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
                                                        reuse=True)   #N*ST,FN
-
+			content_encode = text_conv_encoder(
+                                                       inputs=self.content_source,
+                                                       vocab_size=newsClsModelParams.source_vocab_size,
+                                                       multi_cnn_params=[5,2,7],#kernel,stride,layers
+                                                       maxlen=newsClsModelParams.content_maxlen,
+                                                       scope='longtext',
+                                                       is_training=self.is_training,
+                                                       is_dropout=self.is_dropout,
+                                                       reuse=None)   #N*ST,FN
                         stack_content = stack_short_encode(content_encoding,sentence_num)#N,ST,FN
 
                         content_encoding = text_conv_encoder(
                                                        inputs=stack_content,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
                                                        multi_cnn_params=[3,1,1],#kernel,stride,layer
-                                                       maxlen=newsClsModelParams.content_maxlen,
+                                                       maxlen=newsClsModelParams.title_maxlen,
                                                        scope='doc',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
@@ -83,7 +91,7 @@ class ConvCls(multiClsModel):
                         
                         #full_layer = tf.concat([title_out,content_out],1)
                         #full_layer = content_encoding
-                        full_layer = content_encoding
+                        full_layer = content_encode
                         self.logits = multi_layer_perceptron(
                                                          inputs=full_layer,
                                                          output_dim=newsClsModelParams.target_vocab_size,
@@ -145,7 +153,7 @@ class AttenCls(multiClsModel):
                                                        reuse=None)   ##N*m,m,FN			 
                         #full connect
                         self.logits = multi_layer_perceptron(
-                                                         inputs=content_encoding,
+                                                         inputs=title_encoding,
                                                          output_dim=1,
                                                          is_training=self.is_training,
                                                          is_dropout=self.is_dropout)

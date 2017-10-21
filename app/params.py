@@ -1,10 +1,10 @@
 class baseLayerParams:
-		dropout_rate  = 0.5
-		activation_fn ="tensorflow.nn.relu"
-		zero_pad=True
-		scale=True
-		direct_cont=True
-		norm=True
+        dropout_rate  = 0.5
+        activation_fn ="tensorflow.nn.relu"
+        zero_pad=True
+        scale=True
+        direct_cont=True
+        norm=True
 		
 class convLayerParams(baseLayerParams):
         filter_nums  = 128
@@ -21,7 +21,7 @@ class embedLayerParams(baseLayerParams):
         flag_position_embed = True
         embedding_dim = 128
 
-class baseModelParams(baseLayerParams):
+class baseModelParams:
         test_rate  = 0.005
         batch_size = 100
         learning_rate = 0.0001

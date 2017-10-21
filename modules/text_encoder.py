@@ -57,4 +57,4 @@ def text_atten_encoder(inputs,query,vocab_size,multi_cnn_params,maxlen,scope,is_
                                            scope_name="target_atten",
                                            is_training=is_training) #N,m,WD
                  
-        return atten_layer
+        return tf.squeeze(atten_layer)

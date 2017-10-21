@@ -8,10 +8,8 @@ from real2real.modules.full_connector import multi_layer_perceptron
 
 from real2real.utils.shape_ops import *
 
-from real2real.app.params import ctrRankModelParams,newsClsModelParams
-
-from pydoc import locate
-
+from real2real.app.params import ctrRankModelParams,newsClsModelParams,embedLayerParams
+ 
 class ConvRank(regressModel):
             def _build_(self):
                         # input coding placeholder
@@ -36,10 +34,10 @@ class ConvRank(regressModel):
                         #forward feed connect
                         full_layer = tf.concat([tag_embed,encoding],1)
                         self.logits = multi_layer_perceptron(
-                                                inputs=full_layer,
-                                                output_dim=1,
-                                                is_training=self.is_training,
-                                                is_dropout=self.is_dropout)
+                                                         inputs=full_layer,
+                                                         output_dim=1,
+                                                         is_training=self.is_training,
+                                                         is_dropout=self.is_dropout)
 
  
 class ConvCls(multiClsModel):
@@ -85,10 +83,10 @@ class ConvCls(multiClsModel):
                         #full_layer = content_encoding
                         full_layer = title_encoding
                         self.logits = multi_layer_perceptron(
-                                          inputs=full_layer,
-                                          output_dim=newsClsModelParams.target_vocab_size,
-                                          is_training=self.is_training,
-                                          is_dropout=self.is_dropout)
+                                                         inputs=full_layer,
+                                                         output_dim=newsClsModelParams.target_vocab_size,
+                                                         is_training=self.is_training,
+                                                         is_dropout=self.is_dropout)
 class AttenCls(multiClsModel):
             def _build_(self):
                         # input coding placeholder
@@ -98,7 +96,7 @@ class AttenCls(multiClsModel):
                         #target embedding
                         target_embed = tf.get_variable('target_embed',
                                                        dtype=tf.float32,
-                                                       shape=[newsClsModelParams.target_vocab_size, newsClsModelParams.embedding_dim],
+                                                       shape=[newsClsModelParams.target_vocab_size, embedLayerParams.embedding_dim],
                                                        initializer=tf.contrib.layers.xavier_initializer(),
                                                        trainable=self.is_training)
 
@@ -127,8 +125,9 @@ class AttenCls(multiClsModel):
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
                                                        reuse=True)   #N*ST,m,FN
+                                                       
                         content_encoding = stack_short_encode(content_encoding,sentence_num)#N,ST,m,FN
-                        content_encoding = tf.reshape(tf.transpose(content_encoding,[0,2,1,3]),[-1,sentence_num,newsClsModelParams.embedding_dim])#N*m,ST,FN
+                        content_encoding = tf.reshape(tf.transpose(content_encoding,[0,2,1,3]),[-1,sentence_num,embedLayerParams.embedding_dim])#N*m,ST,FN
 
                         content_encoding = text_atten_encoder(
                                                        inputs=split_content,
@@ -142,6 +141,9 @@ class AttenCls(multiClsModel):
                                                        reuse=None)   ##N*m,m,FN
 			'''
                         #full connect
-                        #self.logits = tf.squeeze(tf.layers.dense(content_encoding,1, activation=locate(newsClsModelParams.activation_fn)))
-                        self.logits = tf.squeeze(tf.layers.dense(title_encoding,1, activation=locate(newsClsModelParams.activation_fn)))
+                        self.logits = multi_layer_perceptron(
+                                                         inputs=title_encoding,
+                                                         output_dim=1,
+                                                         is_training=self.is_training,
+                                                         is_dropout=self.is_dropout)
 

@@ -82,7 +82,7 @@ class ConvCls(multiClsModel):
                         
                         #full_layer = tf.concat([title_out,content_out],1)
                         #full_layer = content_encoding
-                        full_layer = title_encoding
+                        full_layer = content_encoding
                         self.logits = multi_layer_perceptron(
                                                          inputs=full_layer,
                                                          output_dim=newsClsModelParams.target_vocab_size,
@@ -126,9 +126,8 @@ class AttenCls(multiClsModel):
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
                                                        reuse=True)   #N*ST,m,FN
-                                                       
-                        stack_content = stack_short_encode(content_encoding,sentence_num)#N,ST,m,FN
-
+                        
+			stack_content = stack_short_encode(content_encoding,sentence_num)#N,ST,m,FN
                         #target to sentence embedding
                         target_sentence_embed = tf.get_variable('target_sentence_embed',
                                                        dtype=tf.float32,
@@ -150,7 +149,7 @@ class AttenCls(multiClsModel):
                                                        reuse=None)   ##N*m,m,FN			 
                         #full connect
                         self.logits = multi_layer_perceptron(
-                                                         inputs=title_encoding,
+                                                         inputs=content_encoding,
                                                          output_dim=1,
                                                          is_training=self.is_training,
                                                          is_dropout=self.is_dropout)

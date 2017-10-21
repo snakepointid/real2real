@@ -96,7 +96,7 @@ def target_attention_4d(inputs,query,scope_name,is_training):
                         weights = tf.where(tf.equal(mask, 0), paddings, weights)
                 # Activation
                 weights = tf.nn.softmax(weights,1) # (N, SL, m)
-                weights = tf.tile(tf.expand_dims(weights,3),tf.shape(reshaped_query)[-1])# (N, SL, m,QD)
+                weights = tf.tile(tf.expand_dims(weights,3),[1,1,1,tf.shape(reshaped_query)[-1]])# (N, SL, m,QD)
                 # Weighted sum
                 outputs = tf.reduce_sum(tf.multiply(weights,V),1) # (N,m,QD)
 

@@ -44,6 +44,7 @@ def text_atten_encoder(inputs,query,vocab_size,multi_cnn_params,maxlen,scope,is_
                 else:
                         embed = inputs
                 #convolution
+                
                 conv_out = multiLayer_conv_strip(
                                            inputs=embed,
                                            multi_cnn_params=multi_cnn_params,

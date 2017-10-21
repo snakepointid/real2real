@@ -93,18 +93,18 @@ class AttenCls(multiClsModel):
                         self.title_source = tf.placeholder(shape=(None, newsClsModelParams.title_maxlen),dtype=tf.int64)
                         self.content_source = tf.placeholder(shape=(None, newsClsModelParams.content_maxlen),dtype=tf.int64)
                         self.target = tf.placeholder(shape=(None, ),dtype=tf.int32)
-                        #target embedding
-                        target_embed = tf.get_variable('target_embed',
+                        #target to token embedding
+                        target_token_embed = tf.get_variable('target_token_embed',
                                                        dtype=tf.float32,
                                                        shape=[newsClsModelParams.target_vocab_size, embedLayerParams.embedding_dim],
                                                        initializer=tf.contrib.layers.xavier_initializer(),
                                                        trainable=self.is_training)
 
-                        target_embed = tf.tile(tf.expand_dims(target_embed,0),[tf.shape(self.target)[0],1,1]) #N,m,WD
-                        #conv and anttention
+                        target_token_embed = tf.tile(tf.expand_dims(target_token_embed,0),[tf.shape(self.target)[0],1,1]) #N,m,WD
+                        #title encoding
                         title_encoding = text_atten_encoder(
                                                        inputs=self.title_source,
-                                                       query=target_embed,
+                                                       query=target_token_embed,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
                                                        multi_cnn_params=[3,1,1],#kernel,stride,layer
                                                        maxlen=newsClsModelParams.title_maxlen,
@@ -112,12 +112,12 @@ class AttenCls(multiClsModel):
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
                                                        reuse=None) #N,m,FN
-
+                        #content encoding
                         split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
-			'''
+			 
                         content_encoding = text_atten_encoder(
                                                        inputs=split_content,
-                                                       query=target_embed,
+                                                       query=target_token_embed,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
                                                        multi_cnn_params=[3,1,1],#kernel,stride,layer
                                                        maxlen=newsClsModelParams.title_maxlen,
@@ -126,20 +126,27 @@ class AttenCls(multiClsModel):
                                                        is_dropout=self.is_dropout,
                                                        reuse=True)   #N*ST,m,FN
                                                        
-                        content_encoding = stack_short_encode(content_encoding,sentence_num)#N,ST,m,FN
-                        content_encoding = tf.reshape(tf.transpose(content_encoding,[0,2,1,3]),[-1,sentence_num,embedLayerParams.embedding_dim])#N*m,ST,FN
+                        stack_content = stack_short_encode(content_encoding,sentence_num)#N,ST,m,FN
+
+                        #target to sentence embedding
+                        target_sentence_embed = tf.get_variable('target_sentence_embed',
+                                                       dtype=tf.float32,
+                                                       shape=[newsClsModelParams.target_vocab_size, embedLayerParams.embedding_dim],
+                                                       initializer=tf.contrib.layers.xavier_initializer(),
+                                                       trainable=self.is_training)
+
+                        target_sentence_embed = tf.tile(tf.expand_dims(target_sentence_embed,0),[tf.shape(self.target)[0],1,1]) #N,m,WD
 
                         content_encoding = text_atten_encoder(
-                                                       inputs=split_content,
-                                                       query=target_embed,
+                                                       inputs=stack_content,
+                                                       query=target_sentence_embed,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
                                                        multi_cnn_params=[1,1,1],#kernel,stride,layer
                                                        maxlen=newsClsModelParams.content_maxlen,
                                                        scope='doc',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
-                                                       reuse=None)   ##N*m,m,FN
-			'''
+                                                       reuse=None)   ##N*m,m,FN			 
                         #full connect
                         self.logits = multi_layer_perceptron(
                                                          inputs=title_encoding,

@@ -6,6 +6,14 @@ from real2real.app.params import attentionLayerParams
 
 from pydoc import locate
 
+def target_attention(inputs,query,scope_name,is_training):
+        if len(inputs.get_shape())==3:
+                return target_attention_3d(inputs,query,scope_name,is_training)
+        elif len(inputs.get_shape())==4:
+                return target_attention_4d(inputs,query,scope_name,is_training)
+        else:
+                raise ValueError("the rank of inputs must be 3 or 4")        
+
 def target_attention_3d(inputs,query,scope_name,is_training):
         '''
         inputs N*SL*WD

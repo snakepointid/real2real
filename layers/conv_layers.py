@@ -5,6 +5,10 @@ from pydoc import locate
 from real2real.app.params import convLayerParams 
  
 def multiLayer_conv_strip(inputs,multi_cnn_params,scope_name,is_training,is_dropout,reuse=None):
+        
+        if len(inputs.get_shape())!=3:
+                return inputs
+
         kernel_size,stride_step,conv_layer_num = multi_cnn_params
         activation_fn = locate(convLayerParams.activation_fn)
         with tf.variable_scope(scope_name,reuse=reuse):

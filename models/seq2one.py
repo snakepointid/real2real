@@ -68,7 +68,7 @@ class ConvCls(multiClsModel):
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
                                                        reuse=True)   #N*ST,FN
-			content_encode = text_conv_encoder(
+                        content_encode = text_conv_encoder(
                                                        inputs=self.content_source,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
                                                        multi_cnn_params=[5,2,7],#kernel,stride,layers

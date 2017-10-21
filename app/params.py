@@ -29,7 +29,9 @@ class baseModelParams:
 
 class multiClsModelParams(baseModelParams):
         flag_label_smooth = True
-
+        target_vocab_size = 35
+        loss_softmax=True
+        
 class regressModelParams(baseModelParams):
         loss_rmse = True     
    

@@ -2,7 +2,7 @@ from __future__ import print_function
 import tensorflow as tf
 import six
 import abc
-from real2real.app.params import regressModelParams,baseModelParams
+from real2real.app.params import *
 from real2real.utils.shape_ops import label_smoothing
 
 @six.add_metaclass(abc.ABCMeta)
@@ -54,7 +54,14 @@ class multiClsModel(baseModel):
                 tf.summary.scalar('acc', self.acc)
 
         def _cost_(self):
-                self.loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.logits, labels=tf.reshape(self.target,[-1,1]))
+                if multiClsModelParams.loss_softmax:
+                        self.loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.logits, labels=tf.reshape(self.target,[-1,1]))
+                else:
+                        self.loss = tf.nn.sigmoid_cross_entropy_with_logits(
+                                                                        logits=tf.reshape(self.logits,[-1,1]), 
+                                                                        labels=tf.one_hot(
+                                                                                        indices=tf.reshape(self.target,[-1,1]), 
+                                                                                        depth=multiClsModelParams.target_vocab_size))
                 self.mean_loss = tf.reduce_mean(self.loss)
 
 @six.add_metaclass(abc.ABCMeta)

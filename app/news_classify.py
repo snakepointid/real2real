@@ -13,7 +13,7 @@ from real2real.utils.info_layout import *
 
 def training():
         gpu_options = tf.GPUOptions(allow_growth = True)
-       # model = ConvCls(is_training=True)
+      #  model = ConvCls(is_training=True)
         model = AttenCls(is_training=True)
         startTime = time.time()
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
@@ -50,7 +50,7 @@ def training():
 								model.target:label_batch,
                                                                 model.is_dropout:False})
 			valid_num=len(label_batch)
-                        print("Iteration:%s\ttrain num:%s\ttrain accuracy:%s\ttrain loss:%s\tvalid num:%s\tvalid accuracy:%s\tvalid loss:%s"%(gs,train_num,train_acc,train_loss,valid_num,valid_acc,valid_loss))  
+                        print("Iteration:%s\ttrain num:%s\ttrain acc:%s\ttrain loss:%s\tvalid num:%s\tvalid acc:%s\tvalid loss:%s"%(gs,train_num,train_acc,train_loss,valid_num,valid_acc,valid_loss))  
                         endTime = time.time()
                         if endTime-startTime>3600:
                                 print ("save the whole model")

@@ -4,6 +4,8 @@ import tensorflow as tf
 from real2real.layers.common_layers import layer_norm
 from real2real.app.params import attentionLayerParams
 
+from pydoc import locate
+
 def target_attention(inputs,query,scope_name,is_training):
         '''
         inputs N*SL*WD

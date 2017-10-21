@@ -1,11 +1,15 @@
 from __future__ import print_function
 import tensorflow as tf
- 
-from real2real.modules.text_encoder import text_conv_encoder,text_atten_encoder
-from real2real.app.params import ctrRankModelParams,newsClsModelParams
+
 from real2real.models.base_model import regressModel,multiClsModel
+
+from real2real.modules.text_encoder import text_conv_encoder,text_atten_encoder
 from real2real.modules.full_connector import multi_layer_perceptron
+
 from real2real.utils.shape_ops import *
+
+from real2real.app.params import ctrRankModelParams,newsClsModelParams
+
 from pydoc import locate
 
 class ConvRank(regressModel):
@@ -17,13 +21,8 @@ class ConvRank(regressModel):
 
                         encoding = text_conv_encoder(
                                                        inputs=self.source,
-                                                       vocab_size=ctrRankModelParams.source_vocab_size,
-                                                       num_units=ctrRankModelParams.embedding_dim,
-                                                       kernel_size=5,
-                                                       conv_layer_num=3,
-                                                       stride_step=2,
-                                                       zero_pad=ctrRankModelParams.zero_pad,
-                                                       scale=ctrRankModelParams.scale,
+                                                       vocab_size=ctrRankModelParams.source_vocab_size,                                                     
+                                                       multi_cnn_params=[5,2,3],#kernel,stride,layers                                                                                                             
                                                        maxlen=ctrRankModelParams.source_maxlen,
                                                        scope='title',
                                                        is_training=self.is_training,
@@ -31,19 +30,14 @@ class ConvRank(regressModel):
                                                        reuse=None)
                         tag_embed = embedding(
                                           inputs=self.tag,
-                                          vocab_size=ctrRankModelParams.tag_size,
-                                          num_units=ctrRankModelParams.embedding_dim,
-                                          zero_pad=False,
-                                          scale=ctrRankModelParams.scale,
+                                          vocab_size=ctrRankModelParams.tag_size,                                         
+                                          zero_pad=False,                                         
                                           scope="tag_embed")
                         #forward feed connect
                         full_layer = tf.concat([tag_embed,encoding],1)
                         self.logits = multi_layer_perceptron(
                                                 inputs=full_layer,
                                                 output_dim=1,
-                                                mlp_layers=ctrRankModelParams.mlp_layers,
-                                                hidden_units=ctrRankModelParams.hidden_units,
-                                                activation_fn=ctrRankModelParams.activation_fn,
                                                 is_training=self.is_training,
                                                 is_dropout=self.is_dropout)
 
@@ -58,12 +52,7 @@ class ConvCls(multiClsModel):
                         title_encoding = text_conv_encoder(
                                                        inputs=self.title_source,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
-                                                       num_units=newsClsModelParams.embedding_dim,
-                                                       kernel_size=5,
-                                                       conv_layer_num=3,
-                                                       stride_step=2,
-                                                       zero_pad=newsClsModelParams.zero_pad,
-                                                       scale=newsClsModelParams.scale,
+                                                       multi_cnn_params=[5,2,3],#kernel,stride,layers
                                                        maxlen=newsClsModelParams.title_maxlen,
                                                        scope='sentence',
                                                        is_training=self.is_training,
@@ -74,29 +63,19 @@ class ConvCls(multiClsModel):
                         content_encoding = text_conv_encoder(
                                                        inputs=split_content,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
-                                                       num_units=newsClsModelParams.embedding_dim,
-                                                       kernel_size=5,
-                                                       conv_layer_num=3,
-                                                       stride_step=2,
-                                                       zero_pad=newsClsModelParams.zero_pad,
-                                                       scale=newsClsModelParams.scale,
+                                                       multi_cnn_params=[5,2,3],#kernel,stride,layers
                                                        maxlen=newsClsModelParams.title_maxlen,
                                                        scope='sentence',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
                                                        reuse=True)   #N*ST,FN
 
-                        content_encoding = stack_short_encode(content_encoding,sentence_num)#N,ST,FN
+                        stack_content = stack_short_encode(content_encoding,sentence_num)#N,ST,FN
 
                         content_encoding = text_conv_encoder(
-                                                       inputs=split_content,
+                                                       inputs=stack_content,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
-                                                       num_units=newsClsModelParams.embedding_dim,
-                                                       kernel_size=3,
-                                                       conv_layer_num=1,
-                                                       stride_step=1,
-                                                       zero_pad=newsClsModelParams.zero_pad,
-                                                       scale=newsClsModelParams.scale,
+                                                       multi_cnn_params=[3,1,1],#kernel,stride,layer
                                                        maxlen=newsClsModelParams.content_maxlen,
                                                        scope='doc',
                                                        is_training=self.is_training,
@@ -108,9 +87,6 @@ class ConvCls(multiClsModel):
                         self.logits = multi_layer_perceptron(
                                           inputs=full_layer,
                                           output_dim=newsClsModelParams.target_vocab_size,
-                                          mlp_layers=newsClsModelParams.mlp_layers,
-                                          hidden_units=newsClsModelParams.hidden_units,
-                                          activation_fn=newsClsModelParams.activation_fn,
                                           is_training=self.is_training,
                                           is_dropout=self.is_dropout)
 class AttenCls(multiClsModel):
@@ -132,30 +108,20 @@ class AttenCls(multiClsModel):
                                                        inputs=self.title_source,
                                                        query=target_embed,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
-                                                       num_units=newsClsModelParams.embedding_dim,
-                                                       kernel_size=3,
-                                                       conv_layer_num=1,
-                                                       stride_step=1,
-                                                       zero_pad=newsClsModelParams.zero_pad,
-                                                       scale=newsClsModelParams.scale,
+                                                       multi_cnn_params=[3,1,1],#kernel,stride,layer
                                                        maxlen=newsClsModelParams.title_maxlen,
                                                        scope='sentence',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
                                                        reuse=None) #N,m,FN
 
-                        #split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
+                        split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
 			'''
                         content_encoding = text_atten_encoder(
                                                        inputs=split_content,
                                                        query=target_embed,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
-                                                       num_units=newsClsModelParams.embedding_dim,
-                                                       kernel_size=3,
-                                                       conv_layer_num=1,
-                                                       stride_step=1,
-                                                       zero_pad=newsClsModelParams.zero_pad,
-                                                       scale=newsClsModelParams.scale,
+                                                       multi_cnn_params=[3,1,1],#kernel,stride,layer
                                                        maxlen=newsClsModelParams.title_maxlen,
                                                        scope='sentence',
                                                        is_training=self.is_training,
@@ -168,12 +134,7 @@ class AttenCls(multiClsModel):
                                                        inputs=split_content,
                                                        query=target_embed,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
-                                                       num_units=newsClsModelParams.embedding_dim,
-                                                       kernel_size=1,
-                                                       conv_layer_num=1,
-                                                       stride_step=1,
-                                                       zero_pad=newsClsModelParams.zero_pad,
-                                                       scale=newsClsModelParams.scale,
+                                                       multi_cnn_params=[1,1,1],#kernel,stride,layer
                                                        maxlen=newsClsModelParams.content_maxlen,
                                                        scope='doc',
                                                        is_training=self.is_training,

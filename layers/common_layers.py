@@ -4,7 +4,7 @@
 
 from __future__ import print_function
 import tensorflow as tf
-from real2real.app.params import embedLayerParams,baseLayerParams
+from real2real.app.params import embedLayerParams
 import math
 from pydoc import locate
 def layer_norm(x, filters=None, epsilon=1e-6, name=None, reuse=None):
@@ -36,9 +36,7 @@ def noam_norm(x, epsilon=1.0, name=None):
 
 def embedding(inputs, 
               vocab_size, 
-              num_units, 
               zero_pad=True, 
-              scale=True,
               scope="embedding", 
               is_training=True,
               reuse=None):
@@ -46,53 +44,47 @@ def embedding(inputs,
         with tf.variable_scope(scope, reuse=reuse):
                 lookup_table = tf.get_variable('lookup_table',
                                    dtype=tf.float32,
-                                   shape=[vocab_size, num_units],
+                                   shape=[vocab_size, embedLayerParams.embedding_dim],
                                    initializer=tf.contrib.layers.xavier_initializer(),
                                    trainable=is_training)
         if zero_pad:
-                lookup_table = tf.concat((tf.zeros(shape=[1, num_units]), lookup_table[1:, :]), 0)
+                lookup_table = tf.concat((tf.zeros(shape=[1, embedLayerParams.embedding_dim]), lookup_table[1:, :]), 0)
+
         outputs = tf.nn.embedding_lookup(lookup_table, inputs)
     
-        if scale:
-                outputs = outputs * (num_units ** 0.5) 
+        if embedLayerParams.scale:
+                outputs = outputs * (embedLayerParams.embedding_dim ** 0.5) 
         
         return outputs
     
 
-def positional_encoding(inputs,
-            vocab_size,
-            num_units,
-            zero_pad = True,
-            scale = True,
-            scope = "position_embedding"):
- 
+def positional_encoding(inputs,vocab_size,scope = "position_embedding"):
+
         with tf.name_scope(scope):
-                position_block = tf.tile(tf.expand_dims(tf.range(vocab_size), 1), [1, num_units // 2])
-                unit_block = tf.tile(tf.expand_dims(tf.range(num_units // 2), 0), [vocab_size, 1])
-                rad_block = tf.pow(tf.div(position_block, tf.multiply(10000, 1)), tf.div(unit_block, num_units // 2))
+                position_block = tf.tile(tf.expand_dims(tf.range(vocab_size), 1), [1, embedLayerParams.embedding_dim // 2])
+                unit_block = tf.tile(tf.expand_dims(tf.range(embedLayerParams.embedding_dim // 2), 0), [vocab_size, 1])
+                rad_block = tf.pow(tf.div(position_block, tf.multiply(10000, 1)), tf.div(unit_block, embedLayerParams.embedding_dim // 2))
         
                 sin_block = tf.sin(tf.cast(rad_block, tf.float32))
                 cos_block = tf.cos(tf.cast(rad_block, tf.float32))
                 lookup_table = tf.concat([sin_block, cos_block], axis = 1)
 
-                if zero_pad:
-                        lookup_table = tf.concat((tf.zeros(shape = [1, num_units]), lookup_table[1:, :]), 0)
+                if embedLayerParams.zero_pad:
+                        lookup_table = tf.concat((tf.zeros(shape = [1, embedLayerParams.embedding_dim]), lookup_table[1:, :]), 0)
                 outputs = tf.nn.embedding_lookup(lookup_table, inputs)
     
-                if scale:
-                        outputs = outputs * math.sqrt(num_units)
+                if embedLayerParams.scale:
+                        outputs = outputs * math.sqrt(embedLayerParams.embedding_dim)
 
         return outputs
 
 
     
-def semantic_position_embedding(inputs,vocab_size,num_units,maxlen,zero_pad,scale,is_training,scope,reuse=None):
+def semantic_position_embedding(inputs,vocab_size,maxlen,is_training,scope,reuse=None):
         with tf.variable_scope(scope,reuse=reuse):
                 encoding = embedding(inputs=inputs, 
-                                     vocab_size=vocab_size, 
-                                     num_units=num_units, 
-                                     zero_pad=zero_pad,
-                                     scale=scale,
+                                     vocab_size=vocab_size,                                
+                                     zero_pad=embedLayerParams.zero_pad,
                                      reuse=reuse,
                                      is_training=is_training,
                                      scope="token")
@@ -107,18 +99,13 @@ def semantic_position_embedding(inputs,vocab_size,num_units,maxlen,zero_pad,scal
                 if embedLayerParams.flag_sinusoid:
                         encoding += positional_encoding(
                                         inputs=position_code,
-                                        vocab_size=maxlen+1, 
-                                        num_units=num_units, 
-                                        zero_pad=zero_pad, 
-                                        scale=scale,
+                                        vocab_size=maxlen+1,  
                                         scope="position")
                 else:
                         encoding += embedding(
                                         inputs=position_code,
                                         vocab_size=maxlen+1, 
-                                        num_units=num_units, 
-                                        zero_pad=zero_pad, 
-                                        scale=scale,
+                                        zero_pad=embedLayerParams.zero_pad, 
                                         reuse=reuse,
                                         is_training=is_training,
                                         scope="position")

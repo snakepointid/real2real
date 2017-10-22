@@ -4,7 +4,7 @@ import tensorflow as tf
 from real2real.models.base_model import regressModel,multiClsModel
 
 from real2real.modules.text_encoder import text_conv_encoder,text_atten_encoder
-from real2real.modules.full_connector import multi_layer_perceptron
+from real2real.modules.full_connector import final_mlp_encoder
 
 from real2real.utils.shape_ops import *
 
@@ -32,7 +32,7 @@ class ConvRank(regressModel):
                                           scope="tag_embed")
                         #forward feed connect
                         full_layer = tf.concat([tag_embed,encoding],1)
-                        self.logits = multi_layer_perceptron(
+                        self.logits = final_mlp_encoder(
                                                          inputs=full_layer,
                                                          output_dim=1,
                                                          is_training=self.is_training,
@@ -96,7 +96,7 @@ class StackAttenCls(multiClsModel):
                         elif newsClsModelParams.mode == 'title':    
                                     full_layer = title_encoding      
  
-                        self.logits = multi_layer_perceptron(
+                        self.logits = final_mlp_encoder(
                                              inputs=full_layer,
                                              output_dim=newsClsModelParams.target_vocab_size,
                                              is_training=self.is_training,
@@ -141,7 +141,7 @@ class DirectAttenCls(multiClsModel):
                         elif newsClsModelParams.mode == 'title':    
                                     full_layer = title_encoding    
 
-                        self.logits = multi_layer_perceptron(
+                        self.logits = final_mlp_encoder(
                                              inputs=full_layer,
                                              output_dim=newsClsModelParams.target_vocab_size,
                                              is_training=self.is_training,

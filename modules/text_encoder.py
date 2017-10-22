@@ -34,7 +34,7 @@ def sentence_encoder(inputs,query,vocab_size,multi_cnn_params,scope,is_training,
                                            inputs=atten_layer,
                                            scope_name="conv2full", 
                                            is_training=is_training,
-                   is_dropout=is_dropout)
+                                           is_dropout=is_dropout)
                  
         return full_layer
 
@@ -55,10 +55,5 @@ def doc_encoder(inputs,query,multi_cnn_params,scope,is_training,is_dropout,reuse
                                            is_training=is_training,
                                            is_dropout=is_dropout) #N,m,WD
 
-                full_layer = conv_to_full_layer(
-                                           inputs=atten_layer,
-                                           scope_name="conv2full", 
-                                           is_training=is_training,
-                   is_dropout=is_dropout)
-                 
+                   
         return full_layer

@@ -1,10 +1,10 @@
 class baseLayerParams:
-        dropout_rate  = 0.6
+        dropout_rate  = 0.5
         activation_fn ="tensorflow.nn.relu"
         zero_pad=True
         scale=True
         direct_cont=True
-        norm=False
+        norm=True
 		
 class convLayerParams(baseLayerParams):
         filter_nums  = 128

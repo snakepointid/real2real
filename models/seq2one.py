@@ -44,7 +44,7 @@ class StackAttenCls(multiClsModel):
                                                        is_dropout=self.is_dropout,
                                                        reuse=True)#N*ST,FN
                         stack_content = stack_short_encode(content_encoding,sentence_num)#N,ST,FN
-			#target to sentence embedding
+			      #target to sentence embedding
                         sentence_context = tf.get_variable('sentence_context',
                                                        dtype=tf.float32,
                                                        shape=[newsClsModelParams.target_vocab_size, embedLayerParams.embedding_dim],

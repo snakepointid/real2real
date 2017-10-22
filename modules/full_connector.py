@@ -12,7 +12,10 @@ from pydoc import locate
 activation_fn = locate(fullLayerParams.activation_fn)
 
 def final_mlp_encoder(inputs,output_dim,is_training,is_dropout):
-    
+        static_shape = inputs.get_shape()
+        if len(static_shape)==3:
+                inputs = tf.reshape(inputs,[-1,int(static_shape[1])*int(static_shape[2])])
+                
         for layer_idx in range(fullLayerParams.mlp_layers):
                 with tf.variable_scope("full_layer{}".format(layer_idx)):   
                         if fullLayerParams.norm:                 

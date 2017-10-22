@@ -45,7 +45,7 @@ class StackAttenCls(multiClsModel):
                         self.content_source = tf.placeholder(shape=(None, newsClsModelParams.content_maxlen),dtype=tf.int64)
                         self.target = tf.placeholder(shape=(None, ),dtype=tf.int32)
                         #target to token embedding
-                        target_token_embed = tf.get_variable('target_token_embed',
+                        token_context = tf.get_variable('token_context',
                                                        dtype=tf.float32,
                                                        shape=[newsClsModelParams.target_vocab_size, embedLayerParams.embedding_dim],
                                                        initializer=tf.contrib.layers.xavier_initializer(),
@@ -53,7 +53,7 @@ class StackAttenCls(multiClsModel):
                         #title encoding
                         title_encoding = text_atten_encoder(
                                                        inputs=self.title_source,
-                                                       query=target_token_embed,
+                                                       query=token_context,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
                                                        multi_cnn_params=newsClsModelParams.token_cnn_params,#kernel,stride,layer
                                                        scope='sentence',
@@ -65,7 +65,7 @@ class StackAttenCls(multiClsModel):
 
                         content_encoding = text_atten_encoder(
                                                        inputs=split_content,
-                                                       query=target_token_embed,
+                                                       query=token_context,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
                                                        multi_cnn_params=newsClsModelParams.token_cnn_params,#kernel,stride,layer
                                                        scope='sentence',
@@ -75,7 +75,7 @@ class StackAttenCls(multiClsModel):
                         
                         stack_content = stack_short_encode(content_encoding,sentence_num)#N,ST,m,FN
                         #target to sentence embedding
-                        target_sentence_embed = tf.get_variable('target_sentence_embed',
+                        sentence_context = tf.get_variable('sentence_context',
                                                        dtype=tf.float32,
                                                        shape=[newsClsModelParams.target_vocab_size, embedLayerParams.embedding_dim],
                                                        initializer=tf.contrib.layers.xavier_initializer(),
@@ -83,9 +83,9 @@ class StackAttenCls(multiClsModel):
 
                         content_encoding = text_atten_encoder(
                                                        inputs=stack_content,
-                                                       query=target_sentence_embed,
+                                                       query=sentence_context,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
-                                                       multi_cnn_params=newsClsModelParams.sentence_cnn_param,#kernel,stride,layer
+                                                       multi_cnn_params=newsClsModelParams.sentence_cnn_params,#kernel,stride,layer
                                                        scope='doc',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
@@ -117,7 +117,7 @@ class DirectAttenCls(multiClsModel):
                         self.content_source = tf.placeholder(shape=(None, newsClsModelParams.content_maxlen),dtype=tf.int64)
                         self.target = tf.placeholder(shape=(None, ),dtype=tf.int32)
                         #target to token embedding
-                        target_token_embed = tf.get_variable('target_token_embed',
+                        token_context = tf.get_variable('token_context',
                                                        dtype=tf.float32,
                                                        shape=[newsClsModelParams.target_vocab_size, embedLayerParams.embedding_dim],
                                                        initializer=tf.contrib.layers.xavier_initializer(),
@@ -125,7 +125,7 @@ class DirectAttenCls(multiClsModel):
                         #title encoding
                         title_encoding = text_atten_encoder(
                                                        inputs=self.title_source,
-                                                       query=target_token_embed,
+                                                       query=token_context,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
                                                        multi_cnn_params=newsClsModelParams.token_cnn_params,#kernel,stride,layer
                                                        scope='sentence',
@@ -135,7 +135,7 @@ class DirectAttenCls(multiClsModel):
                          
                         content_encoding = text_atten_encoder(
                                                        inputs=self.content_source,
-                                                       query=target_token_embed,
+                                                       query=token_context,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
                                                        multi_cnn_params=newsClsModelParams.token_cnn_params,#kernel,stride,layer
                                                        scope='sentence',

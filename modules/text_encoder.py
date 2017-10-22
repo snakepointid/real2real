@@ -31,7 +31,7 @@ def text_conv_encoder(inputs,vocab_size,multi_cnn_params,scope,is_training,is_dr
                                            is_training=is_training)
         return full_layer
 
-def text_atten_encoder(inputs,query,vocab_size,multi_cnn_params,maxlen,scope,is_training,is_dropout,reuse):
+def text_atten_encoder(inputs,query,vocab_size,multi_cnn_params,scope,is_training,is_dropout,reuse):
         with tf.variable_scope(scope,reuse=reuse):
                 if len(inputs.get_shape())==2:
                         embed = semantic_position_embedding(

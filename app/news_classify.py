@@ -6,15 +6,17 @@ import argparse
 import os
 sys.path.insert(0,"..")
 sys.path.append(os.getcwd())
-from real2real.models.seq2one import ConvCls,AttenCls
-from real2real.app.params import baseModelParams
+from real2real.models.seq2one import DirectAttenCls,StackAttenCls
+from real2real.app.params import appParams
 from real2real.preprocess.news_cls_feeds import *
 from real2real.utils.info_layout import *
 
 def training():
         gpu_options = tf.GPUOptions(allow_growth = True)
-        model = ConvCls(is_training=True)
-      #  model = AttenCls(is_training=True)
+	if appParams.newsClsModel:
+        	model = DirectAttenCls(is_training=True)
+	else:
+		model = StackAttenCls(is_training=True)
         startTime = time.time()
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
                 try:
@@ -27,7 +29,7 @@ def training():
                 cache = LoadTrainFeeds()
                 #compute the initial pearson coef
 
-                for epoch in range(baseModelParams.num_epochs):
+                for epoch in range(appParams.num_epochs):
                         for title_code_batch,content_code_batch,label_batch in cache['training']:
                                 _,gs=sess.run([model.train_op,model.global_step],feed_dict={
                                                                 model.title_source:title_code_batch ,

@@ -28,7 +28,8 @@ def text_conv_encoder(inputs,vocab_size,multi_cnn_params,scope,is_training,is_dr
                 full_layer = conv_to_full_layer(
                                            inputs=conv_out,
                                            scope_name="conv2full",
-                                           is_training=is_training)
+                                           is_training=is_training,
+					   is_dropout=is_dropout)
         return full_layer
 
 def text_atten_encoder(inputs,query,vocab_size,multi_cnn_params,scope,is_training,is_dropout,reuse):
@@ -60,6 +61,7 @@ def text_atten_encoder(inputs,query,vocab_size,multi_cnn_params,scope,is_trainin
                 full_layer = conv_to_full_layer(
                                            inputs=atten_layer,
                                            scope_name="conv2full", 
-                                           is_training=is_training)
+                                           is_training=is_training,
+				           is_dropout=is_dropout)
                  
         return full_layer

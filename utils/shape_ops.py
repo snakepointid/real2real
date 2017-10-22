@@ -16,10 +16,7 @@ def split_long_text(inputs,short_length):
 
 def stack_short_encode(inputs,splited_num):
 	static_shape = inputs.get_shape()
-        if len(static_shape)==2:
-                outputs = tf.reshape(inputs,[-1,splited_num,int(static_shape[1])])
-        elif len(inputs.get_shape())==3:
-                outputs = tf.reshape(inputs,[-1,splited_num,int(static_shape[1]),int(static_shape[2])])
+        outputs = tf.reshape(inputs,[-1,splited_num,int(static_shape[1])])
         return outputs
 
 def label_smoothing(inputs, epsilon=0.1):

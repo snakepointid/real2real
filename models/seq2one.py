@@ -3,41 +3,13 @@ import tensorflow as tf
 
 from real2real.models.base_model import regressModel,multiClsModel
 
-from real2real.modules.text_encoder import text_conv_encoder,text_atten_encoder
+from real2real.modules.text_encoder import sentence_encoder,doc_encoder
 from real2real.modules.full_connector import final_mlp_encoder
 
 from real2real.utils.shape_ops import *
 
 from real2real.app.params import ctrRankModelParams,newsClsModelParams,embedLayerParams
  
-class ConvRank(regressModel):
-            def _build_(self):
-                        # input coding placeholder
-                        self.source = tf.placeholder(shape=(None, ctrRankModelParams.source_maxlen),dtype=tf.int64)
-                        self.tag = tf.placeholder(shape=(None, ),dtype=tf.int64)
-                        self.target = tf.placeholder(shape=(None, ),dtype=tf.float32)
-
-                        encoding = text_conv_encoder(
-                                                       inputs=self.source,
-                                                       vocab_size=ctrRankModelParams.source_vocab_size,                                                     
-                                                       multi_cnn_params=ctrRankModelParams.token_cnn_params,#kernel,stride,layers                                                                                                             
-                                                       scope='title',
-                                                       is_training=self.is_training,
-                                                       is_dropout=self.is_dropout,
-                                                       reuse=None)
-                        tag_embed = embedding(
-                                          inputs=self.tag,
-                                          vocab_size=ctrRankModelParams.tag_size,                                         
-                                          zero_pad=False,                                         
-                                          scope="tag_embed")
-                        #forward feed connect
-                        full_layer = tf.concat([tag_embed,encoding],1)
-                        self.logits = final_mlp_encoder(
-                                                         inputs=full_layer,
-                                                         output_dim=1,
-                                                         is_training=self.is_training,
-                                                         is_dropout=self.is_dropout)
-
 class StackAttenCls(multiClsModel):
             def _build_(self):
                         # input coding placeholder
@@ -51,7 +23,7 @@ class StackAttenCls(multiClsModel):
                                                        initializer=tf.contrib.layers.xavier_initializer(),
                                                        trainable=self.is_training)
                         #title encoding
-                        title_encoding = text_atten_encoder(
+                        title_encoding = sentence_encoder(
                                                        inputs=self.title_source,
                                                        query=token_context,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
@@ -63,7 +35,7 @@ class StackAttenCls(multiClsModel):
                         #content encoding
                         split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
 
-                        content_encoding = text_atten_encoder(
+                        content_encoding = sentence_encoder(
                                                        inputs=split_content,
                                                        query=token_context,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
@@ -81,10 +53,9 @@ class StackAttenCls(multiClsModel):
                                                        initializer=tf.contrib.layers.xavier_initializer(),
                                                        trainable=self.is_training)
 
-                        content_encoding = text_atten_encoder(
+                        content_encoding = doc_encoder(
                                                        inputs=stack_content,
-                                                       query=sentence_context,
-                                                       vocab_size=newsClsModelParams.source_vocab_size,
+                                                       query=sentence_context, 
                                                        multi_cnn_params=newsClsModelParams.sentence_cnn_params,#kernel,stride,layer
                                                        scope='doc',
                                                        is_training=self.is_training,
@@ -115,7 +86,7 @@ class DirectAttenCls(multiClsModel):
                                                        initializer=tf.contrib.layers.xavier_initializer(),
                                                        trainable=self.is_training)
                         #title encoding
-                        title_encoding = text_atten_encoder(
+                        title_encoding = sentence_encoder(
                                                        inputs=self.title_source,
                                                        query=token_context,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
@@ -125,7 +96,7 @@ class DirectAttenCls(multiClsModel):
                                                        is_dropout=self.is_dropout,
                                                        reuse=None) #N,FN
                          
-                        content_encoding = text_atten_encoder(
+                        content_encoding = sentence_encoder(
                                                        inputs=self.content_source,
                                                        query=token_context,
                                                        vocab_size=newsClsModelParams.source_vocab_size,

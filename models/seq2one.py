@@ -20,8 +20,7 @@ class ConvRank(regressModel):
                         encoding = text_conv_encoder(
                                                        inputs=self.source,
                                                        vocab_size=ctrRankModelParams.source_vocab_size,                                                     
-                                                       multi_cnn_params=[5,2,3],#kernel,stride,layers                                                                                                             
-                                                       maxlen=ctrRankModelParams.source_maxlen,
+                                                       multi_cnn_params=ctrRankModelParams.token_cnn_params,#kernel,stride,layers                                                                                                             
                                                        scope='title',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
@@ -39,65 +38,7 @@ class ConvRank(regressModel):
                                                          is_training=self.is_training,
                                                          is_dropout=self.is_dropout)
 
- 
-class ConvCls(multiClsModel):
-            def _build_(self):
-                        # input coding placeholder
-                        self.title_source = tf.placeholder(shape=(None, newsClsModelParams.title_maxlen),dtype=tf.int64)
-                        self.content_source = tf.placeholder(shape=(None, newsClsModelParams.content_maxlen),dtype=tf.int64)
-                        self.target = tf.placeholder(shape=(None, ),dtype=tf.int32)
-                        
-                        title_encoding = text_conv_encoder(
-                                                       inputs=self.title_source,
-                                                       vocab_size=newsClsModelParams.source_vocab_size,
-                                                       multi_cnn_params=[5,2,3],#kernel,stride,layers
-                                                       maxlen=newsClsModelParams.title_maxlen,
-                                                       scope='sentence',
-                                                       is_training=self.is_training,
-                                                       is_dropout=self.is_dropout,
-                                                       reuse=None) #N,FN
-
-                        split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
-                        
-                        content_encoding = text_conv_encoder(
-                                                       inputs=split_content,
-                                                       vocab_size=newsClsModelParams.source_vocab_size,
-                                                       multi_cnn_params=[5,2,3],#kernel,stride,layers
-                                                       maxlen=newsClsModelParams.title_maxlen,
-                                                       scope='sentence',
-                                                       is_training=self.is_training,
-                                                       is_dropout=self.is_dropout,
-                                                       reuse=True)   #N*ST,FN
-                        content_encode = text_conv_encoder(
-                                                       inputs=self.content_source,
-                                                       vocab_size=newsClsModelParams.source_vocab_size,
-                                                       multi_cnn_params=[5,2,7],#kernel,stride,layers
-                                                       maxlen=newsClsModelParams.content_maxlen,
-                                                       scope='longtext',
-                                                       is_training=self.is_training,
-                                                       is_dropout=self.is_dropout,
-                                                       reuse=None)   #N*ST,FN
-                        stack_content = stack_short_encode(content_encoding,sentence_num)#N,ST,FN
-
-                        content_encoding = text_conv_encoder(
-                                                       inputs=stack_content,
-                                                       vocab_size=newsClsModelParams.source_vocab_size,
-                                                       multi_cnn_params=[3,1,1],#kernel,stride,layer
-                                                       maxlen=newsClsModelParams.title_maxlen,
-                                                       scope='doc',
-                                                       is_training=self.is_training,
-                                                       is_dropout=self.is_dropout,
-                                                       reuse=None)   #N,FN
-                        
-                        #full_layer = tf.concat([title_out,content_out],1)
-                        #full_layer = content_encoding
-                        full_layer = content_encode
-                        self.logits = multi_layer_perceptron(
-                                                         inputs=full_layer,
-                                                         output_dim=newsClsModelParams.target_vocab_size,
-                                                         is_training=self.is_training,
-                                                         is_dropout=self.is_dropout)
-class AttenCls(multiClsModel):
+class StackAttenCls(multiClsModel):
             def _build_(self):
                         # input coding placeholder
                         self.title_source = tf.placeholder(shape=(None, newsClsModelParams.title_maxlen),dtype=tf.int64)
@@ -114,24 +55,23 @@ class AttenCls(multiClsModel):
                                                        inputs=self.title_source,
                                                        query=target_token_embed,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
-                                                       multi_cnn_params=[3,1,1],#kernel,stride,layer
-                                                       maxlen=newsClsModelParams.title_maxlen,
+                                                       multi_cnn_params=newsClsModelParams.token_cnn_params,#kernel,stride,layer
                                                        scope='sentence',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
                                                        reuse=None) #N,m,FN
                         #content encoding
                         split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
+
                         content_encoding = text_atten_encoder(
                                                        inputs=split_content,
                                                        query=target_token_embed,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
-                                                       multi_cnn_params=[3,1,1],#kernel,stride,layer
-                                                       maxlen=newsClsModelParams.title_maxlen,
+                                                       multi_cnn_params=newsClsModelParams.token_cnn_params,#kernel,stride,layer
                                                        scope='sentence',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
-                                                       reuse=True)   #N*ST,m,FN
+                                                       reuse=True)#N*ST,m,FN
                         
                         stack_content = stack_short_encode(content_encoding,sentence_num)#N,ST,m,FN
                         #target to sentence embedding
@@ -145,16 +85,82 @@ class AttenCls(multiClsModel):
                                                        inputs=stack_content,
                                                        query=target_sentence_embed,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
-                                                       multi_cnn_params=[1,1,1],#kernel,stride,layer
-                                                       maxlen=newsClsModelParams.content_maxlen,
+                                                       multi_cnn_params=newsClsModelParams.sentence_cnn_param,#kernel,stride,layer
                                                        scope='doc',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
-                                                       reuse=None)   ##N*m,m,FN			 
+                                                       reuse=None) ##N*m,m,FN      
+                        #full_layer
+                        if newsClsModelParams.mode == 'content':
+                                    full_layer = title_encoding 
+                        elif newsClsModelParams.mode == 'title':    
+                                    full_layer = title_encoding 
+                        else:
+                                    pass     
                         #full connect
-                        self.logits = multi_layer_perceptron(
-                                                         inputs=title_encoding,
+                        if newsClsModelParams.mlp_full_conn:
+                                    self.logits = multi_layer_perceptron(
+                                                         inputs=full_layer,
                                                          output_dim=1,
                                                          is_training=self.is_training,
                                                          is_dropout=self.is_dropout)
+                        else:
+                                    self.logits = conv1d_to_full_layer(
+                                                         inputs=full_layer,
+                                                         scope_name="conv2full",
+                                                         output_dim=newsClsModelParams.target_vocab_size,
+                                                         is_training=self.is_training)       
+class DirectAttenCls(multiClsModel):
+            def _build_(self):
+                        # input coding placeholder
+                        self.title_source = tf.placeholder(shape=(None, newsClsModelParams.title_maxlen),dtype=tf.int64)
+                        self.content_source = tf.placeholder(shape=(None, newsClsModelParams.content_maxlen),dtype=tf.int64)
+                        self.target = tf.placeholder(shape=(None, ),dtype=tf.int32)
+                        #target to token embedding
+                        target_token_embed = tf.get_variable('target_token_embed',
+                                                       dtype=tf.float32,
+                                                       shape=[newsClsModelParams.target_vocab_size, embedLayerParams.embedding_dim],
+                                                       initializer=tf.contrib.layers.xavier_initializer(),
+                                                       trainable=self.is_training)
+                        #title encoding
+                        title_encoding = text_atten_encoder(
+                                                       inputs=self.title_source,
+                                                       query=target_token_embed,
+                                                       vocab_size=newsClsModelParams.source_vocab_size,
+                                                       multi_cnn_params=newsClsModelParams.token_cnn_params,#kernel,stride,layer
+                                                       scope='sentence',
+                                                       is_training=self.is_training,
+                                                       is_dropout=self.is_dropout,
+                                                       reuse=None) #N,m,FN
+                         
+                        content_encoding = text_atten_encoder(
+                                                       inputs=self.content_source,
+                                                       query=target_token_embed,
+                                                       vocab_size=newsClsModelParams.source_vocab_size,
+                                                       multi_cnn_params=newsClsModelParams.token_cnn_params,#kernel,stride,layer
+                                                       scope='sentence',
+                                                       is_training=self.is_training,
+                                                       is_dropout=self.is_dropout,
+                                                       reuse=True)#N*ST,m,FN
+
+                        #full_layer
+                        if newsClsModelParams.mode == 'content':
+                                    full_layer = title_encoding 
+                        elif newsClsModelParams.mode == 'title':    
+                                    full_layer = title_encoding 
+                        else:
+                                    pass        
+                        #full connect
+                        if newsClsModelParams.mlp_full_conn:
+                                    self.logits = multi_layer_perceptron(
+                                                         inputs=full_layer,
+                                                         output_dim=1,
+                                                         is_training=self.is_training,
+                                                         is_dropout=self.is_dropout)
+                        else:
+                                    self.logits = conv1d_to_full_layer(
+                                                         inputs=full_layer,
+                                                         scope_name="conv2full",
+                                                         output_dim=newsClsModelParams.target_vocab_size,
+                                                         is_training=self.is_training)  
 

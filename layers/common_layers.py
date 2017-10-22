@@ -80,7 +80,7 @@ def positional_encoding(inputs,vocab_size,scope = "position_embedding"):
 
 
     
-def semantic_position_embedding(inputs,vocab_size,maxlen,is_training,scope,reuse=None):
+def semantic_position_embedding(inputs,vocab_size,is_training,scope,reuse=None):
         with tf.variable_scope(scope,reuse=reuse):
                 encoding = embedding(inputs=inputs, 
                                      vocab_size=vocab_size,                                
@@ -95,7 +95,8 @@ def semantic_position_embedding(inputs,vocab_size,maxlen,is_training,scope,reuse
                 position_code = tf.tile(tf.expand_dims(tf.to_int64(tf.range(tf.shape(inputs)[1])+1), 0), [tf.shape(inputs)[0], 1])
                 paddings = tf.zeros_like(inputs)
                 position_code = tf.where(tf.equal(inputs, 0), paddings, position_code)
-
+                #position embed
+                maxlen = int(inputs.get_shape()[-1])
                 if embedLayerParams.flag_sinusoid:
                         encoding += positional_encoding(
                                         inputs=position_code,

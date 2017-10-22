@@ -7,14 +7,13 @@ from real2real.layers.common_layers import semantic_position_embedding,embedding
 from real2real.layers.attention_layers import target_attention
 from pydoc import locate
 
-def text_conv_encoder(inputs,vocab_size,multi_cnn_params,maxlen,scope,is_training,is_dropout,reuse):
+def text_conv_encoder(inputs,vocab_size,multi_cnn_params,scope,is_training,is_dropout,reuse):
         with tf.variable_scope(scope,reuse=reuse):
                 if len(inputs.get_shape())==2:
                         embed = semantic_position_embedding(
                                            inputs=inputs,
                                            vocab_size=vocab_size,
                                            is_training=is_training,
-                                           maxlen=maxlen,
                                            scope='embedding')
                 else:
                         embed = inputs                 
@@ -39,7 +38,6 @@ def text_atten_encoder(inputs,query,vocab_size,multi_cnn_params,maxlen,scope,is_
                                            inputs=inputs,
                                            vocab_size=vocab_size,
                                            is_training=is_training,
-                                           maxlen=maxlen,
                                            scope='embedding')
                 else:
                         embed = inputs

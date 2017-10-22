@@ -8,13 +8,15 @@ class baseLayerParams:
 		
 class convLayerParams(baseLayerParams):
         filter_nums  = 128
+        token_cnn_param = [3,1,1]
+        sentence_cnn_param = [1,1,1]
 
 class fullLayerParams(baseLayerParams):
         hidden_units  = 128
         mlp_layers = 0
 
 class attentionLayerParams(baseLayerParams):
-        pass
+        mlp_full_conn = True
 
 class embedLayerParams(baseLayerParams):
         flag_sinusoid = True     
@@ -40,11 +42,12 @@ class ctrRankModelParams(embedLayerParams,fullLayerParams,convLayerParams,regres
         tag_size = 130000
         source_maxlen = 40
 
-class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,multiClsModelParams):
+class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attentionLayerParams,multiClsModelParams):
         source_vocab_size = 10000
         target_vocab_size = 35
         title_maxlen = 30
         content_maxlen = 3000
+        mode = 'content'
 
 
 

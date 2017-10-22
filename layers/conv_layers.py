@@ -27,7 +27,11 @@ def multiLayer_conv_strip(inputs,multi_cnn_params,scope_name,is_training,is_drop
                         
         return  next_input 
 
-def strip_conv(inputs,kernel_size,stride_step,scope_name,is_training):
+def strip_conv(inputs,kernel_size,stride_step,scope_name,is_training,is_dropout):
+	inputs = tf.contrib.layers.dropout(
+                                           inputs=inputs,
+                                           keep_prob=convLayerParams.dropout_rate,
+                                           is_training=is_dropout)
         static_shape  = inputs.get_shape()
         with tf.variable_scope(scope_name,reuse=None):
                 filter_kernels = tf.get_variable('kernel', shape=[kernel_size,static_shape[2],convLayerParams.filter_nums],trainable=is_training)
@@ -45,14 +49,14 @@ def strip_conv(inputs,kernel_size,stride_step,scope_name,is_training):
                         cnn_output = tf.where(tf.equal(cnn_mask, 0), paddings, cnn_output) # (h*N, T_q, T_k)
         return cnn_output
  
-def conv_to_full_layer(inputs,scope_name,output_dim=convLayerParams.filter_nums,is_training=True,reuse=None):
+def conv_to_full_layer(inputs,scope_name,output_dim=convLayerParams.filter_nums,is_training=True):
 
         inputs = tf.contrib.layers.dropout(
                                            inputs=inputs,
                                            keep_prob=convLayerParams.dropout_rate,
                                            is_training=is_dropout)
         static_shape  = inputs.get_shape()
-        with tf.variable_scope(scope_name,reuse=reuse):
+        with tf.variable_scope(scope_name,reuse=None):
                 filter_kernels = tf.get_variable('kernel', shape=[static_shape[1],static_shape[2],output_dim],trainable=is_training)
                 cnn_bias      = tf.get_variable('bias'  , shape=(output_dim,), initializer=tf.constant_initializer(0),trainable=is_training)
                 cnn_output  = tf.nn.conv1d(inputs, filter_kernels,stride=1, padding='VALID')+ cnn_bias

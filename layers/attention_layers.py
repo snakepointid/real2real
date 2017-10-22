@@ -13,7 +13,7 @@ def target_attention(inputs,query,scope_name,is_training,is_dropout):
         inputs N*SL*WD
         query m*QD
         '''
-        if convLayerParams.norm:        
+        if attentionLayerParams.norm:        
                 norm_inputs = layer_norm(inputs)
         else:
                 norm_inputs = inputs

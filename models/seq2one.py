@@ -34,7 +34,6 @@ class StackAttenCls(multiClsModel):
                                                        reuse=None) #N,FN
                         #content encoding
                         split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
-
                         content_encoding = sentence_encoder(
                                                        inputs=split_content,
                                                        query=token_context,
@@ -44,9 +43,8 @@ class StackAttenCls(multiClsModel):
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
                                                        reuse=True)#N*ST,FN
-                        
                         stack_content = stack_short_encode(content_encoding,sentence_num)#N,ST,FN
-                        #target to sentence embedding
+			#target to sentence embedding
                         sentence_context = tf.get_variable('sentence_context',
                                                        dtype=tf.float32,
                                                        shape=[newsClsModelParams.target_vocab_size, embedLayerParams.embedding_dim],

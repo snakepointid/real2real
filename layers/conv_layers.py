@@ -65,5 +65,5 @@ def conv_to_full_layer(inputs,scope_name,is_training,is_dropout):
                                            keep_prob=convLayerParams.dropout_rate,
                                            is_training=is_dropout)
 
-        return dropout_cnn
+        return tf.reshape(dropout_cnn,[-1,convLayerParams.filter_nums])
  

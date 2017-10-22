@@ -54,7 +54,8 @@ def text_atten_encoder(inputs,query,vocab_size,multi_cnn_params,scope,is_trainin
                                            inputs=conv_out,
                                            query=query,
                                            scope_name="target_atten",
-                                           is_training=is_training) #N,m,WD
+                                           is_training=is_training,
+                                           is_dropout=is_dropout) #N,m,WD
 
                 full_layer = conv_to_full_layer(
                                            inputs=atten_layer,

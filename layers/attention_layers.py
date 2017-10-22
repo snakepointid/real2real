@@ -6,29 +6,27 @@ from real2real.app.params import attentionLayerParams
 
 from pydoc import locate
 
-def target_attention(inputs,query,scope_name,is_training):
-        if len(inputs.get_shape())==3:
-                return target_attention_3d(inputs,query,scope_name,is_training)
-        elif len(inputs.get_shape())==4:
-                return target_attention_4d(inputs,query,scope_name,is_training)
-        else:
-                raise ValueError("the rank of inputs must be 3 or 4")        
+activation_fn = locate(attentionLayerParams.activation_fn)
 
-def target_attention_3d(inputs,query,scope_name,is_training):
+def target_attention(inputs,query,scope_name,is_training,is_dropout):
         '''
         inputs N*SL*WD
         query m*QD
         '''
+        if convLayerParams.norm:        
+                norm_inputs = layer_norm(inputs)
+        else:
+                norm_inputs = inputs
+
         query_shape = query.get_shape()
         if len(query_shape)==2:
                 query = tf.tile(tf.expand_dims(query,0),[tf.shape(inputs)[0],1,1]) # (N, m, QD)
 
-        activation_fn = locate(attentionLayerParams.activation_fn)
-        out_dim = int(query.get_shape()[2])
+        output_dim = int(query.get_shape()[2])
         with tf.variable_scope(scope_name):
                 # Linear projections
-                K = tf.layers.dense(inputs, out_dim, activation=activation_fn) # (N, SL, QD)
-                V = tf.layers.dense(inputs, out_dim, activation=activation_fn) # (N, SL, QD)
+                K = tf.layers.dense(norm_inputs, output_dim, activation=activation_fn) # (N, SL, QD)
+                V = tf.layers.dense(norm_inputs, output_dim, activation=activation_fn) # (N, SL, QD)
                 Q = query # (N, m, QD)
                 # Multiplication
                 weights =  tf.matmul(Q,tf.transpose(K,[0,2,1])) # (N,m,SL)
@@ -40,21 +38,24 @@ def target_attention_3d(inputs,query,scope_name,is_training):
                         weights = tf.where(tf.equal(mask, 0), paddings, weights)
                 # Activation
                 weights = tf.nn.softmax(weights) # (N,m,SL)
+                #dropout
+                weights = tf.contrib.layers.dropout(
+                                           inputs=weights,
+                                           keep_prob=attentionLayerParams.dropout_rate,
+                                           is_training=is_dropout)
                 # Weighted sum
                 outputs = tf.matmul(weights, V) # (N,m,QD)
 
                 if attentionLayerParams.direct_cont:
                         # Residual connection
                         outputs += query# (N,m,QD)
-                if attentionLayerParams.norm:
-                        # Normalize
-                        outputs = layer_norm(outputs) # (N,m,QD)
                 #sentence mask
                 if attentionLayerParams.zero_pad:
                         mask = tf.sign(tf.reduce_sum(tf.abs(inputs), axis=[1,2])) #N 
                         mask = tf.tile(tf.expand_dims(tf.expand_dims(mask,1),1),[1,tf.shape(outputs)[1],tf.shape(outputs)[2]])#(N,m,QD)
                         paddings = tf.zeros_like(outputs)
                         outputs = tf.where(tf.equal(mask, 0), paddings, outputs)
+
                 return outputs
 
 def target_attention_4d(inputs,query,scope_name,is_training):
@@ -70,12 +71,12 @@ def target_attention_4d(inputs,query,scope_name,is_training):
 
         activation_fn = locate(attentionLayerParams.activation_fn)
 
-        out_dim = int(reshaped_query.get_shape()[3])
+        output_dim = int(reshaped_query.get_shape()[3])
 
         with tf.variable_scope(scope_name):
                 # Linear projections
-                K = tf.layers.dense(inputs, out_dim, activation=activation_fn) # (N, SL, m, QD)
-                V = tf.layers.dense(inputs, out_dim, activation=activation_fn) # (N, SL, m, QD)
+                K = tf.layers.dense(inputs, output_dim, activation=activation_fn) # (N, SL, m, QD)
+                V = tf.layers.dense(inputs, output_dim, activation=activation_fn) # (N, SL, m, QD)
                 Q = reshaped_query # (N,SL, m, QD)
 
                 # Multiplication

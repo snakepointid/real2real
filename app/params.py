@@ -4,7 +4,7 @@ class baseLayerParams:
         zero_pad=True
         scale=True
         direct_cont=True
-        norm=True
+        norm=False
 		
 class convLayerParams(baseLayerParams):
         filter_nums  = 128
@@ -47,7 +47,7 @@ class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attent
         target_vocab_size = 35
         title_maxlen = 30
         content_maxlen = 3000
-        mode = 'content'
+        mode = 'title'
 
 class appParams(baseModelParams):
 	newsClsModel = 0

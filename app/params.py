@@ -1,5 +1,5 @@
 class baseLayerParams:
-        dropout_rate  = 0.5
+        dropout_rate  = 0.7
         activation_fn ="tensorflow.nn.relu"
         zero_pad=True
         scale=True

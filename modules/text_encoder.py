@@ -2,7 +2,7 @@
 #/usr/bin/python2
 
 import tensorflow as tf
-from real2real.layers.conv_layers import multiLayer_conv_strip,conv1d_to_full_layer
+from real2real.layers.conv_layers import multiLayer_conv_strip,conv_to_full_layer
 from real2real.layers.common_layers import semantic_position_embedding,embedding
 from real2real.layers.attention_layers import target_attention
 from pydoc import locate
@@ -25,7 +25,7 @@ def text_conv_encoder(inputs,vocab_size,multi_cnn_params,scope,is_training,is_dr
                                            is_training=is_training,
                                            is_dropout=is_dropout)
                          
-                full_layer = conv1d_to_full_layer(
+                full_layer = conv_to_full_layer(
                                            inputs=conv_out,
                                            scope_name="conv2full",
                                            is_training=is_training)
@@ -55,5 +55,10 @@ def text_atten_encoder(inputs,query,vocab_size,multi_cnn_params,scope,is_trainin
                                            query=query,
                                            scope_name="target_atten",
                                            is_training=is_training) #N,m,WD
+
+                full_layer = conv_to_full_layer(
+                                           inputs=atten_layer,
+                                           scope_name="conv2full", 
+                                           is_training=is_training)
                  
-        return atten_layer
+        return full_layer

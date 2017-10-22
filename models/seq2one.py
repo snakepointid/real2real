@@ -59,7 +59,7 @@ class StackAttenCls(multiClsModel):
                                                        scope='sentence',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
-                                                       reuse=None) #N,m,FN
+                                                       reuse=None) #N,FN
                         #content encoding
                         split_content,sentence_num = split_long_text(self.content_source,newsClsModelParams.title_maxlen)
 
@@ -71,9 +71,9 @@ class StackAttenCls(multiClsModel):
                                                        scope='sentence',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
-                                                       reuse=True)#N*ST,m,FN
+                                                       reuse=True)#N*ST,FN
                         
-                        stack_content = stack_short_encode(content_encoding,sentence_num)#N,ST,m,FN
+                        stack_content = stack_short_encode(content_encoding,sentence_num)#N,ST,FN
                         #target to sentence embedding
                         sentence_context = tf.get_variable('sentence_context',
                                                        dtype=tf.float32,
@@ -89,7 +89,7 @@ class StackAttenCls(multiClsModel):
                                                        scope='doc',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
-                                                       reuse=None) ##N*m,m,FN      
+                                                       reuse=None) ##N,FN      
                         #full_layer
                         if newsClsModelParams.mode == 'content':
                                     full_layer = content_encoding 
@@ -123,7 +123,7 @@ class DirectAttenCls(multiClsModel):
                                                        scope='sentence',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
-                                                       reuse=None) #N,m,FN
+                                                       reuse=None) #N,FN
                          
                         content_encoding = text_atten_encoder(
                                                        inputs=self.content_source,
@@ -133,7 +133,7 @@ class DirectAttenCls(multiClsModel):
                                                        scope='sentence',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
-                                                       reuse=True)#N*ST,m,FN
+                                                       reuse=True)#N,FN
 
                         #full_layer
                         if newsClsModelParams.mode == 'content':

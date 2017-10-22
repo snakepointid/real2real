@@ -45,7 +45,12 @@ def strip_conv(inputs,kernel_size,stride_step,scope_name,is_training):
                         cnn_output = tf.where(tf.equal(cnn_mask, 0), paddings, cnn_output) # (h*N, T_q, T_k)
         return cnn_output
  
-def conv1d_to_full_layer(inputs,scope_name,output_dim=convLayerParams.filter_nums,is_training=True,reuse=None):
+def conv_to_full_layer(inputs,scope_name,output_dim=convLayerParams.filter_nums,is_training=True,reuse=None):
+
+        inputs = tf.contrib.layers.dropout(
+                                           inputs=inputs,
+                                           keep_prob=convLayerParams.dropout_rate,
+                                           is_training=is_dropout)
         static_shape  = inputs.get_shape()
         with tf.variable_scope(scope_name,reuse=reuse):
                 filter_kernels = tf.get_variable('kernel', shape=[static_shape[1],static_shape[2],output_dim],trainable=is_training)
@@ -55,14 +60,4 @@ def conv1d_to_full_layer(inputs,scope_name,output_dim=convLayerParams.filter_num
         activation_fn = locate(convLayerParams.activation_fn)
 
         return tf.squeeze(activation_fn(cnn_output),1) 
-
-def conv2d_to_full_layer(inputs,scope_name,output_dim=convLayerParams.filter_nums,is_training=True,reuse=None):
-        static_shape  = inputs.get_shape()
-        with tf.variable_scope(scope_name,reuse=reuse):
-                filter_kernels = tf.get_variable('kernel', shape=[static_shape[1],static_shape[2],static_shape[3],output_dim],trainable=is_training)
-                cnn_bias      = tf.get_variable('bias'  , shape=(output_dim,), initializer=tf.constant_initializer(0),trainable=is_training)
-                cnn_output  = tf.nn.conv1d(inputs, filter_kernels,stride=1, padding='VALID')+ cnn_bias
-        
-        activation_fn = locate(convLayerParams.activation_fn)
-        
-        return tf.squeeze(activation_fn(cnn_output),[1,2])
+ 

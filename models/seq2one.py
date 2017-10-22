@@ -92,7 +92,7 @@ class StackAttenCls(multiClsModel):
                                                        reuse=None) ##N*m,m,FN      
                         #full_layer
                         if newsClsModelParams.mode == 'content':
-                                    full_layer = title_encoding 
+                                    full_layer = content_encoding 
                         elif newsClsModelParams.mode == 'title':    
                                     full_layer = title_encoding      
  
@@ -137,7 +137,7 @@ class DirectAttenCls(multiClsModel):
 
                         #full_layer
                         if newsClsModelParams.mode == 'content':
-                                    full_layer = title_encoding 
+                                    full_layer = content_encoding 
                         elif newsClsModelParams.mode == 'title':    
                                     full_layer = title_encoding    
 

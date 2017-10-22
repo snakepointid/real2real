@@ -2,6 +2,8 @@
 #/usr/bin/python2
         
 import tensorflow as tf
+import numpy as np
+
 from real2real.app.params import fullLayerParams
 
 from real2real.layers.common_layers import layer_norm
@@ -12,9 +14,10 @@ def multi_layer_perceptron(inputs,output_dim,is_training,is_dropout):
         activation_fn = locate(fullLayerParams.activation_fn)
 
         if fullLayerParams.inputs_reshape:
-                inputs=tf.reshape(inputs,[tf.shape(inputs)[0],-1])   
+		
+                inputs=tf.reshape(inputs,[-1,int(np.prod(inputs.get_shape()[1:]))])   
                                 
-        elif tf.shape(inputs)[-2]==output_dim:
+        elif len(inputs.get_shape())==3:
                 output_dim = 1
 
         dropout_layer = tf.contrib.layers.dropout(

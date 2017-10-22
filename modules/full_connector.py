@@ -11,6 +11,12 @@ def multi_layer_perceptron(inputs,output_dim,is_training,is_dropout):
     
         activation_fn = locate(fullLayerParams.activation_fn)
 
+        if fullLayerParams.inputs_reshape:
+                inputs=tf.reshape(inputs,[tf.shape(inputs)[0],-1])   
+                                
+        elif tf.shape(inputs)[-2]==output_dim:
+                output_dim = 1
+
         dropout_layer = tf.contrib.layers.dropout(
                                            inputs=inputs,
                                            keep_prob=fullLayerParams.dropout_rate,
@@ -34,3 +40,6 @@ def multi_layer_perceptron(inputs,output_dim,is_training,is_dropout):
         logits  = tf.layers.dense(dropout_layer,output_dim, name="output")
 
         return tf.squeeze(logits)
+
+
+

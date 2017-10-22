@@ -14,9 +14,10 @@ class convLayerParams(baseLayerParams):
 class fullLayerParams(baseLayerParams):
         hidden_units  = 128
         mlp_layers = 0
+        inputs_reshape = False
 
 class attentionLayerParams(baseLayerParams):
-        mlp_full_conn = False
+        pass
 
 class embedLayerParams(baseLayerParams):
         flag_sinusoid = True     

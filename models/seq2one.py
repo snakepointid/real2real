@@ -94,22 +94,14 @@ class StackAttenCls(multiClsModel):
                         if newsClsModelParams.mode == 'content':
                                     full_layer = title_encoding 
                         elif newsClsModelParams.mode == 'title':    
-                                    full_layer = title_encoding 
-                        else:
-                                    pass     
-                        #full connect
-                        if newsClsModelParams.mlp_full_conn:
-                                    self.logits = multi_layer_perceptron(
-                                                         inputs=full_layer,
-                                                         output_dim=1,
-                                                         is_training=self.is_training,
-                                                         is_dropout=self.is_dropout)
-                        else:
-                                    self.logits = conv1d_to_full_layer(
-                                                         inputs=full_layer,
-                                                         scope_name="conv2full",
-                                                         output_dim=newsClsModelParams.target_vocab_size,
-                                                         is_training=self.is_training)       
+                                    full_layer = title_encoding      
+ 
+                        self.logits = multi_layer_perceptron(
+                                             inputs=full_layer,
+                                             output_dim=newsClsModelParams.target_vocab_size,
+                                             is_training=self.is_training,
+                                             is_dropout=self.is_dropout)
+   
 class DirectAttenCls(multiClsModel):
             def _build_(self):
                         # input coding placeholder
@@ -147,20 +139,11 @@ class DirectAttenCls(multiClsModel):
                         if newsClsModelParams.mode == 'content':
                                     full_layer = title_encoding 
                         elif newsClsModelParams.mode == 'title':    
-                                    full_layer = title_encoding 
-                        else:
-                                    pass        
-                        #full connect
-                        if newsClsModelParams.mlp_full_conn:
-                                    self.logits = multi_layer_perceptron(
-                                                         inputs=full_layer,
-                                                         output_dim=1,
-                                                         is_training=self.is_training,
-                                                         is_dropout=self.is_dropout)
-                        else:
-                                    self.logits = conv1d_to_full_layer(
-                                                         inputs=full_layer,
-                                                         scope_name="conv2full",
-                                                         output_dim=newsClsModelParams.target_vocab_size,
-                                                         is_training=self.is_training)  
+                                    full_layer = title_encoding    
+
+                        self.logits = multi_layer_perceptron(
+                                             inputs=full_layer,
+                                             output_dim=newsClsModelParams.target_vocab_size,
+                                             is_training=self.is_training,
+                                             is_dropout=self.is_dropout)  
 

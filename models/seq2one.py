@@ -47,7 +47,7 @@ class NewsClsModel(multiClsModel):
                         full_layer = tf.concat([content_encoding,title_encoding],1)
                                     
                         self.logits = final_mlp_encoder(
-                                             inputs=full_layer,
+                                             inputs=title_encoding,
                                              output_dim=newsClsModelParams.target_vocab_size,
                                              is_training=self.is_training,
                                              is_dropout=self.is_dropout) 

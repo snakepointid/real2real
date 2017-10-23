@@ -48,8 +48,9 @@ class AttenCls(multiClsModel):
                                     full_layer = content_encoding 
                         elif newsClsModelParams.mode == 'title':    
                                     full_layer = title_encoding    
-			else:
-			            full_layer = tf.concat([content_encoding,title_encoding],1)
+                        else:
+                                    full_layer = tf.concat([content_encoding,title_encoding],1)
+                                    
                         self.logits = final_mlp_encoder(
                                              inputs=full_layer,
                                              output_dim=newsClsModelParams.target_vocab_size,

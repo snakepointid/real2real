@@ -8,10 +8,10 @@ activation_fn = locate(convLayerParams.activation_fn)
 
 def multiLayer_conv_strip(inputs,multi_cnn_params,scope_name,is_training,is_dropout,reuse=None):
         
-        if len(inputs.get_shape())!=3:
-                return inputs
-
-        next_input = inputs        
+        next_input = tf.contrib.layers.dropout(
+                                           inputs=inputs,
+                                           keep_prob=convLayerParams.dropout_rate,
+                                           is_training=is_dropout)  
         kernel_size,stride_step,conv_layer_num = multi_cnn_params
         with tf.variable_scope(scope_name,reuse=reuse):
                 for layer_idx in range(conv_layer_num):
@@ -44,11 +44,7 @@ def strip_conv(inputs,kernel_size,stride_step,scope_name,is_training,is_dropout)
                 cnn_output = tf.layers.batch_normalization(cnn_output)
                 
         cnn_output =  activation_fn(cnn_output) 
-        dropout_cnn = tf.contrib.layers.dropout(
-                                           inputs=cnn_output,
-                                           keep_prob=convLayerParams.dropout_rate,
-                                           is_training=is_dropout)
-        return  dropout_cnn
+        return  cnn_output
  
 def conv_to_full_layer(inputs,scope_name,is_training,is_dropout):  
 
@@ -60,10 +56,6 @@ def conv_to_full_layer(inputs,scope_name,is_training,is_dropout):
 
         cnn_output  = tf.nn.conv1d(inputs, filter_kernels,stride=1, padding='VALID')+ cnn_bias
         cnn_output =  activation_fn(cnn_output) 
-        dropout_cnn = tf.contrib.layers.dropout(
-                                           inputs=cnn_output,
-                                           keep_prob=convLayerParams.dropout_rate,
-                                           is_training=is_dropout)
 
-        return tf.reshape(dropout_cnn,[-1,convLayerParams.filter_nums])
+        return tf.reshape(cnn_output,[-1,convLayerParams.filter_nums])
  

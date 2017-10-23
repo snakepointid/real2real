@@ -46,7 +46,7 @@ class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attent
         target_vocab_size = 35
         title_maxlen = 30
         content_maxlen = 3000
-        mode = 'content'
+        mode = 'title'
 
 class appParams(baseModelParams):
 	newsClsModel = 0

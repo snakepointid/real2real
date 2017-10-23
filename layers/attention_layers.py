@@ -13,11 +13,6 @@ def target_attention(inputs,query,scope_name,is_training,is_dropout):
         inputs N*SL*WD
         query m*QD
         '''
-        if attentionLayerParams.norm:        
-                norm_inputs = layer_norm(inputs)
-        else:
-                norm_inputs = inputs
-
         query_shape = query.get_shape()
         if len(query_shape)==2:
                 query = tf.tile(tf.expand_dims(query,0),[tf.shape(inputs)[0],1,1]) # (N, m, QD)
@@ -25,8 +20,8 @@ def target_attention(inputs,query,scope_name,is_training,is_dropout):
         output_dim = int(query.get_shape()[2])
         with tf.variable_scope(scope_name):
                 # Linear projections
-                K = tf.layers.dense(norm_inputs, output_dim, activation=activation_fn) # (N, SL, QD)
-                V = tf.layers.dense(norm_inputs, output_dim, activation=activation_fn) # (N, SL, QD)
+                K = tf.layers.dense(inputs, output_dim, activation=activation_fn) # (N, SL, QD)
+                V = tf.layers.dense(inputs, output_dim, activation=activation_fn) # (N, SL, QD)
                 Q = query # (N, m, QD)
                 # Multiplication
                 weights =  tf.matmul(Q,tf.transpose(K,[0,2,1])) # (N,m,SL)
@@ -44,7 +39,9 @@ def target_attention(inputs,query,scope_name,is_training,is_dropout):
                 if attentionLayerParams.direct_cont:
                         # Residual connection
                         outputs += query# (N,m,QD)
-                #sentence mask
+		if attentionLayerParams.norm:
+			outputs = layer_norm(outputs)
+		#sentence mask
                 if attentionLayerParams.zero_pad:
                         mask = tf.sign(tf.reduce_sum(tf.abs(inputs), axis=[1,2])) #N 
                         mask = tf.tile(tf.expand_dims(tf.expand_dims(mask,1),1),[1,tf.shape(outputs)[1],tf.shape(outputs)[2]])#(N,m,QD)

@@ -20,11 +20,13 @@ def LoadTrainFeeds():
 		source_testa,tag_testa,target_testa=[],[],[]
 		cache={'training':[]}
 		for line in reader:
+				if len(line)!=5:
+					continue
 				rdv,tag_code,source,target,flag=line
 				source=source.split('|')
 				if len(source)<4:
 					continue
-				source=source[:ctrRankModelParams.source_maxlen]+[0]*(ctrRankModelParams.source_maxlen-len(source))
+				source=source[:ctrRankModelParams.title_maxlen]+[0]*(ctrRankModelParams.title_maxlen-len(source))
 
 				if flag=='test':
 						if abs(float(rdv))<ctrRankModelParams.test_rate:
@@ -90,7 +92,7 @@ def LoadPredictFeeds():
 						source=["%s"%zh2code.get(char,"1") for char in quick_sentence_segment(title.decode('utf-8'))]
 						if len(source)<4:
 								continue		
-						source=source[:ctrRankModelParams.source_maxlen]+[0]*(ctrRankModelParams.source_maxlen-len(source))		
+						source=source[:ctrRankModelParams.title_maxlen]+[0]*(ctrRankModelParams.title_maxlen-len(source))		
 				except:
 						continue
 				raw='%s\t%s\t%s'%(url,recalltag,title)

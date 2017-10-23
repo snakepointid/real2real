@@ -46,7 +46,9 @@ class regressModelParams(baseModelParams):
 class ctrRankModelParams(embedLayerParams,fullLayerParams,convLayerParams,regressModelParams):
         source_vocab_size = 10000
         tag_size = 130000
-        title_maxlen = 40
+        title_maxlen = 30
+        test_rate  = 0.05
+        token_cnn_params = [5,2,1]
 
 class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attentionLayerParams,multiClsModelParams):
         source_vocab_size = 10000

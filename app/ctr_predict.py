@@ -27,39 +27,39 @@ def training():
                 cache = LoadTrainFeeds()
                 #compute the initial pearson coef
 		text_code_batch,tag_code_batch,ctr_batch = cache['testa']   
-                probs = sess.run(model.logits,feed_dict={
-                                                        model.source:text_code_batch,                                            
-                                                        model.tag:tag_code_batch,
+		probs = sess.run(model.logits,feed_dict={
+                                                        model.title_source:text_code_batch,                                            
+                                                        model.recall_tag:tag_code_batch,
                                                         model.is_dropout:False})
                 old_pc = regression_model_eval(ctr_batch,probs,'testa',False)
 
                 for epoch in range(baseModelParams.num_epochs):
                         for text_code_batch,tag_code_batch,ctr_batch in cache['training']:
                                 _,gs=sess.run([model.train_op,model.global_step],feed_dict={
-                                                                model.source:text_code_batch ,
-                                                                model.tag:tag_code_batch ,
+                                                                model.title_source:text_code_batch ,
+                                                                model.recall_tag:tag_code_batch ,
                                                                 model.target:ctr_batch,
 								model.is_dropout:True})
 	 
                         text_code_batch,tag_code_batch,ctr_batch = cache['train']	
                         probs = sess.run(model.logits,feed_dict={
-                                                model.source:text_code_batch,                                            
-                            			model.tag:tag_code_batch,
+                                                model.title_source:text_code_batch,                                            
+                            			model.recall_tag:tag_code_batch,
         			                model.is_dropout:False})
 
                         _ = regression_model_eval(ctr_batch,probs,'train')
                         text_code_batch,tag_code_batch,ctr_batch = cache['valid']   
                         probs = sess.run(model.logits,feed_dict={
-                                            			model.source:text_code_batch,                                            
-                                                                model.tag:tag_code_batch,
+                                            			model.title_source:text_code_batch,                                            
+                                                                model.recall_tag:tag_code_batch,
                                                                 model.is_dropout:False})
 
                         _ = regression_model_eval(ctr_batch,probs,'valid')
 
                         text_code_batch,tag_code_batch,ctr_batch = cache['testa']   
                         probs = sess.run(model.logits,feed_dict={
-                                                                model.source:text_code_batch,                                            
-                                                                model.tag:tag_code_batch,
+                                                                model.title_source:text_code_batch,                                            
+                                                                model.recall_tag:tag_code_batch,
                                                                 model.is_dropout:False})
 
                         new_pc = regression_model_eval(ctr_batch,probs,'testa')
@@ -84,10 +84,10 @@ def inference():
                 model.global_saver.restore(sess,FLAGS.restore_path+"/global_model")
                 cache = LoadPredictFeeds()
     
-                for raw_batch,source_batch,tag_batch in cache:
+                for raw_batch,title_source_batch,tag_batch in cache:
                         probs=sess.run(model.logits,feed_dict={
-                                                        model.source:source_batch ,
-                                                        model.tag:tag_batch ,
+                                                        model.title_source:title_source_batch ,
+                                                        model.recall_tag:tag_batch ,
                                                         model.is_dropout:False}) 
 
                         for idx,raw in enumerate(raw_batch):

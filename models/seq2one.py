@@ -57,7 +57,7 @@ class CtrRankModel(regressModel):
                         # input coding placeholder
                         self.title_source = tf.placeholder(shape=(None, ctrRankModelParams.title_maxlen),dtype=tf.int64)
                         self.recall_tag = tf.placeholder(shape=(None,),dtype=tf.int64)
-                        self.target = tf.placeholder(shape=(None, ),dtype=tf.int32)
+                        self.target = tf.placeholder(shape=(None, ),dtype=tf.float32)
                         #target to token embedding
                         tag_embed = tag_embedding(
                                                 inputs=tf.reshape(self.recall_tag,[-1,1]),
@@ -76,8 +76,8 @@ class CtrRankModel(regressModel):
                                                        reuse=None) #N,1,FN
                                     
                         self.logits = final_mlp_encoder(
-                                             inputs=full_layer,
-                                             output_dim=ctrRankModelParams.target_vocab_size,
+                                             inputs=title_encoding,
+                                             output_dim=1,
                                              is_training=self.is_training,
                                              is_dropout=self.is_dropout)                                               
 

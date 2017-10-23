@@ -38,7 +38,7 @@ class baseModelParams:
 class multiClsModelParams(baseModelParams):
         flag_label_smooth = True
         target_vocab_size = 35
-        loss_softmax=True
+        loss_softmax=False
         
 class regressModelParams(baseModelParams):
         loss_rmse = True     
@@ -46,14 +46,14 @@ class regressModelParams(baseModelParams):
 class ctrRankModelParams(embedLayerParams,fullLayerParams,convLayerParams,regressModelParams):
         source_vocab_size = 10000
         tag_size = 130000
-        source_maxlen = 40
+        title_maxlen = 40
 
 class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attentionLayerParams,multiClsModelParams):
         source_vocab_size = 10000
         target_vocab_size = 35
         title_maxlen = 30
         content_maxlen = 3000
-        mode = 'both'
+        mode = 'title'
 
 class appParams(baseModelParams):
 	newsClsModel = 0

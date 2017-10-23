@@ -6,7 +6,7 @@ from itertools import groupby
 from operator import itemgetter
 import cPickle as pickle
 from real2real.preprocess.sentence_process import quick_sentence_segment 
-from real2real.app.params import convRankParams
+from real2real.app.params import ctrRankModelParams
 
 def LoadData():
 	for line in sys.stdin:
@@ -24,16 +24,16 @@ def LoadTrainFeeds():
 				source=source.split('|')
 				if len(source)<4:
 					continue
-				source=source[:convRankParams.source_maxlen]+[0]*(convRankParams.source_maxlen-len(source))
+				source=source[:ctrRankModelParams.source_maxlen]+[0]*(ctrRankModelParams.source_maxlen-len(source))
 
 				if flag=='test':
-						if abs(float(rdv))<convRankParams.test_rate:
+						if abs(float(rdv))<ctrRankModelParams.test_rate:
 								source_testa.append(source)
 								tag_testa.append(tag_code)
 								target_testa.append(target)		
 						continue
 						
-				if abs(float(rdv))<convRankParams.test_rate:
+				if abs(float(rdv))<ctrRankModelParams.test_rate:
 						source_valid.append(source)
 						tag_valid.append(tag_code)
 						target_valid.append(target)
@@ -41,12 +41,12 @@ def LoadTrainFeeds():
 						source_batch.append(source)
 		 				tag_batch.append(tag_code)
 		 				target_batch.append(target)
-		 				if abs(float(rdv))>(1-convRankParams.test_rate):
+		 				if abs(float(rdv))>(1-ctrRankModelParams.test_rate):
  								source_train.append(source)
 								tag_train.append(tag_code)
 								target_train.append(target)
 
-				if len(source_batch)==convRankParams.batch_size:
+				if len(source_batch)==ctrRankModelParams.batch_size:
 						source_batch=np.array(source_batch,dtype=np.int64)
 						tag_batch=np.array(tag_batch,dtype=np.int64)
 						target_batch=np.array(target_batch,dtype=np.float32)
@@ -90,14 +90,14 @@ def LoadPredictFeeds():
 						source=["%s"%zh2code.get(char,"1") for char in quick_sentence_segment(title.decode('utf-8'))]
 						if len(source)<4:
 								continue		
-						source=source[:convRankParams.source_maxlen]+[0]*(convRankParams.source_maxlen-len(source))		
+						source=source[:ctrRankModelParams.source_maxlen]+[0]*(ctrRankModelParams.source_maxlen-len(source))		
 				except:
 						continue
 				raw='%s\t%s\t%s'%(url,recalltag,title)
 				raw_batch.append(raw)
 				source_batch.append(source)
 				tag_batch.append(tag_code)
-				if len(source_batch)==convRankParams.batch_size:
+				if len(source_batch)==ctrRankModelParams.batch_size:
 						source_batch=np.array(source_batch,dtype=np.int64)
 						tag_batch=np.array(tag_batch,dtype=np.int64)
 						predict_cache=[raw_batch,source_batch,tag_batch]
@@ -112,4 +112,4 @@ def LoadPredictFeeds():
 
 if __name__ =="__main__":
 	cache=LoadTrainFeeds()
-	print ("train nums is %s\ttest nums is %s"%(len(cache['training'])*convRankParams.batch_size,len(cache['valid'][1])))
+	print ("train nums is %s\ttest nums is %s"%(len(cache['training'])*ctrRankModelParamss.batch_size,len(cache['valid'][1])))

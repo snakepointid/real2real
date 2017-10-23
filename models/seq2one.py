@@ -60,7 +60,7 @@ class CtrRankModel(regressModel):
                         self.target = tf.placeholder(shape=(None, ),dtype=tf.float32)
                         #target to token embedding
                         tag_embed = tag_embedding(
-                                                inputs=tf.reshape(self.target,[-1,1]),
+                                                inputs=tf.reshape(self.recall_tag,[-1,1]),
                                                 vocab_size=ctrRankModelParams.tag_size,
                                                 is_training=self.is_training,
                                                 scope='recalltag')

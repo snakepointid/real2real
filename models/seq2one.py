@@ -3,7 +3,7 @@ import tensorflow as tf
 
 from real2real.models.base_model import regressModel,multiClsModel
 
-from real2real.modules.text_encoder import sentence_encoder,doc_encoder
+from real2real.modules.text_encoder import sentence_encoder
 from real2real.modules.full_connector import final_mlp_encoder
 
 from real2real.utils.shape_ops import *

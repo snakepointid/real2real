@@ -9,7 +9,6 @@ class baseLayerParams:
 class convLayerParams(baseLayerParams):
         filter_nums  = 128
         token_cnn_params = [3,1,1]
-        sentence_cnn_params = [1,1,1]
 
 class fullLayerParams(baseLayerParams):
         hidden_units  = 128
@@ -47,7 +46,7 @@ class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attent
         target_vocab_size = 35
         title_maxlen = 30
         content_maxlen = 3000
-        mode = 'title'
+        mode = 'content'
 
 class appParams(baseModelParams):
 	newsClsModel = 0

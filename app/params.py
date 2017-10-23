@@ -12,7 +12,7 @@ class convLayerParams(baseLayerParams):
 
 class fullLayerParams(baseLayerParams):
         hidden_units  = 128
-        mlp_layers = 0
+        mlp_layers = 1
 
 class attentionLayerParams(baseLayerParams):
         pass
@@ -31,7 +31,7 @@ class baseModelParams:
 class multiClsModelParams(baseModelParams):
         flag_label_smooth = True
         target_vocab_size = 35
-        loss_softmax=True
+        loss_softmax=False
         
 class regressModelParams(baseModelParams):
         loss_rmse = True     
@@ -46,7 +46,7 @@ class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attent
         target_vocab_size = 35
         title_maxlen = 30
         content_maxlen = 3000
-        mode = 'title'
+        mode = 'both'
 
 class appParams(baseModelParams):
 	newsClsModel = 0

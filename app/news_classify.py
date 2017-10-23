@@ -6,7 +6,7 @@ import argparse
 import os
 sys.path.insert(0,"..")
 sys.path.append(os.getcwd())
-from real2real.models.seq2one import AttenCls
+from real2real.models.seq2one import NewsClsModel
 from real2real.app.params import appParams
 from real2real.preprocess.news_cls_feeds import *
 from real2real.utils.info_layout import *
@@ -14,7 +14,7 @@ from real2real.utils.info_layout import *
 def training():
         gpu_options = tf.GPUOptions(allow_growth = True)
 
-        model = AttenCls(is_training=True)
+        model = NewsClsModel(is_training=True)
 
         startTime = time.time()
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
@@ -22,7 +22,7 @@ def training():
                         model.global_saver.restore(sess,FLAGS.restore_path+"/global_model")
                 except:			
                         sess.run(model.init_op)
-			print("initial the graph")
+                        print("initial the graph")
 		        #list all trainable variables the graph hold 
                 layout_trainable_variables()
                 cache = LoadTrainFeeds()
@@ -34,30 +34,30 @@ def training():
                                                                 model.title_source:title_code_batch ,
                                                                 model.content_source:content_code_batch ,
                                                                 model.target:label_batch,
-								model.is_dropout:True})
+                                                                model.is_dropout:True})
 	 
                         title_code_batch,content_code_batch,label_batch = cache['train']	
                         train_acc,train_loss = sess.run([model.acc,model.mean_loss],feed_dict={
                                                                 model.title_source:title_code_batch,                                            
-                            			                model.content_source:content_code_batch,
-								model.target:label_batch,
-        			                                model.is_dropout:False})
+                                                                model.content_source:content_code_batch,
+                                                                model.target:label_batch,
+                                                                model.is_dropout:False})
 
-                	train_num=len(label_batch)
+                        train_num=len(label_batch)
                         title_code_batch,content_code_batch,label_batch = cache['valid']   
                         valid_acc,valid_loss = sess.run([model.acc,model.mean_loss],feed_dict={
-                                            			model.title_source:title_code_batch,                                            
+                                                                model.title_source:title_code_batch,                                            
                                                                 model.content_source:content_code_batch,
-								model.target:label_batch,
+                                                                model.target:label_batch,
                                                                 model.is_dropout:False})
-			valid_num=len(label_batch)
+                        valid_num=len(label_batch)
                         print("Iteration:%s\ttrain num:%s\ttrain acc:%s\ttrain loss:%s\tvalid num:%s\tvalid acc:%s\tvalid loss:%s"%(gs,train_num,train_acc,train_loss,valid_num,valid_acc,valid_loss))  
                         endTime = time.time()
                         if endTime-startTime>3600:
                                 print ("save the whole model")
                                 model.global_saver.save(sess,FLAGS.save_path+"/global_model")
                                 startTime = endTime
-		print ("save the whole model")
+                print ("save the whole model")
                 model.global_saver.save(sess,FLAGS.save_path+"/global_model")
  
 def evaluation():
@@ -65,7 +65,7 @@ def evaluation():
 
 def inference():
         gpu_options = tf.GPUOptions(allow_growth = True)
-        model = ConvCls(is_training=False)
+        model = NewsClsModel(is_training=False)
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
                 model.global_saver.restore(sess,FLAGS.restore_path+"/global_model")
                 cache = LoadPredictFeeds()

@@ -6,7 +6,7 @@ import argparse
 import os
 sys.path.insert(0,"..")
 sys.path.append(os.getcwd())
-from real2real.models.seq2one import ConvRank
+from real2real.models.seq2one import CtrRankModel
 from real2real.app.params import baseModelParams
 from real2real.preprocess.ctr_predict_feeds import *
 from real2real.utils.info_layout import *
@@ -14,7 +14,7 @@ from real2real.utils.metrics import regression_model_eval
 
 def training():
         gpu_options = tf.GPUOptions(allow_growth = True)
-        model = ConvRank(is_training=True)
+        model = CtrRankModel(is_training=True)
         startTime = time.time()
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
                 try:
@@ -79,7 +79,7 @@ def evaluation():
 
 def inference():
         gpu_options = tf.GPUOptions(allow_growth = True)
-        model = ConvRank(is_training=False)
+        model = CtrRankModel(is_training=False)
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
                 model.global_saver.restore(sess,FLAGS.restore_path+"/global_model")
                 cache = LoadPredictFeeds()

@@ -18,9 +18,16 @@ class attentionLayerParams(baseLayerParams):
         pass
 
 class embedLayerParams(baseLayerParams):
+        
+        embedding_dim = 128
+
+class textModuleParams:
+        stride_cnn = True
+        target_atten = True
+
+class entityEmbedModuleParams(embedLayerParams):
         flag_sinusoid = True     
         flag_position_embed = True
-        embedding_dim = 128
 
 class baseModelParams:
         test_rate  = 0.005

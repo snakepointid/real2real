@@ -47,7 +47,7 @@ class NewsClsModel(multiClsModel):
                         full_layer = tf.concat([content_encoding,title_encoding],1)
                                     
                         self.logits = final_mlp_encoder(
-                                             inputs=title_encoding,
+                                             inputs=full_layer,
                                              output_dim=newsClsModelParams.target_vocab_size,
                                              is_training=self.is_training,
                                              is_dropout=self.is_dropout) 
@@ -60,7 +60,7 @@ class CtrRankModel(regressModel):
                         self.target = tf.placeholder(shape=(None, ),dtype=tf.float32)
                         #target to token embedding
                         tag_embed = tag_embedding(
-                                                inputs=tf.reshape(self.recall_tag,[-1,1]),
+                                                inputs=tf.reshape(,[-1,1]),
                                                 vocab_size=ctrRankModelParams.tag_size,
                                                 is_training=self.is_training,
                                                 scope='recalltag')

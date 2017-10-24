@@ -22,7 +22,7 @@ class embedLayerParams(baseLayerParams):
 
 class textModuleParams:
         stride_cnn = True
-        target_atten = True
+        target_atten = False
 
 class entityEmbedModuleParams(embedLayerParams):
         flag_sinusoid = True     
@@ -46,7 +46,7 @@ class ctrRankModelParams(embedLayerParams,fullLayerParams,convLayerParams,regres
         tag_size = 130000
         title_maxlen = 30
         test_rate  = 0.05
-        title_cnn_params = [5,2,1]
+        title_cnn_params = [5,2,3]
 
 
 class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attentionLayerParams,multiClsModelParams):

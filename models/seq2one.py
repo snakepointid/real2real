@@ -61,7 +61,7 @@ class NewsClsModel(multiClsModel):
                         elif newsClsModelParams.final_layer == "content":
                                     full_layer = content_encoding  
                         else:                        
-                                    full_layer = tf.concat([content_encoding,title_encoding],1)
+                                    full_layer = tf.concat([content_encoding,title_encoding],2)
                                     
                         self.logits = final_mlp_encoder(
                                              inputs=full_layer,
@@ -96,10 +96,11 @@ class CtrRankModel(regressModel):
                                                        scope='title',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
-                                                       reuse=None) #N,FN
-                                    
+                                                       reuse=None) #N,s,FN
+
+                        full_layer = tf.concat([title_encoding,tag_embed],1)            
                         self.logits = final_mlp_encoder(
-                                             inputs=title_encoding,
+                                             inputs=full_layer,
                                              output_dim=1,
                                              is_training=self.is_training,
                                              is_dropout=self.is_dropout)                                               

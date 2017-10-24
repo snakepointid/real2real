@@ -8,7 +8,7 @@ sys.path.insert(0,"..")
 sys.path.append(os.getcwd())
 from real2real.models.entity_embed import TokenEmbed
 from real2real.app.params import appParams
-from real2real.preprocess.news_cls_feeds import *
+from real2real.preprocess.token_embed_feeds import *
 from real2real.utils.info_layout import *
 
 def training():

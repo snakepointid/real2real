@@ -3,17 +3,19 @@ import tensorflow as tf
 from real2real.models.base_model import multiClsModel
 from real2real.app.params import tokenEmbedModelParams
 
+from real2real.modules.entity_encoder import semantic_position_embedding
+from real2real.modules.full_connector import final_mlp_encoder
 class TokenEmbed(multiClsModel):
             def _build_(self):
                         # input coding placeholder
                         self.pair=tf.placeholder(tf.int32, shape=(None,2))
-                        self.target=tf.placeholder(tf.float32 , shape=(None,))
+                        self.target=tf.placeholder(tf.int32 , shape=(None,))
                         #embedding
                         pair_embed = semantic_position_embedding(
                                                        inputs=self.pair,
                                                        vocab_size=tokenEmbedModelParams.source_vocab_size,
                                                        is_training=self.is_training,
-                                                       position_embed=False
+                                                       position_embed=False,
                                                        reuse=None,
                                                        scope=tokenEmbedModelParams.language)
                         #reshape

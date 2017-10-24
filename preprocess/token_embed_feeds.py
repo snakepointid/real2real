@@ -47,7 +47,7 @@ def LoadTrainFeeds():
 										cache['training'].append(train_cache)
 										pair_batch,target_batch = [],[]
  
-		pair_valid+=pair_batch+;target_valid+=target_batch
+		pair_valid+=pair_batch;target_valid+=target_batch
  		pair_valid=np.array(pair_valid,dtype=np.int64)
  		target_valid=np.array(target_valid,dtype=np.int32)
 		cache['valid']=[pair_valid,target_valid]

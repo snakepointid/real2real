@@ -54,7 +54,7 @@ class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attent
         content_maxlen = 3000
         title_cnn_params = [3,1,1] #kernel,stride,layers
         content_cnn_params = [5,2,3]
-        final_layer = "both"
+        final_layer = "title"
  
 class appParams(baseModelParams):
 	pass

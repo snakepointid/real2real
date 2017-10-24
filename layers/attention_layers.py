@@ -36,6 +36,11 @@ def target_attention(inputs,query,scope_name,is_training,is_dropout):
                         weights = tf.where(tf.equal(mask, 0), paddings, weights)
                 # Activation
                 weights = tf.nn.softmax(weights) # (N,m,SL)
+		# dropout
+		weights = tf.contrib.layers.dropout(
+                                           inputs=weights,
+                                           keep_prob=attentionLayerParams.dropout_rate,
+                                           is_training=is_dropout)
                 # Weighted sum
                 outputs = tf.matmul(weights, V) # (N,m,QD)
 

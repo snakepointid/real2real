@@ -75,7 +75,7 @@ class multiClsModel(baseModel):
                         self.loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.logits, labels=tf.reshape(self.target,[-1,1]))
                 else:
                         logits = tf.reshape(self.logits,[-1,1])
-                        labels = tf.one_hot(indices=tf.reshape(self.target,[-1,1]),depth=multiClsModelParams.target_label_num)
+                        labels = tf.one_hot(indices=tf.reshape(self.target,[-1,1]),depth=tf.shape(self.logits)[1])
                         labels = tf.reshape(labels,[-1,1])
                         self.loss = tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=labels)
                 self.mean_loss = tf.reduce_mean(self.loss)

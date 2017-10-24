@@ -56,7 +56,7 @@ class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attent
 
 class tokenEmbedModelParams(embedLayerParams,multiClsModelParams):
         language="chinese"
-        target_label_num = 2
+        target_label_num = 10
 	batch_size = 10000
 	test_rate = 0.05
 

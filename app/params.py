@@ -8,18 +8,17 @@ class baseLayerParams:
 		
 class convLayerParams(baseLayerParams):
         filter_nums  = 128
-        token_cnn_params = [3,1,1]
 
 class fullLayerParams(baseLayerParams):
         hidden_units  = 128
-        mlp_layers = 1
+        mlp_layers = 0
 
 class attentionLayerParams(baseLayerParams):
         pass
 
-class embedLayerParams(baseLayerParams):
-        
+class embedLayerParams(baseLayerParams):      
         embedding_dim = 128
+        source_vocab_size = 10000
 
 class textModuleParams:
         stride_cnn = True
@@ -37,27 +36,26 @@ class baseModelParams:
 
 class multiClsModelParams(baseModelParams):
         flag_label_smooth = True
-        target_vocab_size = 35
+        target_label_num = 35
         loss_softmax=True
         
 class regressModelParams(baseModelParams):
         loss_rmse = True     
    
 class ctrRankModelParams(embedLayerParams,fullLayerParams,convLayerParams,regressModelParams):
-        source_vocab_size = 10000
         tag_size = 130000
         title_maxlen = 30
         test_rate  = 0.05
-        token_cnn_params = [5,2,1]
+        title_cnn_params = [5,2,1]
+
 
 class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attentionLayerParams,multiClsModelParams):
-        source_vocab_size = 10000
-        target_vocab_size = 35
         title_maxlen = 30
         content_maxlen = 3000
+        title_cnn_params = [3,1,1] #kernel,stride,layers
+        content_cnn_params = [5,2,3]
+        final_layer = "title"
  
-class appParams(baseModelParams):
-	newsClsModel = 0
 
 
  

@@ -20,35 +20,52 @@ class NewsClsModel(multiClsModel):
                         #target to token embedding
                         token_context = tf.get_variable('token_context',
                                                        dtype=tf.float32,
-                                                       shape=[newsClsModelParams.target_vocab_size, newsClsModelParams.embedding_dim],
+                                                       shape=[newsClsModelParams.target_label_num, newsClsModelParams.embedding_dim],
                                                        initializer=tf.contrib.layers.xavier_initializer(),
                                                        trainable=self.is_training)
+                        #embedding
+                        title_embed = semantic_position_embedding(
+                                                       inputs=self.title_source,
+                                                       vocab_size=newsClsModelParams.source_vocab_size,
+                                                       is_training=is_training,
+                                                       reuse=None,
+                                                       scope='chinese')
+                        #embedding
+                        content_embed = semantic_position_embedding(
+                                                       inputs=self.content_source,
+                                                       vocab_size=newsClsModelParams.source_vocab_size,
+                                                       is_training=is_training,
+                                                       reuse=True,
+                                                       scope='chinese')
                         #title encoding
                         title_encoding = sentence_encoder(
-                                                       inputs=self.title_source,
-                                                       query=token_context,
-                                                       vocab_size=newsClsModelParams.source_vocab_size,
-                                                       multi_cnn_params=newsClsModelParams.token_cnn_params,#kernel,stride,layer
-                                                       scope='sentence',
+                                                       inputs=title_embed,
+                                                       query=token_context,                                                       
+                                                       multi_cnn_params=newsClsModelParams.title_cnn_params,#kernel,stride,layer
+                                                       scope='title',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
                                                        reuse=None) #N,FN
                          
                         content_encoding = sentence_encoder(
-                                                       inputs=self.content_source,
-                                                       query=token_context,
-                                                       vocab_size=newsClsModelParams.source_vocab_size,
-                                                       multi_cnn_params=newsClsModelParams.token_cnn_params,#kernel,stride,layer
-                                                       scope='sentence',
+                                                       inputs=content_embed,
+                                                       query=token_context, 
+                                                       multi_cnn_params=newsClsModelParams.content_cnn_params,#kernel,stride,layer
+                                                       scope='content',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
-                                                       reuse=True)#N,FN
-
-                        full_layer = tf.concat([content_encoding,title_encoding],1)
+                                                       reuse=None)#N,FN
+                        
+                        if newsClsModelParams.final_layer == "title":
+                                    full_layer = title_encoding
+                        elif newsClsModelParams.final_layer == "content":
+                                    full_layer = content_encoding  
+                        else:                        
+                                    full_layer = tf.concat([content_encoding,title_encoding],1)
                                     
                         self.logits = final_mlp_encoder(
                                              inputs=full_layer,
-                                             output_dim=newsClsModelParams.target_vocab_size,
+                                             output_dim=newsClsModelParams.target_label_num,
                                              is_training=self.is_training,
                                              is_dropout=self.is_dropout) 
 
@@ -64,16 +81,22 @@ class CtrRankModel(regressModel):
                                                 vocab_size=ctrRankModelParams.tag_size,
                                                 is_training=self.is_training,
                                                 scope='recalltag')
+                        #embedding
+                        title_embed = semantic_position_embedding(
+                                                       inputs=self.title_source,
+                                                       vocab_size=ctrRankModelParams.source_vocab_size,
+                                                       is_training=is_training,
+                                                       reuse=None,
+                                                       scope='chinese')
                         #title encoding
                         title_encoding = sentence_encoder(
-                                                       inputs=self.title_source,
-                                                       query=tag_embed,
-                                                       vocab_size=ctrRankModelParams.source_vocab_size,
-                                                       multi_cnn_params=ctrRankModelParams.token_cnn_params,#kernel,stride,layer
-                                                       scope='sentence',
+                                                       inputs=title_embed,
+                                                       query=tag_embed,                                                       
+                                                       multi_cnn_params=ctrRankModelParams.title_cnn_params,#kernel,stride,layer
+                                                       scope='title',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
-                                                       reuse=None) #N,1,FN
+                                                       reuse=None) #N,FN
                                     
                         self.logits = final_mlp_encoder(
                                              inputs=title_encoding,

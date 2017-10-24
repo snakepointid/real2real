@@ -17,7 +17,6 @@ def LoadTrainFeeds():
 		title_batch,content_batch,target_batch=[],[],[]
 		title_train,content_train,target_train=[],[],[]
 		title_valid,content_valid,target_valid=[],[],[]
-		title_testa,content_testa,target_testa=[],[],[]
 		cache={'training':[]}
 		for line in reader:
 				rdv,target,title,content,flag=line
@@ -26,13 +25,6 @@ def LoadTrainFeeds():
 					continue
 				title=title[:newsClsModelParams.title_maxlen]+[0]*(newsClsModelParams.title_maxlen-len(title))
 				content=content[:newsClsModelParams.content_maxlen]+[0]*(newsClsModelParams.content_maxlen-len(content))
-
-				if flag=='test':
-						if abs(float(rdv))<newsClsModelParams.test_rate:
-								title_testa.append(title)
-								content_testa.append(content)
-								target_testa.append(target)		
-						continue
 						
 				if abs(float(rdv))<newsClsModelParams.test_rate:
 						title_valid.append(title)
@@ -66,11 +58,6 @@ def LoadTrainFeeds():
  		content_train =np.array(content_train,dtype=np.int64)
  		target_train=np.array(target_train,dtype=np.int32)
 		cache['train']=[title_train,content_train,target_train]
-
-		title_testa=np.array(title_testa,dtype=np.int64)
- 		content_testa =np.array(content_testa,dtype=np.int64)
- 		target_testa=np.array(target_testa,dtype=np.int32)
-		cache['testa']=[title_testa,content_testa,target_testa]
 
 		return cache
 

@@ -25,8 +25,8 @@ class textModuleParams:
         target_atten = True
 
 class entityEmbedModuleParams(embedLayerParams):
-        flag_sinusoid = True     
-        flag_position_embed = True
+        sinusoid = True     
+        position_embed = True
 
 class baseModelParams:
         test_rate  = 0.005
@@ -35,7 +35,6 @@ class baseModelParams:
         num_epochs = 2000
 
 class multiClsModelParams(baseModelParams):
-        flag_label_smooth = True
         target_label_num = 35
         loss_softmax=False
         
@@ -48,14 +47,17 @@ class ctrRankModelParams(embedLayerParams,fullLayerParams,convLayerParams,regres
         test_rate  = 0.05
         title_cnn_params = [5,2,1]
 
-
 class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attentionLayerParams,multiClsModelParams):
         title_maxlen = 30
         content_maxlen = 3000
         title_cnn_params = [3,1,1] #kernel,stride,layers
         content_cnn_params = [5,2,3]
         final_layer = "title"
- 
+
+class tokenEmbedModelParams(embedLayerParams,multiClsModelParams):
+        language="chinese"
+        target_label_num = 2
+
 class appParams(baseModelParams):
 	pass
 

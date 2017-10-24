@@ -5,7 +5,7 @@ from real2real.layers.common_layers import embedding,positional_encoding
 from real2real.app.params import entityEmbedModuleParams
 from pydoc import locate
 
-def semantic_position_embedding(inputs,vocab_size,is_training,scope,reuse=None):
+def semantic_position_embedding(inputs,vocab_size,is_training,scope,position_embed=entityEmbedModuleParams.position_embed,reuse=None):
         with tf.variable_scope(scope,reuse=reuse):
                 encoding = embedding(inputs=inputs, 
                                      vocab_size=vocab_size,                                
@@ -16,7 +16,7 @@ def semantic_position_embedding(inputs,vocab_size,is_training,scope,reuse=None):
 
                 
                 
-                if not entityEmbedModuleParams.flag_position_embed:
+                if not position_embed:
                         return encoding
                 ## Positional Encoding
                 position_code = tf.tile(tf.expand_dims(tf.to_int64(tf.range(tf.shape(inputs)[1])+1), 0), [tf.shape(inputs)[0], 1])
@@ -24,7 +24,7 @@ def semantic_position_embedding(inputs,vocab_size,is_training,scope,reuse=None):
                 position_code = tf.where(tf.equal(inputs, 0), paddings, position_code)
                 #position embed
                 maxlen = int(inputs.get_shape()[-1])
-                if entityEmbedModuleParams.flag_sinusoid:
+                if entityEmbedModuleParams.sinusoid:
                         encoding += positional_encoding(
                                         inputs=position_code,
                                         vocab_size=maxlen+1,  

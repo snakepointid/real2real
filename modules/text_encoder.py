@@ -11,7 +11,7 @@ from pydoc import locate
 
 def sentence_encoder(inputs,query,multi_cnn_params,scope,is_training,is_dropout,reuse):
         encoding = inputs
-	with tf.variable_scope(scope,reuse=reuse):              
+        with tf.variable_scope(scope,reuse=reuse):              
                 #convolution
                 if textModuleParams.stride_cnn:
                         encoding = multiLayer_conv_strip(

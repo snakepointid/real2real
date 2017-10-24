@@ -39,11 +39,10 @@ def semantic_position_embedding(inputs,vocab_size,is_training,scope,reuse=None):
 
 
 def tag_embedding(inputs,vocab_size,is_training,scope,reuse=None):
-        with tf.variable_scope(scope,reuse=reuse):
-                encoding = embedding(inputs=inputs, 
-                                     vocab_size=vocab_size,                                
-                                     zero_pad=False,
-                                     reuse=reuse,
-                                     is_training=is_training,
-                                     scope="tag")
-        return encoding
+        return embedding(
+                     inputs=inputs, 
+                     vocab_size=vocab_size,                                
+                     zero_pad=False,
+                     reuse=reuse,
+                     is_training=is_training,
+                     scope=scope)

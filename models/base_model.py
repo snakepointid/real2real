@@ -45,11 +45,15 @@ class baseModel(object):
                 self.global_saver = tf.train.Saver()
 
                 for variable in tf.trainable_variables():
-                        if variable.name=="chinese/token/embedding:0":
-                                print("chinese embed saver")
+                        if variable.name=="chinese/token/lookup_table:0":
                                 with tf.variable_scope("",reuse=True):
-                                        zh_embed = tf.get_variable(variable.name)   
-                                self.zh_embed_saver = tf.train.Saver(zh_embed)
+                                        zh_embed = tf.get_variable("chinese/token/lookup_table")   
+                                self.zh_embed_saver = tf.train.Saver([zh_embed])
+
+			if variable.name=="english/token/lookup_table:0":
+                                with tf.variable_scope("",reuse=True):
+                                        en_embed = tf.get_variable("english/token/lookup_table")
+                                self.en_embed_saver = tf.train.Saver([en_embed])
 
 
                         

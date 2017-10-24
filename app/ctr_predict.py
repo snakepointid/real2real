@@ -64,7 +64,8 @@ def training():
 
                         new_pc = regression_model_eval(ctr_batch,probs,'testa')
 			if new_pc<old_pc:
-				break
+				#break
+				pass
                    	old_pc = new_pc     
                         endTime = time.time()
                         if endTime-startTime>3600:

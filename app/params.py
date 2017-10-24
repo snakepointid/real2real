@@ -37,7 +37,7 @@ class baseModelParams:
 class multiClsModelParams(baseModelParams):
         flag_label_smooth = True
         target_label_num = 35
-        loss_softmax=True
+        loss_softmax=False
         
 class regressModelParams(baseModelParams):
         loss_rmse = True     
@@ -54,9 +54,10 @@ class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attent
         content_maxlen = 3000
         title_cnn_params = [3,1,1] #kernel,stride,layers
         content_cnn_params = [5,2,3]
-        final_layer = "title"
+        final_layer = "both"
  
-
+class appParams(baseModelParams):
+	pass
 
  
 

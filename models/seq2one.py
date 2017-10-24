@@ -27,14 +27,14 @@ class NewsClsModel(multiClsModel):
                         title_embed = semantic_position_embedding(
                                                        inputs=self.title_source,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
-                                                       is_training=is_training,
+                                                       is_training=self.is_training,
                                                        reuse=None,
                                                        scope='chinese')
                         #embedding
                         content_embed = semantic_position_embedding(
                                                        inputs=self.content_source,
                                                        vocab_size=newsClsModelParams.source_vocab_size,
-                                                       is_training=is_training,
+                                                       is_training=self.is_training,
                                                        reuse=True,
                                                        scope='chinese')
                         #title encoding
@@ -85,7 +85,7 @@ class CtrRankModel(regressModel):
                         title_embed = semantic_position_embedding(
                                                        inputs=self.title_source,
                                                        vocab_size=ctrRankModelParams.source_vocab_size,
-                                                       is_training=is_training,
+                                                       is_training=self.is_training,
                                                        reuse=None,
                                                        scope='chinese')
                         #title encoding

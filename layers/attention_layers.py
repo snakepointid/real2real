@@ -16,10 +16,12 @@ def target_attention(inputs,query,scope_name,is_training,is_dropout):
         query_shape = query.get_shape()
         if len(query_shape)==2:
                 query = tf.tile(tf.expand_dims(query,0),[tf.shape(inputs)[0],1,1]) # (N, m, QD)
-	if attentionLayerParams.norm:
-		norm_inputs = layer_norm(inputs)
-	else:
-		norm_inputs = inputs
+                
+        if attentionLayerParams.norm:
+                norm_inputs = layer_norm(inputs)
+        else:
+                norm_inputs = inputs
+
         output_dim = int(query.get_shape()[2])
         with tf.variable_scope(scope_name):
                 # Linear projections
@@ -36,8 +38,8 @@ def target_attention(inputs,query,scope_name,is_training,is_dropout):
                         weights = tf.where(tf.equal(mask, 0), paddings, weights)
                 # Activation
                 weights = tf.nn.softmax(weights) # (N,m,SL)
-		# dropout
-		weights = tf.contrib.layers.dropout(
+                # dropout
+                weights = tf.contrib.layers.dropout(
                                            inputs=weights,
                                            keep_prob=attentionLayerParams.dropout_rate,
                                            is_training=is_dropout)

@@ -16,8 +16,9 @@ class baseModel(object):
                         self._metrics_()
                         if self.is_training:
                                 self._cost_()
-                                self._optimize_()    
-			self.global_saver = tf.train.Saver()         
+                                self._optimize_() 
+                        self._save_()
+                     
         @abc.abstractmethod
         def _build_(self):
                 raise NotImplementedError
@@ -39,6 +40,18 @@ class baseModel(object):
                 # Summary 
                 tf.summary.scalar('mean_loss', self.mean_loss)
                 self.merged = tf.summary.merge_all() 
+
+        def _save_(self):
+                self.global_saver = tf.train.Saver()
+
+                for variable in tf.trainable_variables():
+                        if variable.name=="chinese/token/embedding:0":
+                                print("chinese embed saver")
+                                with tf.variable_scope("",reuse=True):
+                                        zh_embed = tf.get_variable(variable.name)   
+                                self.zh_embed_saver = tf.train.Saver(zh_embed)
+
+
                         
 @six.add_metaclass(abc.ABCMeta)
 class multiClsModel(baseModel):

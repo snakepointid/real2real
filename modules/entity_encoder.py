@@ -14,6 +14,8 @@ def semantic_position_embedding(inputs,vocab_size,is_training,scope,reuse=None):
                                      is_training=is_training,
                                      scope="token")
 
+                
+                
                 if not entityEmbedModuleParams.flag_position_embed:
                         return encoding
                 ## Positional Encoding

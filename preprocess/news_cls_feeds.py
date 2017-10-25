@@ -1,4 +1,3 @@
-from __future__ import print_function
 import numpy as np
 import sys
 import re
@@ -62,24 +61,25 @@ def LoadTrainFeeds():
 		return cache
 
 def LoadEvalFeeds():
-		content2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/titles/recalltag2code.pkl','rb'))
-		zh2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/titles/zh2code.pkl','rb'))
-		label2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/titles/label2code.pkl','rb'))
+		content2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/sources/recalltag2code.pkl','rb'))
+		zh2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/sources/zh2code.pkl','rb'))
+		label2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/sources/label2code.pkl','rb'))
 		zh2code['#NUMB#']=len(zh2code)+2
 		zh2code['#ENG#']=len(zh2code)+2
 		reader=LoadData()
 		raw_batch,title_batch,content_batch,target_batch=[],[],[],[]
-		for line in reader:
+		for line in sys.stdin:
+				line = line.strip()
 				line = re.sub(r'<\w+>','',line)
-                line = re.sub(r'<\/\w+>','\t',line)
-                sep = line.split('\t')
-                if len(sep)!=5:
-                        continue
-                label,url,title,content,_ = sep
-                raw='%s\t%s\t%s'%(title,content,label)
-                title = ["%s"%zh2code.get(char,"1") for char in quick_sentence_segment(title.decode('utf-8'))]
-                content = ["%s"%zh2code.get(char,"1") for char in quick_sentence_segment(content.decode('utf-8'))]
-                target = label2code.get(label,0)
+                		line = re.sub(r'<\/\w+>','\t',line)
+                		sep = line.split('\t')
+                		if len(sep)!=5:
+                		        continue
+              			label,url,title,content,_ = sep
+           			raw='%s\t%s\t%s'%(title,content,label)
+                		title = ["%s"%zh2code.get(char,"1") for char in quick_sentence_segment(title.decode('utf-8'))]
+                		content = ["%s"%zh2code.get(char,"1") for char in quick_sentence_segment(content.decode('utf-8'))]
+                		target = label2code.get(label,0)
 
 				if len(title)<4 or len(content)<20:
 					continue		
@@ -90,11 +90,11 @@ def LoadEvalFeeds():
 				content_batch.append(content)
 				target_batch.append(target)
 				raw_batch.append(raw)
-				if len(title_valid)==100:
+				if len(target_batch)==100:
 						title_batch=np.array(title_batch,dtype=np.int64)
 						content_batch=np.array(content_batch,dtype=np.int64)
 						target_batch=np.array(target_batch,dtype=np.int32)
-						yield [title_batch,content_batch,target_batch,raw_batch]
+						yield [raw_batch,title_batch,content_batch,target_batch]
 						raw_batch,title_batch,content_batch,target_batch=[],[],[],[]
 			 																																					
 if __name__ =="__main__":

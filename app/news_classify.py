@@ -29,29 +29,30 @@ def training():
                 #compute the initial pearson coef
 
                 for epoch in range(appParams.num_epochs):
-                        for title_code_batch,content_code_batch,target_batch in cache['training']:
+                        for title_batch,content_batch,target_batch in cache['training']:
                                 _,gs=sess.run([model.train_op,model.global_step],feed_dict={
-                                                                model.title_source:title_code_batch ,
-                                                                model.content_source:content_code_batch ,
+                                                                model.title_source:title_batch ,
+                                                                model.content_source:content_batch ,
                                                                 model.target:target_batch,
                                                                 model.is_dropout:True})
 	 
-                        title_code_batch,content_code_batch,target_batch = cache['train']	
+                        title_batch,content_batch,target_batch = cache['train']	
                         train_acc,train_loss = sess.run([model.acc,model.mean_loss],feed_dict={
-                                                                model.title_source:title_code_batch,                                            
-                                                                model.content_source:content_code_batch,
+                                                                model.title_source:title_batch,                                            
+                                                                model.content_source:content_batch,
                                                                 model.target:target_batch,
                                                                 model.is_dropout:False})
 
                         train_num=len(target_batch)
-                        title_code_batch,content_code_batch,target_batch = cache['valid']   
+                        title_batch,content_batch,target_batch = cache['valid']   
                         valid_acc,valid_loss = sess.run([model.acc,model.mean_loss],feed_dict={
-                                                                model.title_source:title_code_batch,                                            
-                                                                model.content_source:content_code_batch,
+                                                                model.title_source:title_batch,                                            
+                                                                model.content_source:content_batch,
                                                                 model.target:target_batch,
                                                                 model.is_dropout:False})
                         valid_num=len(target_batch)
-                        print("Iteration:%s\ttrain num:%s\ttrain acc:%s\ttrain loss:%s\tvalid num:%s\tvalid acc:%s\tvalid loss:%s"%(gs,train_num,train_acc,train_loss,valid_num,valid_acc,valid_loss))  
+                        print("Iteration:%s\ttrain num:%s\ttrain acc:%s\ttrain loss:%s\tvalid num:%s\tvalid acc:%s\tvalid loss:%s"\
+				%(gs,train_num,train_acc,train_loss,valid_num,valid_acc,valid_loss))  
                         endTime = time.time()
                         if endTime-startTime>3600:
                                 print ("save the whole model")
@@ -61,23 +62,26 @@ def training():
                 model.global_saver.save(sess,FLAGS.save_path+"/global_model")
  
 def evaluation():
+	label2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/sources/label2code.pkl','rb'))
+	code2label= dict(zip(label2code.values(), label2code.keys()))
         gpu_options = tf.GPUOptions(allow_growth = True)
         model = NewsClsModel(is_training=False)
         with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
                 model.global_saver.restore(sess,FLAGS.restore_path+"/global_model")
                 cache = LoadEvalFeeds()
-    
+   		acc = [] 
                 for raw_batch,title_batch,content_batch,target_batch in cache:
-                        testa_acc,testa_pred = sess.run([model.acc,model.preds],feed_dict={
-                                                                model.title_source:title_code_batch,                                            
-                                                                model.content_source:content_code_batch,
+                        testa_acc,testa_pred,probs = sess.run([model.acc,model.preds,model.probs],feed_dict={
+                                                                model.title_source:title_batch,                                            
+                                                                model.content_source:content_batch,
                                                                 model.target:target_batch,
                                                                 model.is_dropout:False}) 
-
+			acc.append(testa_acc)
                         for idx,raw in enumerate(raw_batch):
                                 if testa_pred[idx]!=target_batch[idx]:
-                                        print("acc:%s\t%s\t%s\t%s"%(testa_acc,raw,testa_pred[idx],target_batch[idx]))
-
+                                        print("%s\t%s\tacc:%s\t%s\t%s"%\
+					(raw,probs[idx][target_batch[idx]],np.mean(acc),code2label.get(testa_pred[idx],'UNK'),probs[idx][testa_pred[idx]]))
+					print('-'*150)
 def inference():
         gpu_options = tf.GPUOptions(allow_growth = True)
         model = NewsClsModel(is_training=False)

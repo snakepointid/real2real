@@ -27,6 +27,9 @@ class textModuleParams:
 class entityEmbedModuleParams(embedLayerParams):
         sinusoid = True     
         position_embed = True
+        
+class fullConnectModuleParams(fullLayerParams):
+        input_reshape=True
 
 class baseModelParams:
         test_rate  = 0.02

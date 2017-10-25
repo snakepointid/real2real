@@ -61,43 +61,42 @@ def LoadTrainFeeds():
 
 		return cache
 
-def LoadPredictFeeds():
-		content2code=pickle.load(open('/home/hdp-reader-content/shechanglue/titles/recallcontent2code.pkl','rb'))
-		zh2code=pickle.load(open('/home/hdp-reader-content/shechanglue/titles/zh2code.pkl','rb'))
+def LoadEvalFeeds():
+		content2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/titles/recalltag2code.pkl','rb'))
+		zh2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/titles/zh2code.pkl','rb'))
+		label2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/titles/label2code.pkl','rb'))
 		zh2code['#NUMB#']=len(zh2code)+2
 		zh2code['#ENG#']=len(zh2code)+2
-
 		reader=LoadData()
-		raw_batch,title_batch,content_batch=[],[],[]
+		raw_batch,title_batch,content_batch,target_batch=[],[],[],[]
 		for line in reader:
-				if len(line)!=3:
-						continue
-				url,recallcontent,title=line
-				content=content2code.get(recallcontent,0)
-				try:
-						title=["%s"%zh2code.get(char,"1") for char in quick_sentence_segment(title.decode('utf-8'))]
-						if len(title)<4:
-								continue		
-						title=title[:newsClsModelParams.title_maxlen]+[0]*(newsClsModelParams.title_maxlen-len(title))		
-				except:
-						continue
-				raw='%s\t%s\t%s'%(url,recallcontent,title)
-				raw_batch.append(raw)
+				line = re.sub(r'<\w+>','',line)
+                line = re.sub(r'<\/\w+>','\t',line)
+                sep = line.split('\t')
+                if len(sep)!=5:
+                        continue
+                label,url,title,content,_ = sep
+                raw='%s\t%s\t%s'%(title,content,label)
+                title = ["%s"%zh2code.get(char,"1") for char in quick_sentence_segment(title.decode('utf-8'))]
+                content = ["%s"%zh2code.get(char,"1") for char in quick_sentence_segment(content.decode('utf-8'))]
+                target = label2code.get(label,0)
+
+				if len(title)<4 or len(content)<20:
+					continue		
+				title=title[:newsClsModelParams.title_maxlen]+[0]*(newsClsModelParams.title_maxlen-len(title))
+				content=content[:newsClsModelParams.content_maxlen]+[0]*(newsClsModelParams.content_maxlen-len(content))
+						
 				title_batch.append(title)
 				content_batch.append(content)
-				if len(title_batch)==newsClsModelParams.batch_size:
+				target_batch.append(target)
+				raw_batch.append(raw)
+				if len(title_valid)==100:
 						title_batch=np.array(title_batch,dtype=np.int64)
 						content_batch=np.array(content_batch,dtype=np.int64)
-						predict_cache=[raw_batch,title_batch,content_batch]
-						raw_batch,title_batch,content_batch=[],[],[]
-						yield predict_cache
-																																							
-		if len(title_batch):
-        		title_batch=np.array(title_batch,dtype=np.int64)
-        		content_batch=np.array(content_batch,dtype=np.int64)
-        		predict_cache=[raw_batch,title_batch,content_batch]
-        		yield predict_cache
-
+						target_batch=np.array(target_batch,dtype=np.int32)
+						yield [title_batch,content_batch,target_batch,raw_batch]
+						raw_batch,title_batch,content_batch,target_batch=[],[],[],[]
+			 																																					
 if __name__ =="__main__":
 	reader=LoadData()
 	for line in reader:

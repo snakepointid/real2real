@@ -23,31 +23,34 @@ class NmtModel (multiClsModel):
                                                        is_training=self.is_training,
                                                        reuse=None,
                                                        scope='chinese')
-                        #embedding
-                        target_embed = semantic_position_embedding(
-                                                       inputs=self.target_source,
-                                                       vocab_size=nmtModelParams.source_vocab_size,
-                                                       is_training=self.is_training,
-                                                       reuse=None,
-                                                       scope='english')
+                        
                         #title encoding
-                        source_encoding = sentence_encoder(
+                        source_simp_encoding = sentence_encoder(
                                                        inputs=source_embed,
-                                                       query=token_context,                                                       
+                                                       query=None,                                                       
                                                        multi_cnn_params=nmtModelParams.source_cnn_params,#kernel,stride,layer
-                                                       scope='title',
+                                                       scope='source',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
                                                        reuse=None) #N,FN
-                         
-                        target_encoding = sentence_encoder(
-                                                       inputs=target_embed,
-                                                       query=token_context, 
-                                                       multi_cnn_params=nmtModelParams.target_cnn_params,#kernel,stride,layer
-                                                       scope='content',
+                        #corse predict
+                        coarse_logits = final_mlp_encoder(
+                                             inputs=source_simp_encoding,
+                                             output_dim=nmtModelParams.target_label_num,
+                                             is_training=self.is_training,
+                                             is_dropout=self.is_dropout
+
+                        _,coarse_preds = tf.nn.top_k(coarse_logits,k=nmtModelParams.top_k_coarse,sorted=False)  
+
+                        #title encoding
+                        source_simp_encoding = sentence_encoder(
+                                                       inputs=source_embed,
+                                                       query=None,                                                       
+                                                       multi_cnn_params=nmtModelParams.source_cnn_params,#kernel,stride,layer
+                                                       scope='source',
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout,
-                                                       reuse=None)#N,FN
+                                                       reuse=None) #N,FN
                         
  
                         self.logits = final_mlp_encoder(

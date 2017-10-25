@@ -65,10 +65,10 @@ class multiClsModel(baseModel):
                 
         def _metrics_(self):
                 self.preds = tf.to_int32(tf.arg_max(self.logits, dimension=-1))
-		if multiClsModelParams.loss_softmax:
-			self.probs = tf.nn.softmax(self.logits)
-		else:
-			self.probs = tf.nn.sigmoid(self.logits)
+                if multiClsModelParams.loss_softmax:
+                        self.probs = tf.nn.softmax(self.logits)
+                else:
+                        self.probs = tf.nn.sigmoid(self.logits)
                 self.acc = tf.reduce_mean(tf.to_float(tf.equal(self.preds, self.target)))
                 # save log
                 tf.summary.scalar('acc', self.acc)

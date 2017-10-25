@@ -20,7 +20,7 @@ class embedLayerParams(baseLayerParams):
         embedding_dim = 128
         source_vocab_size = 10000
 
-class textModuleParams:
+class textModuleParams(baseLayerParams):
         stride_cnn = True
         target_atten = True
 

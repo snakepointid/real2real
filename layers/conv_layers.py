@@ -5,25 +5,6 @@ from pydoc import locate
 from real2real.app.params import convLayerParams 
 
 activation_fn = locate(convLayerParams.activation_fn) 
-
-def multiLayer_conv_strip(inputs,multi_cnn_params,scope_name,is_training,is_dropout,reuse=None):
-        
-        next_input = tf.contrib.layers.dropout(
-                                           inputs=inputs,
-                                           keep_prob=convLayerParams.dropout_rate,
-                                           is_training=is_dropout)  
-        kernel_size,stride_step,conv_layer_num = multi_cnn_params
-        with tf.variable_scope(scope_name,reuse=reuse):
-                for layer_idx in range(conv_layer_num):
-                        next_input = strip_conv(
-                                        inputs=next_input,
-                                        kernel_size=kernel_size,
-                                        stride_step=stride_step,
-                                        scope_name="conv_layer{}".format(layer_idx),
-                                        is_training = is_training,
-                                        is_dropout=is_dropout)                    
-        return  next_input 
-
 def strip_conv(inputs,kernel_size,stride_step,scope_name,is_training,is_dropout):
 
         static_shape  = inputs.get_shape()
@@ -45,7 +26,10 @@ def strip_conv(inputs,kernel_size,stride_step,scope_name,is_training,is_dropout)
                 
         cnn_output =  activation_fn(cnn_output) 
         return  cnn_output
- 
+
+def max_pool_layer(inputs):
+        return tf.reduce_max(inputs,1)
+        
 def conv_to_full_layer(inputs,scope_name,is_training,is_dropout):  
 
         static_shape  = inputs.get_shape()

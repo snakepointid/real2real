@@ -29,7 +29,7 @@ class entityEmbedModuleParams(embedLayerParams):
         position_embed = True
 
 class baseModelParams:
-        test_rate  = 0.005
+        test_rate  = 0.02
         batch_size = 100
         learning_rate = 0.0001
         num_epochs = 2000
@@ -44,7 +44,6 @@ class regressModelParams(baseModelParams):
 class ctrRankModelParams(embedLayerParams,fullLayerParams,convLayerParams,regressModelParams):
         tag_size = 130000
         title_maxlen = 30
-        test_rate  = 0.05
         title_cnn_params = [5,2,1]
 
 class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attentionLayerParams,multiClsModelParams):
@@ -52,13 +51,12 @@ class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attent
         content_maxlen = 3000
         title_cnn_params = [3,1,1] #kernel,stride,layers
         content_cnn_params = [5,2,3]
-        final_layer = "title"
+        final_layer = "both"
 
 class tokenEmbedModelParams(embedLayerParams,multiClsModelParams):
         language="chinese"
         target_label_num = 10
 	batch_size = 10000
-	test_rate = 0.05
 
 class appParams(baseModelParams):
 	pass

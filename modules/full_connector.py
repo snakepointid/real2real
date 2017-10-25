@@ -15,7 +15,8 @@ def final_mlp_encoder(inputs,output_dim,is_training,is_dropout):
         static_shape = inputs.get_shape()
         if fullConnectModuleParams.input_reshape and len(static_shape)==3:
                 inputs = tf.reshape(inputs,[-1,int(static_shape[1])*int(static_shape[2])])
-
+	if not fullConnectModuleParams.input_reshape and len(static_shape)==3:
+		output_dim = 1
         inputs  = tf.contrib.layers.dropout(
                                            inputs=inputs,
                                            keep_prob=fullConnectModuleParams.dropout_rate,

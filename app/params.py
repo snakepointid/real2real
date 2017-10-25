@@ -11,7 +11,7 @@ class convLayerParams(baseLayerParams):
 
 class fullLayerParams(baseLayerParams):
         hidden_units  = 128
-        mlp_layers = 0
+        mlp_layers = 1
 
 class attentionLayerParams(baseLayerParams):
         pass
@@ -29,7 +29,7 @@ class entityEmbedModuleParams(embedLayerParams):
         position_embed = True
         
 class fullConnectModuleParams(fullLayerParams):
-        input_reshape=True
+        input_reshape=False
 
 class baseModelParams:
         test_rate  = 0.02

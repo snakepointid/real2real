@@ -1,85 +1,58 @@
 from __future__ import print_function
 import tensorflow as tf
-from real2real.layers.attention_layers import self_attention,enc_dec_attention,conv_attention_conv
-from real2real.models.base_model import multiClsModel
-from real2real.app.params import transformerParams  
-from real2real.layers.common_layers import semantic_position_embedding
 
-class transformer(multiClsModel):
+from real2real.models.base_model import regressModel,multiClsModel
+
+from real2real.modules.text_encoder import sentence_encoder
+from real2real.modules.full_connector import final_mlp_encoder
+from real2real.modules.entity_encoder import *
+
+from real2real.utils.shape_ops import *
+
+from real2real.app.params import nmtModelParams
+   
+class NmtModel (multiClsModel):
             def _build_(self):
                         # input coding placeholder
-                        self.source=tf.placeholder(tf.int32, shape=(None, transformerParams.source_maxlen))
-                        self.target=tf.placeholder(tf.int32, shape=(None, transformerParams.target_maxlen))
-                  # define decoder inputs
-                        decoder_inputs=tf.concat((tf.ones_like(self.target[:, :1])*2, self.target[:, :-1]), -1) # 2:<S>
-
-                        # source embedding
-                        encoding=semantic_position_embedding(
-                                                            inputs=self.source,
-                                                            vocab_size=transformerParams.source_vocab_size,
-                                                            num_units=transformerParams.hidden_units,
-                                                            maxlen=transformerParams.source_maxlen,
-                                                            scope='encoder')
-                        # target embedding
-                        decoding=semantic_position_embedding(
-                                                            inputs=decoder_inputs,
-                                                            vocab_size=transformerParams.target_vocab_size,
-                                                            num_units=transformerParams.hidden_units,
-                                                            maxlen=transformerParams.target_maxlen,
-                                                            scope='decoder')
-                        # source multi_attention
-                        self.encoding=self_attention(
-                                                      encoding=encoding,
-                                                      is_training=self.is_training,
-                                                      is_dropout=self.is_dropout)
-                        # target multi_attention
-                        self.decoding=enc_dec_attention(
-                                                      decoding=decoding,
-                                                      encoding=self.encoding,
-                                                      is_training=self.is_training,
-                                                      is_dropout=self.is_dropout)
-                        # Final linear projection
-                        self.logits=tf.layers.dense(
-                                                      inputs=self.decoding, 
-                                                      units=transformerParams.target_vocab_size,
-                                                      name="full_conn")
-class simpleAttentionCNN(multiClsModel):
-            def _build_(self):
-                        # input coding placeholder
-                        self.source=tf.placeholder(tf.int32, shape=(None, transformerParams.source_maxlen))
-                        self.target=tf.placeholder(tf.int32, shape=(None, transformerParams.target_maxlen))
-                        # source embedding
-                        encoding=semantic_position_embedding(
-                                                            inputs=self.source,
-                                                            vocab_size=transformerParams.source_vocab_size,
-                                                            num_units=transformerParams.hidden_units,
-                                                            maxlen=transformerParams.source_maxlen,
-                                                            scope='encoder')
+                        self.source_source = tf.placeholder(shape=(None, nmtModelParams.source_maxlen),dtype=tf.int64)
+                        self.target_source = tf.placeholder(shape=(None, nmtModelParams.target_maxlen),dtype=tf.int64)
+                        #embedding
+                        source_embed = semantic_position_embedding(
+                                                       inputs=self.source_source,
+                                                       vocab_size=nmtModelParams.source_vocab_size,
+                                                       is_training=self.is_training,
+                                                       reuse=None,
+                                                       scope='chinese')
+                        #embedding
+                        target_embed = semantic_position_embedding(
+                                                       inputs=self.target_source,
+                                                       vocab_size=nmtModelParams.source_vocab_size,
+                                                       is_training=self.is_training,
+                                                       reuse=None,
+                                                       scope='english')
+                        #title encoding
+                        source_encoding = sentence_encoder(
+                                                       inputs=source_embed,
+                                                       query=token_context,                                                       
+                                                       multi_cnn_params=nmtModelParams.source_cnn_params,#kernel,stride,layer
+                                                       scope='title',
+                                                       is_training=self.is_training,
+                                                       is_dropout=self.is_dropout,
+                                                       reuse=None) #N,FN
                          
-                        #simple attention cnn
-                        dec=conv_attention_conv(
-                                          inputs=encoding,
-                                          query_length=transformerParams.source_maxlen,
-                                          scope_name="simpAttenCnn1",
-                                          is_training=self.is_training,
-                                          is_dropout=self.is_dropout)
-                        #simple attention cnn
-                        dec=conv_attention_conv(
-                                          inputs=dec,
-                                          query_length=transformerParams.source_maxlen,
-                                          scope_name="simpAttenCnn2",
-                                          is_training=self.is_training,
-                                          is_dropout=self.is_dropout)
-                        #simple attention cnn
-                        self.decoding=conv_attention_conv(
-                                          inputs=dec,
-                                          query_length=transformerParams.target_maxlen,
-                                          scope_name="simpAttenCnn3",
-                                          is_training=self.is_training,
-                                          is_dropout=self.is_dropout)
-                        # Final linear projection
-                        self.logits=tf.layers.dense(
-                                                inputs=self.decoding, 
-                                                units=transformerParams.target_vocab_size,
-                                                name="full_conn")
+                        target_encoding = sentence_encoder(
+                                                       inputs=target_embed,
+                                                       query=token_context, 
+                                                       multi_cnn_params=nmtModelParams.target_cnn_params,#kernel,stride,layer
+                                                       scope='content',
+                                                       is_training=self.is_training,
+                                                       is_dropout=self.is_dropout,
+                                                       reuse=None)#N,FN
                         
+ 
+                        self.logits = final_mlp_encoder(
+                                             inputs=full_layer,
+                                             output_dim=nmtModelParams.target_label_num,
+                                             is_training=self.is_training,
+                                             is_dropout=self.is_dropout) 
+

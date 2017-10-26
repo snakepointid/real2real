@@ -9,7 +9,8 @@ from real2real.layers.attention_layers import target_attention
 from pydoc import locate
 
 def sentence_encoder(inputs,query,layers,multi_cnn_params,scope,is_training,is_dropout,reuse):
-        with tf.variable_scope(scope,reuse=reuse):              
+        encoding = inputs 
+	with tf.variable_scope(scope,reuse=reuse):              
                 #convolution
                 if 'C' in layers:
                         kernel_size,stride_step,conv_layer_num = multi_cnn_params

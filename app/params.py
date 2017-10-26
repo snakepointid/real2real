@@ -57,10 +57,11 @@ class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attent
 
 class nmtModelParams(embedLayerParams,multiClsModelParams):
         language="chinese"
-        target_label_num = 10
-	batch_size = 10000
+        target_label_num = 100000
         source_cnn_params = [3,1,1] #kernel,stride,layers
-        top_k_coarse = 100
+        source_maxlen = 30
+        target_maxlen = 30
+
 class appParams(baseModelParams):
 	pass
 

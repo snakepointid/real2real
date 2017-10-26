@@ -14,15 +14,12 @@ from real2real.app.params import nmtModelParams
 class NmtModel (multiClsModel):
             def _build_(self):
                         # input coding placeholder
-                        self.source_source = tf.placeholder(shape=(None, nmtModelParams.source_maxlen),dtype=tf.int64)
-                        self.target_source = tf.placeholder(shape=(None, nmtModelParams.target_maxlen),dtype=tf.int64)
-                        self.target = tf.one_hot(indices=self.target_source,depth=nmtModelParams.target_label_num)#N,Len,De
-                        self.target = tf.reduce_sum(self.target,1)
-                        self.target = tf.to_float(tf.not_equal(self.target, 0))
-                        self.target = tf.reshape(self.target,[-1,1])
+                        self.source_code = tf.placeholder(shape=(None, nmtModelParams.source_maxlen),dtype=tf.int64)
+                        self.target_code = tf.placeholder(shape=(None, nmtModelParams.target_maxlen),dtype=tf.int64)
+                        
                         #embedding
                         source_embed = semantic_position_embedding(
-                                                       inputs=self.source_source,
+                                                       inputs=self.source_code,
                                                        vocab_size=nmtModelParams.source_vocab_size,
                                                        is_training=self.is_training,
                                                        reuse=None,
@@ -45,3 +42,7 @@ class NmtModel (multiClsModel):
                                                        is_training=self.is_training,
                                                        is_dropout=self.is_dropout #N,tar
 
+                        self.target = tf.one_hot(indices=self.target_code,depth=nmtModelParams.target_label_num)#N,Len,De
+                        self.target = tf.reduce_sum(self.target,1)
+                        self.target = tf.to_float(tf.not_equal(self.target, 0))
+                        self.target = tf.reshape(self.target,[-1,1])

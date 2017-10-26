@@ -11,7 +11,7 @@ class convLayerParams(baseLayerParams):
 
 class fullLayerParams(baseLayerParams):
         hidden_units  = 128
-        mlp_layers = 1
+        mlp_layers = 0
 
 class attentionLayerParams(baseLayerParams):
         pass
@@ -21,18 +21,17 @@ class embedLayerParams(baseLayerParams):
         source_vocab_size = 10000
 
 class textModuleParams(baseLayerParams):
-        stride_cnn = True
-        target_atten = True
+        pass
 
 class entityEmbedModuleParams(embedLayerParams):
         sinusoid = True     
         position_embed = True
         
 class fullConnectModuleParams(fullLayerParams):
-        input_reshape=False
+        input_reshape=True
 
 class baseModelParams:
-        test_rate  = 0.02
+        test_rate  = 0.05
         batch_size = 100
         learning_rate = 0.0001
         num_epochs = 2000

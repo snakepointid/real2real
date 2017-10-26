@@ -27,7 +27,8 @@ class NmtModel (multiClsModel):
                         #title encoding
                         source_simp_encoding = sentence_encoder(
                                                        inputs=source_embed,
-                                                       query=None,                                                       
+                                                       query=None,
+                                                       layers='CP',                                                       
                                                        multi_cnn_params=nmtModelParams.source_cnn_params,#kernel,stride,layer
                                                        scope='source',
                                                        is_training=self.is_training,

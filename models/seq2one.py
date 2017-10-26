@@ -40,6 +40,7 @@ class NewsClsModel(multiClsModel):
                         #title encoding
                         title_encoding = sentence_encoder(
                                                        inputs=title_embed,
+                                                       layers='CA',
                                                        query=token_context,                                                       
                                                        multi_cnn_params=newsClsModelParams.title_cnn_params,#kernel,stride,layer
                                                        scope='title',
@@ -49,6 +50,7 @@ class NewsClsModel(multiClsModel):
                          
                         content_encoding = sentence_encoder(
                                                        inputs=content_embed,
+                                                       layers='CA',
                                                        query=token_context, 
                                                        multi_cnn_params=newsClsModelParams.content_cnn_params,#kernel,stride,layer
                                                        scope='content',
@@ -91,6 +93,7 @@ class CtrRankModel(regressModel):
                         #title encoding
                         title_encoding = sentence_encoder(
                                                        inputs=title_embed,
+                                                       layers='CA',
                                                        query=tag_embed,                                                       
                                                        multi_cnn_params=ctrRankModelParams.title_cnn_params,#kernel,stride,layer
                                                        scope='title',

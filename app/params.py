@@ -55,11 +55,12 @@ class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attent
         content_cnn_params = [5,2,3]
         final_layer = "both"
 
-class tokenEmbedModelParams(embedLayerParams,multiClsModelParams):
+class nmtModelParams(embedLayerParams,multiClsModelParams):
         language="chinese"
         target_label_num = 10
 	batch_size = 10000
-
+        source_cnn_params = [3,1,1] #kernel,stride,layers
+        top_k_coarse = 100
 class appParams(baseModelParams):
 	pass
 

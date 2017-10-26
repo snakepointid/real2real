@@ -16,6 +16,10 @@ class NmtModel (multiClsModel):
                         # input coding placeholder
                         self.source_source = tf.placeholder(shape=(None, nmtModelParams.source_maxlen),dtype=tf.int64)
                         self.target_source = tf.placeholder(shape=(None, nmtModelParams.target_maxlen),dtype=tf.int64)
+                        self.target = tf.one_hot(indices=self.target_source,depth=nmtModelParams.target_label_num)#N,Len,De
+                        self.target = tf.reduce_sum(self.target,1)
+                        self.target = tf.to_float(tf.not_equal(self.target, 0))
+                        self.target = tf.reshape(self.target,[-1,1])
                         #embedding
                         source_embed = semantic_position_embedding(
                                                        inputs=self.source_source,
@@ -25,7 +29,7 @@ class NmtModel (multiClsModel):
                                                        scope='chinese')
                         
                         #title encoding
-                        source_simp_encoding = sentence_encoder(
+                        source_encoding = sentence_encoder(
                                                        inputs=source_embed,
                                                        query=None,
                                                        layers='CP',                                                       
@@ -35,28 +39,9 @@ class NmtModel (multiClsModel):
                                                        is_dropout=self.is_dropout,
                                                        reuse=None) #N,FN
                         #corse predict
-                        coarse_logits = final_mlp_encoder(
-                                             inputs=source_simp_encoding,
-                                             output_dim=nmtModelParams.target_label_num,
-                                             is_training=self.is_training,
-                                             is_dropout=self.is_dropout
-
-                        _,coarse_preds = tf.nn.top_k(coarse_logits,k=nmtModelParams.top_k_coarse,sorted=False)  
-
-                        #title encoding
-                        source_simp_encoding = sentence_encoder(
-                                                       inputs=source_embed,
-                                                       query=None,                                                       
-                                                       multi_cnn_params=nmtModelParams.source_cnn_params,#kernel,stride,layer
-                                                       scope='source',
-                                                       is_training=self.is_training,
-                                                       is_dropout=self.is_dropout,
-                                                       reuse=None) #N,FN
-                        
- 
                         self.logits = final_mlp_encoder(
-                                             inputs=full_layer,
-                                             output_dim=nmtModelParams.target_label_num,
-                                             is_training=self.is_training,
-                                             is_dropout=self.is_dropout) 
+                                                       inputs=source_encoding,
+                                                       output_dim=nmtModelParams.target_label_num,
+                                                       is_training=self.is_training,
+                                                       is_dropout=self.is_dropout #N,tar
 

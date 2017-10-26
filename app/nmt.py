@@ -35,18 +35,19 @@ def training():
                                                                 model.is_dropout:True})
      
                         source_batch,target_batch = cache['train'] 
-                        train_acc,train_loss = sess.run([model.acc,model.mean_loss],feed_dict={
+                        train_loss = sess.run(model.mean_loss,feed_dict={
                                                                 model.source_code:source_batch,                                            
                                                                 model.target_code:target_batch,
                                                                 model.is_dropout:False})
 
                         train_num=len(target_batch)
                         source_batch,target_batch = cache['valid']   
-                        valid_acc,valid_loss = sess.run([model.acc,model.mean_loss],feed_dict={
+                        valid_loss = sess.run(model.mean_loss,feed_dict={
                                                                 model.source_code:source_batch,                                            
                                                                 model.target_code:target_batch,
                                                                 model.is_dropout:False})
                         valid_num=len(target_batch)
+			train_acc,valid_acc=1,1
                         print("Iteration:%s\ttrain num:%s\ttrain acc:%s\ttrain loss:%s\tvalid num:%s\tvalid acc:%s\tvalid loss:%s"\
                         %(gs,train_num,train_acc,train_loss,valid_num,valid_acc,valid_loss))  
 
@@ -95,7 +96,7 @@ def inference():
                                 print("%s\t%s"%(raw,probs[idx]))
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+	parser = argparse.ArgumentParser()
         parser.register("type", "bool", lambda v: v.lower() == "true")
         # Flags for defining the parameter of data path
         parser.add_argument(

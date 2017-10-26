@@ -72,7 +72,7 @@ def training():
                                 print ("save the whole model")
                                 model.global_saver.save(sess,FLAGS.save_path+"/global_model")
                                 startTime = endTime
-		print ("save the whole model")
+                print ("save the whole model")
                 model.global_saver.save(sess,FLAGS.save_path+"/global_model")
  
 def evaluation():

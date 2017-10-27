@@ -10,10 +10,12 @@ from real2real.modules.entity_encoder import *
 from real2real.utils.shape_ops import *
 
 from real2real.app.params import ctrRankModelParams,newsClsModelParams
-   
+      
+      
 class NewsClsModel(multiClsModel):
 	def _build_(self):
-            # input coding placeholder
+
+      # input coding placeholder
             self.title_source = tf.placeholder(shape=(None, newsClsModelParams.title_maxlen),dtype=tf.int64)
             self.content_source = tf.placeholder(shape=(None, newsClsModelParams.content_maxlen),dtype=tf.int64)
             self.target = tf.placeholder(shape=(None, ),dtype=tf.int32)

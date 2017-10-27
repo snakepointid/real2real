@@ -11,7 +11,7 @@ class convLayerParams(baseLayerParams):
 
 class fullLayerParams(baseLayerParams):
         hidden_units  = 128
-        mlp_layers = 0
+        mlp_layers = 5
 
 class attentionLayerParams(baseLayerParams):
         pass
@@ -31,7 +31,7 @@ class fullConnectModuleParams(fullLayerParams):
         input_reshape=True
 
 class baseModelParams:
-        test_rate  = 0.05
+        test_rate  = 0.02
         batch_size = 100
         learning_rate = 0.0001
         num_epochs = 2000

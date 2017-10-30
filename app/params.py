@@ -1,6 +1,6 @@
 class baseLayerParams:
-        dropout_rate  = 0.5
-        activation_fn ="tensorflow.nn.relu"
+        dropout_rate  = 0.2
+        activation_fn ="tensorflow.nn.tanh"
         zero_pad=True
         scale=True
         direct_cont=True
@@ -11,7 +11,7 @@ class convLayerParams(baseLayerParams):
 
 class fullLayerParams(baseLayerParams):
         hidden_units  = 128
-        mlp_layers = 5
+        mlp_layers = 1
 
 class attentionLayerParams(baseLayerParams):
         pass
@@ -24,8 +24,8 @@ class textModuleParams(baseLayerParams):
         pass
 
 class entityEmbedModuleParams(embedLayerParams):
-        sinusoid = True     
-        position_embed = True
+        sinusoid = False
+        position_embed = False
         
 class fullConnectModuleParams(fullLayerParams):
         input_reshape=True

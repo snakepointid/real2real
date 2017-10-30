@@ -54,7 +54,7 @@ class NewsClsModel(multiClsModel):
                                     inputs=content_embed,
                                     layers='CA',
                                     query=token_context, 
-                                    multi_cnn_params=newsClsModelParams.content_cnn_params,#kernel,stride,layer
+                                    multi_cnn_params=newsClsModelParams.title_cnn_params,#kernel,stride,layer
                                     scope='content',
                                     is_training=self.is_training,
                                     is_dropout=self.is_dropout,

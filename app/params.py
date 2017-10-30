@@ -1,5 +1,5 @@
 class baseLayerParams:
-        dropout_rate  = 0.2
+        dropout_rate  = 0.5
         activation_fn ="tensorflow.nn.tanh"
         zero_pad=True
         scale=True

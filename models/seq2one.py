@@ -42,7 +42,7 @@ class NewsClsModel(multiClsModel):
             #title encoding
             title_encoding = sentence_encoder(
                                     inputs=title_embed,
-                                    layers='CA',
+                                    layers=newsClsModelParams.text_encode_mode,
                                     query=token_context,                                    
                                     multi_cnn_params=newsClsModelParams.title_cnn_params,#kernel,stride,layer
                                     scope='title',
@@ -52,7 +52,7 @@ class NewsClsModel(multiClsModel):
                          
             content_encoding = sentence_encoder(
                                     inputs=content_embed,
-                                    layers='CA',
+                                    layers=newsClsModelParams.text_encode_mode,
                                     query=token_context, 
                                     multi_cnn_params=newsClsModelParams.title_cnn_params,#kernel,stride,layer
                                     scope='content',
@@ -65,7 +65,7 @@ class NewsClsModel(multiClsModel):
             elif newsClsModelParams.final_layer == "content":
                   full_layer = content_encoding  
             else:                        
-                  full_layer = tf.concat([content_encoding,title_encoding],2)
+                  full_layer = tf.concat([content_encoding,title_encoding],-1)
                                     
             self.logits = final_mlp_encoder(
                                     inputs=full_layer,

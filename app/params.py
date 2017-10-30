@@ -1,6 +1,6 @@
 class baseLayerParams:
         dropout_rate  = 0.5
-        activation_fn ="tensorflow.nn.tanh"
+        activation_fn ="tensorflow.nn.relu"
         zero_pad=True
         scale=True
         direct_cont=True
@@ -24,8 +24,8 @@ class textModuleParams(baseLayerParams):
         pass
 
 class entityEmbedModuleParams(embedLayerParams):
-        sinusoid = False
-        position_embed = False
+        sinusoid = True
+        position_embed = True
         
 class fullConnectModuleParams(fullLayerParams):
         input_reshape=True
@@ -54,6 +54,7 @@ class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attent
         title_cnn_params = [3,1,1] #kernel,stride,layers
         content_cnn_params = [5,2,3]
         final_layer = "both"
+	text_encode_mode = 'CP'
 
 class nmtModelParams(embedLayerParams,multiClsModelParams):
         language="chinese"

@@ -18,34 +18,25 @@ def LoadTrainFeeds():
 		pair_valid,target_valid=[],[]
 		cache={'training':[]}
 		for line in reader:
-				if len(line)!=5:
+				if len(line)!=4:
 						continue
-				rdv,target,title,content,flag=line
-				content = content.split("|")
-				window = tokenEmbedModelParams.target_label_num/2
-				for i,token_a in enumerate(content):
-						for j,token_b in enumerate(content):
-								if token_b==token_a or abs(i - j)>window:
-							 			continue
-							 	target = i-j+window
-							 	if target>window:
-							 			target-=1
-								if abs(float(rdv))<tokenEmbedModelParams.test_rate:
-										pair_valid.append([token_a,token_b])
-										target_valid.append(target)
-								else:
-										pair_batch.append([token_a,token_b])
-						 				target_batch.append(target)
-						 				if abs(float(rdv))>(1-tokenEmbedModelParams.test_rate):
-				 								pair_train.append([token_a,token_b])
-												target_train.append(target)
+				rdv,token_a,token_b,target = line
+				if abs(float(rdv))<tokenEmbedModelParams.test_rate:
+						pair_valid.append([token_a,token_b])
+						target_valid.append(target)
+				else:
+						pair_batch.append([token_a,token_b])
+		 				target_batch.append(target)
+		 				if abs(float(rdv))>(1-tokenEmbedModelParams.test_rate):
+ 								pair_train.append([token_a,token_b])
+								target_train.append(target)
 
-								if len(pair_batch)==tokenEmbedModelParams.batch_size:
-										pair_batch=np.array(pair_batch,dtype=np.int64)
-										target_batch=np.array(target_batch,dtype=np.int32)
-										train_cache=[pair_batch,target_batch]
-										cache['training'].append(train_cache)
-										pair_batch,target_batch = [],[]
+				if len(pair_batch)==tokenEmbedModelParams.batch_size:
+						pair_batch=np.array(pair_batch,dtype=np.int64)
+						target_batch=np.array(target_batch,dtype=np.int32)
+						train_cache=[pair_batch,target_batch]
+						cache['training'].append(train_cache)
+						pair_batch,target_batch = [],[]
  
 		pair_valid+=pair_batch;target_valid+=target_batch
  		pair_valid=np.array(pair_valid,dtype=np.int64)
@@ -58,7 +49,6 @@ def LoadTrainFeeds():
 
 		return cache
 
- 
 
 if __name__ =="__main__":
 	reader=LoadData()

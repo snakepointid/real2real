@@ -16,12 +16,12 @@ def target_attention(inputs,query,scope_name,is_training,is_dropout):
         query_shape = query.get_shape()
         if len(query_shape)==2:
                 query = tf.tile(tf.expand_dims(query,0),[tf.shape(inputs)[0],1,1]) # (N, m, QD)
-                
+	#apply the layer normalization                
         if attentionLayerParams.norm:
                 norm_inputs = layer_norm(inputs)
         else:
                 norm_inputs = inputs
-
+	#the keys and values output dim must be the same with the queries dim
         output_dim = int(query.get_shape()[2])
         with tf.variable_scope(scope_name):
                 # Linear projections
@@ -44,7 +44,7 @@ def target_attention(inputs,query,scope_name,is_training,is_dropout):
                 if attentionLayerParams.direct_cont:
                         # Residual connection
                         outputs += query# (N,m,QD)
-                
+                #apply the zero pad mask
                 if attentionLayerParams.zero_pad:
                         mask = tf.sign(tf.reduce_sum(tf.abs(inputs), axis=[1,2])) #N 
                         mask = tf.tile(tf.expand_dims(tf.expand_dims(mask,1),1),[1,tf.shape(outputs)[1],tf.shape(outputs)[2]])#(N,m,QD)

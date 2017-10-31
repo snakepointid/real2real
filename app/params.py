@@ -31,7 +31,7 @@ class fullConnectModuleParams(fullLayerParams):
         input_reshape=True
 
 class baseModelParams:
-        test_rate  = 0.02
+        test_rate  = 0.005
         batch_size = 100
         learning_rate = 0.0001
         num_epochs = 2000
@@ -54,7 +54,7 @@ class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attent
         title_cnn_params = [3,1,1] #kernel,stride,layers
         content_cnn_params = [5,2,3]
         final_layer = "both"
-	text_encode_mode = 'CP'
+	text_encode_mode = 'CA'
 
 class nmtModelParams(embedLayerParams,multiClsModelParams):
         language="chinese"

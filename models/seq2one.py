@@ -45,7 +45,7 @@ class NewsClsModel(multiClsModel):
                                     layers=newsClsModelParams.text_encode_mode,
                                     query=token_context,                                    
                                     multi_cnn_params=newsClsModelParams.title_cnn_params,#kernel,stride,layer
-                                    scope='title',
+                                    scope='token',
                                     is_training=self.is_training,
                                     is_dropout=self.is_dropout,
                                     reuse=None) #N,FN
@@ -55,10 +55,10 @@ class NewsClsModel(multiClsModel):
                                     layers=newsClsModelParams.text_encode_mode,
                                     query=token_context, 
                                     multi_cnn_params=newsClsModelParams.title_cnn_params,#kernel,stride,layer
-                                    scope='content',
+                                    scope='token',
                                     is_training=self.is_training,
                                     is_dropout=self.is_dropout,
-                                    reuse=None)#N,FN
+                                    reuse=True)#N,FN
                         
             if newsClsModelParams.final_layer == "title":
                   full_layer = title_encoding

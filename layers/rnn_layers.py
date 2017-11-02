@@ -12,7 +12,7 @@ def uni_lstm(inputs,reuse,is_training):
 
         seq_length = tf.to_int32(tf.reduce_sum(tf.sign(tf.reduce_sum(tf.abs(inputs), axis=-1)),1))#N,SL
  
-        basic_cell = tf.contrib.rnn.BasicLSTMCell(num_units=rnnLayerParams.hidden_units,activation=activation_fn,reuse=reuse)
+        basic_cell = tf.contrib.rnn.BasicLSTMCell(num_units=rnnLayerParams.hidden_units,activation=activation_fn)
         outputs, states = tf.nn.dynamic_rnn(basic_cell, inputs, dtype=tf.float32,sequence_length=seq_length)
 
         return outputs#N,SL,D

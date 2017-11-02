@@ -33,6 +33,7 @@ def sentence_encoder(inputs,query,layers,multi_cnn_params,scope,is_training,is_d
                         encoding = bi_lstm(
                                            inputs=encoding, 
                                            scope_name="bidirect_lstm",
+                                           reuse=reuse,
                                            is_training=is_training) 
                 #target attention                          
                 if 'A' in layers:

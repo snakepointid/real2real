@@ -21,8 +21,8 @@ def bi_lstm(inputs,reuse,is_training):
 
         seq_length = tf.to_int32(tf.reduce_sum(tf.sign(tf.reduce_sum(tf.abs(inputs), axis=-1)),1))#N,SL
  
-        cell_fw = tf.contrib.rnn.BasicLSTMCell(num_units=rnnLayerParams.hidden_units,activation=activation_fn,reuse=reuse)
-        cell_bw = tf.contrib.rnn.BasicLSTMCell(num_units=rnnLayerParams.hidden_units,activation=activation_fn,reuse=reuse)
+        cell_fw = tf.contrib.rnn.BasicLSTMCell(num_units=rnnLayerParams.hidden_units,activation=activation_fn)
+        cell_bw = tf.contrib.rnn.BasicLSTMCell(num_units=rnnLayerParams.hidden_units,activation=activation_fn)
 
         outputs, states =  tf.nn.bidirectional_dynamic_rnn(
                                                         cell_fw=cell_fw,

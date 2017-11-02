@@ -27,7 +27,7 @@ class textModuleParams(baseLayerParams):
 
 class entityEmbedModuleParams(embedLayerParams):
         sinusoid = True
-        position_embed = True
+        position_embed = False
         
 class fullConnectModuleParams(fullLayerParams):
         input_reshape=True
@@ -53,15 +53,15 @@ class ctrRankModelParams(embedLayerParams,fullLayerParams,convLayerParams,regres
 class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attentionLayerParams,multiClsModelParams):
         title_maxlen = 30
         content_maxlen = 3000
-        title_cnn_params = [3,1,1] #kernel,stride,layers
+        title_cnn_params = [4,2,1] #kernel,stride,layers
         content_cnn_params = [5,2,3]
         final_layer = "title"
-	text_encode_mode = 'RA'
+	text_encode_mode = 'CRA'
 
 class nmtModelParams(embedLayerParams,multiClsModelParams):
         language="chinese"
         target_label_num = 100000
-        source_cnn_params = [3,1,1] #kernel,stride,layers
+        source_cnn_params = [4,2,1] #kernel,stride,layers
         source_maxlen = 30
         target_maxlen = 30
 class tokenEmbedModelParams(embedLayerParams,multiClsModelParams):

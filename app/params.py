@@ -5,15 +5,17 @@ class baseLayerParams:
         scale=True
         direct_cont=True
         norm=True
+        hidden_units  = 128
 		
 class convLayerParams(baseLayerParams):
         filter_nums  = 128
 
 class fullLayerParams(baseLayerParams):
-        hidden_units  = 128
         mlp_layers = 1
 
 class attentionLayerParams(baseLayerParams):
+        pass
+class rnnLayerParams(baseLayerParams):
         pass
 
 class embedLayerParams(baseLayerParams):      
@@ -53,8 +55,8 @@ class newsClsModelParams(embedLayerParams,fullLayerParams,convLayerParams,attent
         content_maxlen = 3000
         title_cnn_params = [3,1,1] #kernel,stride,layers
         content_cnn_params = [5,2,3]
-        final_layer = "both"
-	text_encode_mode = 'CA'
+        final_layer = "title"
+	text_encode_mode = 'RA'
 
 class nmtModelParams(embedLayerParams,multiClsModelParams):
         language="chinese"

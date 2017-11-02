@@ -5,13 +5,14 @@ import tensorflow as tf
 
 from real2real.layers.conv_layers import strip_conv,max_pool_layer
 from real2real.layers.attention_layers import target_attention
+from real2real.layers.rnn_layers import bi_lstm
 '''
 	this is a general text encoding module
 	it can be consisted by three parts: conv,attention and pool layers
 '''
 def sentence_encoder(inputs,query,layers,multi_cnn_params,scope,is_training,is_dropout,reuse):
         #apply the dropout to the inputs
-	encoding = tf.contrib.layers.dropout(
+        encoding = tf.contrib.layers.dropout(
                                            inputs=inputs,
                                            keep_prob=0.5,
                                            is_training=is_dropout) 
@@ -28,6 +29,13 @@ def sentence_encoder(inputs,query,layers,multi_cnn_params,scope,is_training,is_d
                                                        scope_name="conv_layer{}".format(layer_idx),
                                                        is_training = is_training,
                                                        is_dropout=is_dropout)
+                #rnn 
+                if 'R' in layers:
+                        encoding = bi_lstm(
+                                           inputs=encoding, 
+                                           scope_name="bidirect_lstm",
+                                           is_training=is_training,
+                                           is_dropout=is_dropout) 
                 #target attention                          
                 if 'A' in layers:
                         encoding = target_attention(

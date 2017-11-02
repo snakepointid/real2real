@@ -67,6 +67,7 @@ class nmtModelParams(embedLayerParams,multiClsModelParams):
 
 class languageModelParams(embedLayerParams,multiClsModelParams):
         language="chinese"
+        test_rate  = 0.0001
         source_maxlen = 30
 
 class tokenEmbedModelParams(embedLayerParams,multiClsModelParams):

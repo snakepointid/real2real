@@ -6,7 +6,7 @@ from itertools import groupby
 from operator import itemgetter
 import cPickle as pickle
 from real2real.preprocess.sentence_process import quick_sentence_segment 
-from real2real.app.params import nmtModelParams
+from real2real.app.params import languageModelParams
 
 def LoadData():
 	for line in sys.stdin:
@@ -25,16 +25,16 @@ def LoadTrainFeeds():
 				source=source.split('|') 
 				if len(source)<4 or len(target)<4:
 						continue
-				source=source[:nmtModelParams.source_maxlen]+[0]*(nmtModelParams.source_maxlen-len(source))
+				source=source[:languageModelParams.source_maxlen]+[0]*(languageModelParams.source_maxlen-len(source))
 						
-				if abs(float(rdv))<nmtModelParams.test_rate:
+				if abs(float(rdv))<languageModelParams.test_rate:
 						source_valid.append(source)
 				else:
 						source_batch.append(source)
-		 				if abs(float(rdv))>(1-nmtModelParams.test_rate):
+		 				if abs(float(rdv))>(1-languageModelParams.test_rate):
  								source_train.append(source)
 
-				if len(source_batch)==nmtModelParams.batch_size:
+				if len(source_batch)==languageModelParams.batch_size:
 						source_batch=np.array(source_batch,dtype=np.int64)
 						cache['training'].append(source_batch)
 						source_batch = []

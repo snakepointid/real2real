@@ -5,7 +5,7 @@ import tensorflow as tf
 
 from real2real.layers.conv_layers import strip_conv,max_pool_layer
 from real2real.layers.attention_layers import target_attention
-from real2real.layers.rnn_layers import bi_lstm
+from real2real.layers.rnn_layers import bi_lstm,uni_lstm
 '''
 	this is a general text encoding module
 	it can be consisted by three parts: conv,attention and pool layers
@@ -32,7 +32,6 @@ def sentence_encoder(inputs,query,layers,multi_cnn_params,scope,is_training,is_d
                 if 'R' in layers:
                         encoding = bi_lstm(
                                            inputs=encoding, 
-                                           scope_name="bidirect_lstm",
                                            reuse=reuse,
                                            is_training=is_training) 
                 #target attention                          

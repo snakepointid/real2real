@@ -48,7 +48,6 @@ class NewsClsModel(multiClsModel):
                                     is_training=self.is_training,
                                     is_dropout=self.is_dropout,
                                     reuse=None) #N,FN
-                         
             content_encoding = sentence_encoder(
                                     inputs=content_embed,
                                     layers=newsClsModelParams.text_encode_mode,
@@ -58,7 +57,7 @@ class NewsClsModel(multiClsModel):
                                     is_training=self.is_training,
                                     is_dropout=self.is_dropout,
                                     reuse=True)#N,FN
-                        
+                     
             if newsClsModelParams.final_layer == "title":
                   full_layer = title_encoding
             elif newsClsModelParams.final_layer == "content":

@@ -54,8 +54,8 @@ class LanguageModel(multiClsModel):
             self.source_code = tf.placeholder(shape=(None, nmtModelParams.source_maxlen),dtype=tf.int64)
 
             
-            self.input = self.source_code[:,:-1])
-            self.target = self.source_code[:,1:])
+            self.input = self.source_code[:,:-1]
+            self.target = self.source_code[:,1:]
                         
             #embedding
             source_embed = semantic_position_embedding(

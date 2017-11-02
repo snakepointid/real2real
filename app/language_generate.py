@@ -57,40 +57,9 @@ def training():
                 model.global_saver.save(sess,FLAGS.save_path+"/global_model")
  
 def evaluation():
-        label2code=pickle.load(open('/home/hdp-reader-tag/shechanglue/sources/label2code.pkl','rb'))
-        code2label= dict(zip(label2code.values(), label2code.keys()))
-        gpu_options = tf.GPUOptions(allow_growth = True)
-        model = LanguageModel(is_training=False)
-        with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
-                model.global_saver.restore(sess,FLAGS.restore_path+"/global_model")
-                cache = LoadEvalFeeds()
-                acc = [] 
-                for raw_batch,source_batch in cache:
-                        testa_acc,testa_pred,probs = sess.run([model.acc,model.preds,model.probs],feed_dict={
-                                                                model.source_code:source_batch,                                            
-                                                                model.is_dropout:False}) 
-                        acc.append(testa_acc)
-                        for idx,raw in enumerate(raw_batch):
-                                if testa_pred[idx]![idx]:
-                                        print("%s\t%s\tacc:%s\t%s\t%s"%(raw,probs[idx][idx]]\
-                                            ,np.mean(acc),code2label.get(testa_pred[idx],'UNK'),probs[idx][testa_pred[idx]]))
-                                        print('-'*150)
+	pass
 def inference():
-        gpu_options = tf.GPUOptions(allow_growth = True)
-        model = LanguageModel(is_training=False)
-        with tf.Session(graph = model.graph,config = tf.ConfigProto(gpu_options = gpu_options, allow_soft_placement = True, log_device_placement = False)) as sess:
-                model.global_saver.restore(sess,FLAGS.restore_path+"/global_model")
-                cache = LoadPredictFeeds()
-    
-                for raw_batch,title_source_batch,tag_batch in cache:
-                        probs=sess.run(model.logits,feed_dict={
-                                                        model.source:source_batch ,
-                                                        model.tag:tag_batch ,
-                                                        model.is_dropout:False}) 
-
-                        for idx,raw in enumerate(raw_batch):
-                                print("%s\t%s"%(raw,probs[idx]))
-
+	pass
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
         parser.register("type", "bool", lambda v: v.lower() == "true")

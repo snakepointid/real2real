@@ -64,7 +64,7 @@ class multiClsModel(baseModel):
                 raise NotImplementedError
                 
         def _metrics_(self):
-                self.preds = tf.to_int32(tf.arg_max(self.logits, dimension=-1))
+                self.preds = tf.to_int64(tf.arg_max(self.logits, dimension=-1))
                 if multiClsModelParams.loss_softmax:
                         self.probs = tf.nn.softmax(self.logits)
                 else:

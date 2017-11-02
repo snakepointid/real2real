@@ -64,6 +64,11 @@ class nmtModelParams(embedLayerParams,multiClsModelParams):
         source_cnn_params = [4,2,1] #kernel,stride,layers
         source_maxlen = 30
         target_maxlen = 30
+
+class languageModelParams(embedLayerParams,multiClsModelParams):
+        language="chinese"
+        source_maxlen = 30
+
 class tokenEmbedModelParams(embedLayerParams,multiClsModelParams):
         source_vocab_size=60000
         language='english'

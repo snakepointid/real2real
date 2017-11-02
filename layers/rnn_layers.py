@@ -8,7 +8,7 @@ from pydoc import locate
 
 activation_fn = locate(rnnLayerParams.activation_fn)
 
-def uni_lstm(inputs,scope_name,is_training,is_dropout):
+def uni_lstm(inputs,scope_name,is_training):
 
         seq_length = tf.to_int32(tf.reduce_sum(tf.sign(tf.reduce_sum(tf.abs(inputs), axis=-1)),1))#N,SL
  
@@ -18,7 +18,7 @@ def uni_lstm(inputs,scope_name,is_training,is_dropout):
 
         return outputs#N,SL,D
 
-def bi_lstm(inputs,scope_name,is_training,is_dropout):
+def bi_lstm(inputs,scope_name,is_training):
 
         seq_length = tf.to_int32(tf.reduce_sum(tf.sign(tf.reduce_sum(tf.abs(inputs), axis=-1)),1))#N,SL
  

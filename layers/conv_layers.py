@@ -5,7 +5,7 @@ from pydoc import locate
 from real2real.app.params import convLayerParams 
 #load activate function
 activation_fn = locate(convLayerParams.activation_fn) 
-def strip_conv(inputs,kernel_size,stride_step,scope_name,is_training,is_dropout):
+def strip_conv(inputs,kernel_size,stride_step,scope_name,is_training):
 	#get the static shape of the input tensor
         static_shape  = inputs.get_shape()
         with tf.variable_scope(scope_name,reuse=None):
@@ -32,7 +32,7 @@ def max_pool_layer(inputs):
 	#apply the simple max ops
         return tf.reduce_max(inputs,1)
         
-def conv_to_full_layer(inputs,scope_name,is_training,is_dropout):  
+def conv_to_full_layer(inputs,scope_name,is_training):  
 	#get the static shape of the input tensor
         static_shape  = inputs.get_shape()
 

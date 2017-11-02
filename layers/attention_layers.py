@@ -8,7 +8,7 @@ from pydoc import locate
 
 activation_fn = locate(attentionLayerParams.activation_fn)
 
-def target_attention(inputs,query,scope_name,is_training,is_dropout):
+def target_attention(inputs,query,scope_name,is_training):
         '''
         inputs N*SL*WD
         query m*QD

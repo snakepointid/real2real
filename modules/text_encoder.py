@@ -27,23 +27,20 @@ def sentence_encoder(inputs,query,layers,multi_cnn_params,scope,is_training,is_d
                                                        kernel_size=kernel_size,
                                                        stride_step=stride_step,
                                                        scope_name="conv_layer{}".format(layer_idx),
-                                                       is_training = is_training,
-                                                       is_dropout=is_dropout)
+                                                       is_training = is_training)
                 #rnn 
                 if 'R' in layers:
                         encoding = bi_lstm(
                                            inputs=encoding, 
                                            scope_name="bidirect_lstm",
-                                           is_training=is_training,
-                                           is_dropout=is_dropout) 
+                                           is_training=is_training) 
                 #target attention                          
                 if 'A' in layers:
                         encoding = target_attention(
                                            inputs=encoding,
                                            query=query,
                                            scope_name="target_atten",
-                                           is_training=is_training,
-                                           is_dropout=is_dropout) #N,m,WD
+                                           is_training=is_training) #N,m,WD
 		#simple pool layer        
                 if 'P' in layers:
                         encoding = max_pool_layer(encoding)           

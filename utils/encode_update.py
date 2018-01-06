@@ -6,7 +6,7 @@ import cPickle as pickle
 import random
 
 old_recalltag_count = pickle.load(open("recalltag_count.pkl","rb"));recalltag_count={}
-recalltag2code = pickle.load(open('$filedir',"rb"))
+recalltag2code = pickle.load(open("/home/hdp-reader-tag/shechanglue/sources/recalltag2code.pkl","rb"))
 newtag = pickle.load(open("new_tag.pkl","rb"))
 
 #get encoded tag's count

@@ -72,5 +72,6 @@ class LanguageModel(multiClsModel):
             #corse predict
             self.logits = tf.layers.dense(rnn_outptus, languageModelParams.source_vocab_size, activation=tf.nn.relu)#N,SL,out
             self.logits = tf.reshape(self.logits,[-1,languageModelParams.source_vocab_size])
+	    self.target = tf.reshape(self.target,[-1,1])
      
          

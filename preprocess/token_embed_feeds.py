@@ -18,9 +18,10 @@ def LoadTrainFeeds():
 		pair_valid,target_valid=[],[]
 		cache={'training':[]}
 		for line in reader:
-				if len(line)!=4:
+				if len(line)!=3:
 						continue
-				rdv,token_a,token_b,target = line
+				rdv,token_pair,target = line
+				token_a,token_b = token_pair.split("")
 				if abs(float(rdv))<tokenEmbedModelParams.test_rate:
 						pair_valid.append([token_a,token_b])
 						target_valid.append(target)
@@ -33,22 +34,19 @@ def LoadTrainFeeds():
 
 				if len(pair_batch)==tokenEmbedModelParams.batch_size:
 						pair_batch=np.array(pair_batch,dtype=np.int64)
-						target_batch=np.array(target_batch,dtype=np.int32)
+						target_batch=np.array(target_batch,dtype=np.float32)
 						train_cache=[pair_batch,target_batch]
 						cache['training'].append(train_cache)
 						pair_batch,target_batch = [],[]
- 
 		pair_valid+=pair_batch;target_valid+=target_batch
  		pair_valid=np.array(pair_valid,dtype=np.int64)
- 		target_valid=np.array(target_valid,dtype=np.int32)
+ 		target_valid=np.array(target_valid,dtype=np.float32)
 		cache['valid']=[pair_valid,target_valid]
 
 		pair_train=np.array(pair_train,dtype=np.int64)
- 		target_train=np.array(target_train,dtype=np.int32)
+ 		target_train=np.array(target_train,dtype=np.float32)
 		cache['train']=[pair_train,target_train]
-
 		return cache
-
 
 if __name__ =="__main__":
 	reader=LoadData()

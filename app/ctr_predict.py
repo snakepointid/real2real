@@ -28,18 +28,18 @@ def training():
             #compute the initial pearson coef
             text_code_batch,tag_code_batch,ctr_batch = cache['testa']   
             probs = sess.run(model.logits,feed_dict={
-                                                model.title_source:text_code_batch,                                            
-                                                model.recall_tag:tag_code_batch,
-                                                model.is_dropout:False})
+                                                            model.title_source:text_code_batch,                                            
+                                                            model.recall_tag:tag_code_batch,
+                                                            model.is_dropout:False})
             old_pc = regression_model_eval(ctr_batch,probs,'testa',False)
 
             for epoch in range(baseModelParams.num_epochs):
                   for text_code_batch,tag_code_batch,ctr_batch in cache['training']:
                         _,gs=sess.run([model.train_op,model.global_step],feed_dict={
-                                                                  model.title_source:text_code_batch ,
-                                                                  model.recall_tag:tag_code_batch ,
-                                                                  model.target:ctr_batch,
-                                                                  model.is_dropout:True})
+                                                            model.title_source:text_code_batch ,
+                                                            model.recall_tag:tag_code_batch ,
+                                                            model.target:ctr_batch,
+                                                            model.is_dropout:True})
 	 
                         text_code_batch,tag_code_batch,ctr_batch = cache['train']	
                         probs = sess.run(model.logits,feed_dict={
@@ -76,7 +76,8 @@ def training():
             model.global_saver.save(sess,FLAGS.save_path+"/global_model")
  
 def evaluation():
-        pass
+      pass
+      
 
 def inference():
       gpu_options = tf.GPUOptions(allow_growth = True)

@@ -43,19 +43,13 @@ class baseModel(object):
 
         def _save_(self):
                 self.global_saver = tf.train.Saver()
-
-                for variable in tf.trainable_variables():
-                        if variable.name=="chinese/token/lookup_table:0":
-                                with tf.variable_scope("",reuse=True):
-                                        zh_embed = tf.get_variable("chinese/token/lookup_table")   
-                                self.zh_embed_saver = tf.train.Saver([zh_embed])
-
-                if variable.name=="english/token/lookup_table:0":
-                                with tf.variable_scope("",reuse=True):
-                                        en_embed = tf.get_variable("english/token/lookup_table")
-                                self.en_embed_saver = tf.train.Saver([en_embed])
-
-
+                self.token_embed_savers ={}
+                for variable in tf.global_variables():
+                        for language in ['chinese','english']:
+                                if variable.name=="%s/token/lookup_table:0"%language:
+                                        with tf.variable_scope(language,reuse=True):
+                                                token_embed = tf.get_variable("token/lookup_table")   
+                                        self.token_embed_savers[language] = tf.train.Saver([token_embed])
                         
 @six.add_metaclass(abc.ABCMeta)
 class multiClsModel(baseModel):
@@ -75,7 +69,7 @@ class multiClsModel(baseModel):
 
         def _cost_(self):
                 if multiClsModelParams.loss_softmax:
-                        self.loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.logits, labels=tf.reshape(self.target,[-1,1]))
+                        loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.logits, labels=tf.reshape(self.target,[-1,1]))
                 else:
                         logits = tf.reshape(self.logits,[-1,1])
                         if self.target.dtype.is_integer:
@@ -83,8 +77,23 @@ class multiClsModel(baseModel):
                                 labels = tf.reshape(labels,[-1,1])
                         else:
                                 labels = self.target
-                        self.loss = tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=labels)
-                self.mean_loss = tf.reduce_mean(self.loss)
+                        loss = tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=labels)
+                self.mean_loss = tf.reduce_mean(loss)
+
+@six.add_metaclass(abc.ABCMeta)
+class binomialModel(baseModel):
+        @abc.abstractmethod
+        def _build_(self):
+                raise NotImplementedError
+                
+        def _metrics_(self):
+                self.loss = self.mean_loss
+                # save log
+                tf.summary.scalar('loss', self.loss)
+
+        def _cost_(self):           
+                loss = tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=self.target)
+                self.mean_loss = tf.reduce_mean(loss)                
 
 @six.add_metaclass(abc.ABCMeta)
 class regressModel(baseModel):
@@ -98,25 +107,13 @@ class regressModel(baseModel):
                 tf.summary.scalar('mae', self.mae)
 
         def _cost_(self):
-                self.loss = tf.square(tf.subtract(self.logits,self.target))
-                self.mean_loss = tf.reduce_mean(self.loss)
+                loss = tf.square(tf.subtract(self.logits,self.target))
+                self.mean_loss = tf.reduce_mean(loss)
                 if regressModelParams.loss_rmse:
                         self.mean_loss = tf.sqrt(self.mean_loss)
 
-@six.add_metaclass(abc.ABCMeta)
-class embedModel(multiClsModel):
-        @abc.abstractmethod
-        def _build_(self):
-                raise NotImplementedError
+ 
 
-        def _metrics_(self):
-                self.mae = tf.reduce_mean(tf.abs(self.logits-self.target))
-                # save log
-                tf.summary.scalar('mae', self.mae)
-
-        def _cost_(self):
-                self.loss = tf.square(tf.subtract(self.logits,self.target))
-                self.mean_loss = tf.reduce_mean(self.loss)
-                if regressModelParams.loss_rmse:
-                        self.mean_loss = tf.sqrt(self.mean_loss)
+ 
+ 
          

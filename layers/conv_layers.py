@@ -28,9 +28,7 @@ def strip_conv(inputs,kernel_size,stride_step,scope_name,is_training):
         cnn_output =  activation_fn(cnn_output) 
         return  cnn_output
 
-def max_pool_layer(inputs):
-	#apply the simple max ops
-        return tf.reduce_max(inputs,1)
+
         
 def conv_to_full_layer(inputs,scope_name,is_training):  
 	#get the static shape of the input tensor

@@ -26,16 +26,11 @@ def layer_norm_compute_python(x, epsilon, scale, bias):
         norm_x = (x - mean) * tf.rsqrt(variance + epsilon)
         return norm_x * scale + bias
 
-def noam_norm(x, epsilon=1.0, name=None):
-        """One version of layer normalization."""
-        with tf.name_scope(name, default_name="noam_norm", values=[x]):
-                shape = x.get_shape()
-                ndims = len(shape)
-                result = tf.nn.l2_normalize(x, ndims - 1, epsilon=epsilon)*tf.sqrt(tf.to_float(shape[-1]))
-                return result
+
 
 def embedding(inputs, 
-              vocab_size, 
+              vocab_size,
+              embedding_dim=embedLayerParams.embedding_dim,
               zero_pad=True, 
               scope="embedding", 
               is_training=True,
@@ -44,7 +39,7 @@ def embedding(inputs,
         with tf.variable_scope(scope, reuse=reuse):
                 lookup_table = tf.get_variable('lookup_table',
                                    dtype=tf.float32,
-                                   shape=[vocab_size, embedLayerParams.embedding_dim],
+                                   shape=[vocab_size,embedding_dim],
                                    initializer=tf.contrib.layers.xavier_initializer(),
                                    trainable=is_training)
         if zero_pad:

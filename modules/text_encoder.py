@@ -48,6 +48,28 @@ def sentence_encoder(inputs,query,layers,multi_cnn_params,scope,is_training,is_d
                 if 'P' in textModuleParams.layers:
                         encoding = max_pool_layer(encoding)           
         return encoding
+        
+def triTerm(inputs,scope,reuse):
+          with tf.variable_scope(scope,reuse=reuse):
+                    voc_size = baseParams.vocab_size if scope=="word" else baseParams.char_size
+    
+                    embed = embedding(inputs = inputs, 
+                          vocab_size = voc_size,
+                          embedding_dim=baseParams.embedding_dim,
+                          zero_pad=baseParams.zero_pad, 
+                          scope="token", 
+                          is_training=baseParams.embed_trainable,
+                          reuse=False)
+
+                    entity_query = tf.get_variable('entity_query',
+                                   dtype=tf.float32,
+                                   shape=[baseParams.embedding_dim,baseParams.entity_num],
+                                   initializer=tf.contrib.layers.xavier_initializer(),
+                                   trainable=baseParams.embed_trainable)
+                    encoding = entity_attention(
+                              inputs=embed,
+                              query = entity_query,
+                              scope_name="entity_attention")
 
 
 def keyword_encoder(inputs,query,scope,is_training,is_dropout,reuse):
